@@ -8,6 +8,8 @@ import TopBar from './components/layout/TopBar';
 import SoundToggle from './components/shared/SoundToggle';
 import WelcomeSequence from './components/welcome/WelcomeSequence';
 import SceneProvider, { useScene } from './components/3d/SceneProvider';
+import { MusicProvider } from './context/MusicContext';
+import MiniPlayer from './components/music/MiniPlayer';
 
 // Feature Components
 import ChatBox from './components/chat/ChatBox';
@@ -71,6 +73,9 @@ function AppContent() {
 
         {/* Floating Sound Toggle */}
         <SoundToggle />
+
+        {/* Floating Mini Player */}
+        <MiniPlayer />
       </div>
     </>
   );
@@ -82,7 +87,9 @@ function App() {
       <AuthProvider>
         <AuthGuard>
           <SceneProvider>
-            <AppContent />
+            <MusicProvider>
+              <AppContent />
+            </MusicProvider>
           </SceneProvider>
         </AuthGuard>
       </AuthProvider>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Card from '../shared/Card';
+import DoodleGame from './DoodleGame';
 
 interface Wish {
     id: number;
@@ -28,7 +29,7 @@ const quizQuestions: QuizQuestion[] = [
     { question: "What's Rishika's zodiac sign?", options: ["Aries", "Libra", "Scorpio", "Leo"], correctIndex: 1 },
 ];
 
-type GameTab = 'quiz' | 'wishes';
+type GameTab = 'quiz' | 'wishes' | 'doodle';
 
 const GamesHub: React.FC = () => {
     const [activeTab, setActiveTab] = useState<GameTab>('quiz');
@@ -62,7 +63,7 @@ const GamesHub: React.FC = () => {
                 gap: 'var(--space-2)',
                 marginBottom: 'var(--space-6)',
             }}>
-                {(['quiz', 'wishes'] as GameTab[]).map(tab => (
+                {(['quiz', 'wishes', 'doodle'] as GameTab[]).map(tab => (
                     <motion.button
                         key={tab}
                         whileHover={{ scale: 1.05 }}
@@ -82,7 +83,7 @@ const GamesHub: React.FC = () => {
                             fontSize: '0.9rem',
                         }}
                     >
-                        {tab === 'quiz' ? '❓ Love Quiz' : '🫙 Wish Jar'}
+                        {tab === 'quiz' ? '❓ Quiz' : tab === 'wishes' ? '🫙 Wish Jar' : '🎨 Doodle'}
                     </motion.button>
                 ))}
             </div>
@@ -91,8 +92,10 @@ const GamesHub: React.FC = () => {
             <AnimatePresence mode="wait">
                 {activeTab === 'quiz' ? (
                     <LoveQuiz key="quiz" />
-                ) : (
+                ) : activeTab === 'wishes' ? (
                     <WishJar key="wishes" />
+                ) : (
+                    <DoodleGame key="doodle" />
                 )}
             </AnimatePresence>
         </motion.div>
