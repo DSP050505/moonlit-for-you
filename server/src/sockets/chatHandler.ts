@@ -1,0 +1,106 @@
+import { Server, Socket } from 'socket.io';
+import prisma from '../db/database';
+
+export function setupChatHandler(io: Server, socket: Socket) {
+    // Handle new chat message
+    socket.on('chat:message', async (data: {
+        roomId: number;
+        sender: string;
+        content: string;
+        type?: string;
+        mediaUrl?: string;
+    }) => {
+        try {
+            // Save to database
+            const message = await prisma.message.create({
+                data: {
+                    roomId: data.roomId,
+                    sender: data.sender as any,
+                    content: data.content,
+                    type: (data.type as any) || 'text',
+                    mediaUrl: data.mediaUrl,
+                },
+            });
+
+            // Check for special triggers inside this room
+            const count = await prisma.message.count({ where: { roomId: data.roomId } });
+            const isMilestone = count > 0 && count % 50 === 0;
+            const isLoveMessage = data.content.toLowerCase().includes('i love you');
+
+            const roomChannel = `room_${data.roomId}`;
+
+            // Broadcast to the specific room
+            io.to(roomChannel).emit('chat:message', {
+                ...message,
+                milestone: isMilestone ? count : null,
+                confetti: isLoveMessage,
+            });
+
+            // Send notification
+            if (isLoveMessage) {
+                io.to(roomChannel).emit('notification:new', {
+                    type: 'love',
+                    message: `${data.sender === 'you' ? 'Devi Sri Prasad' : 'Rishika'} said "I love you" ❤️`,
+                    timestamp: new Date().toISOString(),
+                });
+            }
+
+            if (isMilestone) {
+                io.to(roomChannel).emit('notification:new', {
+                    type: 'milestone',
+                    message: `🎉 You've exchanged ${count} messages! Flowers are blooming!`,
+                    timestamp: new Date().toISOString(),
+                });
+            }
+        } catch (error) {
+            console.error('Error handling chat message:', error);
+        }
+    });
+
+    // Handle typing indicator
+    socket.on('chat:typing', (data: { roomId: number; sender: string; isTyping: boolean }) => {
+        socket.to(`room_${data.roomId}`).emit('chat:typing', data);
+    });
+
+    // Handle message reactions
+    socket.on('chat:reaction', async (data: {
+        roomId: number;
+        messageId: number;
+        emoji: string;
+        sender: string;
+    }) => {
+        try {
+            const message = await prisma.message.findUnique({
+                where: { id: data.messageId },
+            });
+
+            if (message) {
+                const reactions = Array.isArray(message.reactions) ? message.reactions as any[] : [];
+                reactions.push({ emoji: data.emoji, sender: data.sender, timestamp: new Date().toISOString() });
+
+                await prisma.message.update({
+                    where: { id: data.messageId },
+                    data: { reactions },
+                });
+            }
+
+            // Broadcast reaction to room
+            io.to(`room_${data.roomId}`).emit('chat:reaction', data);
+        } catch (error) {
+            console.error('Error handling reaction:', error);
+        }
+    });
+
+    // Handle read receipts
+    socket.on('chat:read', async (data: { roomId: number; messageId: number }) => {
+        try {
+            await prisma.message.update({
+                where: { id: data.messageId },
+                data: { readAt: new Date() },
+            });
+            io.to(`room_${data.roomId}`).emit('chat:read', data);
+        } catch (error) {
+            console.error('Error handling read receipt:', error);
+        }
+    });
+}

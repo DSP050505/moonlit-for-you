@@ -1,0 +1,149 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Sender {
+  you
+  her
+}
+
+enum MessageType {
+  text
+  voice
+  image
+}
+
+enum EventType {
+  anniversary
+  visit
+  movie
+  call
+  custom
+}
+
+enum UserRole {
+  Rishika
+  DSP
+}
+
+model Room {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  passcode  String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  users     User[]
+  messages  Message[]
+  events    Event[]
+  letters   Letter[]
+  photos    Photo[]
+  wishes    Wish[]
+  quizzes   QuizQuestion[]
+
+  @@map("rooms")
+}
+
+model User {
+  id             Int       @id @default(autoincrement())
+  role           UserRole
+  roomId         Int       @map("room_id")
+  latitude       Float?
+  longitude      Float?
+  locationShared Boolean   @default(false) @map("location_shared")
+  lastSeen       DateTime? @map("last_seen")
+
+  room           Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@unique([role, roomId])
+  @@map("users")
+}
+
+model Message {
+  id        Int         @id @default(autoincrement())
+  roomId    Int         @map("room_id")
+  sender    Sender
+  content   String
+  type      MessageType @default(text)
+  mediaUrl  String?     @map("media_url")
+  reactions Json        @default("[]")
+  readAt    DateTime?   @map("read_at")
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  room      Room        @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+model Event {
+  id        Int       @id @default(autoincrement())
+  roomId    Int       @map("room_id")
+  title     String
+  date      DateTime  @db.Date
+  type      EventType
+  note      String?
+  createdBy String    @map("created_by")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  room      Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@map("events")
+}
+
+model Letter {
+  id        Int      @id @default(autoincrement())
+  roomId    Int      @map("room_id")
+  sender    String
+  content   String
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@map("letters")
+}
+
+model Photo {
+  id         Int       @id @default(autoincrement())
+  roomId     Int       @map("room_id")
+  url        String
+  caption    String?
+  uploadedBy String    @map("uploaded_by")
+  takenAt    DateTime? @map("taken_at") @db.Date
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  room       Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@map("photos")
+}
+
+model Wish {
+  id         Int      @id @default(autoincrement())
+  roomId     Int      @map("room_id")
+  content    String
+  author     String
+  isRevealed Boolean  @default(false) @map("is_revealed")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  room       Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@map("wishes")
+}
+
+model QuizQuestion {
+  id           Int      @id @default(autoincrement())
+  roomId       Int      @map("room_id")
+  question     String
+  options      Json
+  correctIndex Int      @map("correct_index")
+  createdBy    String   @map("created_by")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  room         Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@map("quiz_questions")
+}

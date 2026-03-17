@@ -1,0 +1,27 @@
+@import "tailwindcss";
+@import "./styles/globals.css";
+@import "./styles/animations.css";
+
+/* Tailwind v4 theme customization */
+@theme {
+  --color-bg-primary: #0B0E1A;
+  --color-bg-secondary: #141829;
+  --color-bg-surface: #1C2038;
+  --color-accent-pink: #F2A7C3;
+  --color-accent-lavender: #C4B1D4;
+  --color-accent-rose: #E8788A;
+  --color-accent-gold: #F5D380;
+  --color-accent-silver: #C8D0E0;
+  --color-text-primary: #EDE9F5;
+  --color-text-muted: #8A8FA8;
+  --color-success: #7ECFA0;
+  --color-glow: rgba(242, 167, 195, 0.3);
+
+  --font-heading: 'Quicksand', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-handwriting: 'Caveat', cursive;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius-card: 12px;
+  --radius-pill: 9999px;
+}
