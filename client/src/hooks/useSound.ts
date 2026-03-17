@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useCallback } from 'react';
 
 // Simple synth sounds so we don't need actual audio files
 export const useSound = () => {
