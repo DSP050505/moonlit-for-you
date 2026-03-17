@@ -60,6 +60,7 @@ const MusicPlayer: React.FC = () => {
                 margin: '0 auto',
                 padding: 'var(--space-4)',
             }}
+            className="music-container"
         >
             <h2 style={{
                 fontFamily: 'var(--font-heading)',

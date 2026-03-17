@@ -35,6 +35,7 @@ const PhotoGallery: React.FC = () => {
                 margin: '0 auto',
                 padding: 'var(--space-4)',
             }}
+            className="gallery-container"
         >
             <div style={{
                 display: 'flex',

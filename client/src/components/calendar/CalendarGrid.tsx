@@ -97,6 +97,7 @@ const CalendarGrid: React.FC = () => {
                 margin: '0 auto',
                 padding: 'var(--space-4)',
             }}
+            className="calendar-container"
         >
             {/* Countdown Timer */}
             {nextVisit && <CountdownCard event={nextVisit} />}

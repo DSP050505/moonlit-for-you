@@ -131,6 +131,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '400px' }}
+                className="auth-card"
             >
                 <Card glow hover3D={false}>
                     <div style={{ padding: 'var(--space-8)' }}>

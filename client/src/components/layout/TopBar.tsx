@@ -37,6 +37,7 @@ const TopBar: React.FC = () => {
         }}>
             {/* App Title */}
             <motion.h1
+                className="topbar-title"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 style={{
@@ -66,6 +67,7 @@ const TopBar: React.FC = () => {
             }}>
                 {/* Online Presence Indicator */}
                 <motion.div
+                    className="topbar-presence"
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
@@ -103,6 +105,7 @@ const TopBar: React.FC = () => {
 
                 {/* Time Zone Widget */}
                 <motion.div
+                    className="topbar-time"
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}

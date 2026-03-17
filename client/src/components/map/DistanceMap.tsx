@@ -103,6 +103,7 @@ const DistanceMap: React.FC = () => {
                 margin: '0 auto',
                 padding: 'var(--space-4)',
             }}
+            className="map-container"
         >
             <h2 style={{
                 fontFamily: 'var(--font-heading)',
@@ -211,6 +212,7 @@ const DistanceMap: React.FC = () => {
 
                     {/* Distance Text */}
                     <motion.h1
+                        className="distance-text"
                         animate={{ textShadow: ['0 0 10px rgba(245,211,128,0.3)', '0 0 20px rgba(245,211,128,0.5)', '0 0 10px rgba(245,211,128,0.3)'] }}
                         transition={{ duration: 3, repeat: Infinity }}
                         style={{
@@ -234,7 +236,7 @@ const DistanceMap: React.FC = () => {
             </Card>
 
             {/* City Cards */}
-            <div style={{
+            <div className="city-cards-grid" style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
                 gap: 'var(--space-4)',

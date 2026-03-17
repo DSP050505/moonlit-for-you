@@ -218,9 +218,10 @@ const ChatBox: React.FC = () => {
                 maxWidth: '800px',
                 margin: '0 auto',
             }}
+            className="chat-container"
         >
             {/* Chat Header */}
-            <div style={{
+            <div className="chat-header" style={{
                 padding: 'var(--space-4)',
                 borderBottom: '1px solid rgba(255,255,255,0.06)',
                 display: 'flex',
@@ -262,7 +263,7 @@ const ChatBox: React.FC = () => {
             </div>
 
             {/* Messages Area */}
-            <div style={{
+            <div className="chat-messages" style={{
                 flex: 1,
                 overflowY: 'auto',
                 padding: 'var(--space-4)',
@@ -312,7 +313,7 @@ const ChatBox: React.FC = () => {
             </div>
 
             {/* Input Area */}
-            <div style={{
+            <div className="chat-input-area" style={{
                 padding: 'var(--space-4)',
                 borderTop: '1px solid rgba(255,255,255,0.06)',
                 display: 'flex',

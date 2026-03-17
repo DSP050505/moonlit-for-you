@@ -56,6 +56,7 @@ const LetterWriter: React.FC = () => {
                 margin: '0 auto',
                 padding: 'var(--space-4)',
             }}
+            className="letter-container"
         >
             {/* Header */}
             <div style={{
