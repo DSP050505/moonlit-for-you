@@ -24,6 +24,16 @@ import { setupLocationHandler } from './sockets/locationHandler';
 // Allowed origins
 const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173').split(',');
 
+console.log('========================================');
+console.log('🔧 SERVER CONFIG');
+console.log('========================================');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('PORT:', process.env.PORT);
+console.log('CLIENT_URL env:', process.env.CLIENT_URL);
+console.log('Allowed CORS origins:', allowedOrigins);
+console.log('DATABASE_URL:', process.env.DATABASE_URL ? '✅ SET (hidden)' : '❌ NOT SET');
+console.log('========================================');
+
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
@@ -40,6 +50,12 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Request logger middleware — logs every incoming request
+app.use((req, _res, next) => {
+    console.log(`📥 ${req.method} ${req.url} | Origin: ${req.headers.origin || 'none'} | Body: ${JSON.stringify(req.body).substring(0, 200)}`);
+    next();
+});
+
 // Static files for uploads
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
@@ -55,7 +71,8 @@ app.use('/api/weather', weatherRouter);
 
 // Health check
 app.get('/api/health', (_req, res) => {
-    res.json({ status: 'ok', message: '🌙 MoonlitForRishika server is alive!' });
+    console.log('💓 Health check hit');
+    res.json({ status: 'ok', message: '🌙 MoonlitForRishika server is alive!', timestamp: new Date().toISOString() });
 });
 
 // Track who is online per room: Map<roomChannel, Set<role>>

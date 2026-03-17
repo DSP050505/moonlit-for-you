@@ -26,19 +26,31 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
         setError('');
         setIsLoading(true);
 
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+        console.log('🔐 AuthGuard: handleSubmit called');
+        console.log('   Mode:', mode);
+        console.log('   API URL:', apiUrl);
+        console.log('   Room:', roomName, '| Role:', role);
+
         try {
             const endpoint = mode === 'join' ? '/api/auth/join-room' : '/api/auth/create-room';
             const body = mode === 'join'
                 ? { name: roomName, passcode, role }
                 : { name: roomName, passcode };
 
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}${endpoint}`, {
+            const fullUrl = `${apiUrl}${endpoint}`;
+            console.log(`   Fetching: POST ${fullUrl}`);
+            console.log('   Body:', JSON.stringify(body));
+
+            const res = await fetch(fullUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
             });
 
+            console.log(`   Response status: ${res.status} ${res.statusText}`);
             const data = await res.json();
+            console.log('   Response data:', JSON.stringify(data));
 
             if (!res.ok) {
                 throw new Error(data.error || 'Authentication failed');
@@ -46,19 +58,26 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
 
             if (mode === 'create') {
                 // After creating, automatically join as the selected role
-                const joinRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/auth/join-room`, {
+                const joinUrl = `${apiUrl}/api/auth/join-room`;
+                console.log(`   Auto-joining: POST ${joinUrl}`);
+                const joinRes = await fetch(joinUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name: roomName, passcode, role }),
                 });
                 const joinData = await joinRes.json();
+                console.log(`   Join response: ${joinRes.status}`, JSON.stringify(joinData));
                 if (!joinRes.ok) throw new Error(joinData.error);
                 login({ room: joinData.room, user: joinData.user });
+                console.log('   ✅ Logged in after create+join');
             } else {
                 login({ room: data.room, user: data.user });
+                console.log('   ✅ Logged in after join');
             }
 
         } catch (err: any) {
+            console.error('   🔥 Auth error:', err.message);
+            console.error('   Full error:', err);
             setError(err.message);
         } finally {
             setIsLoading(false);

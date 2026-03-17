@@ -4,8 +4,10 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export function setupLocationHandler(io: Server, socket: Socket) {
+    console.log(`📍 Location handler set up for socket ${socket.id}`);
     socket.on('location:update', async (data: { roomId: number; userId: number; lat: number; lng: number }) => {
         try {
+            console.log(`📍 location:update from user ${data.userId} in room ${data.roomId}: lat=${data.lat}, lng=${data.lng}`);
             // Update user in DB
             await prisma.user.update({
                 where: { id: data.userId },
@@ -24,8 +26,9 @@ export function setupLocationHandler(io: Server, socket: Socket) {
                 lng: data.lng,
                 timestamp: new Date().toISOString(),
             });
+            console.log(`📍 Location updated & broadcast for user ${data.userId}`);
         } catch (error) {
-            console.error('Error updating location:', error);
+            console.error('🔥 Error updating location:', error);
         }
     });
 }

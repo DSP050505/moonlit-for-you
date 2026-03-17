@@ -2,6 +2,7 @@ import { Server, Socket } from 'socket.io';
 import prisma from '../db/database';
 
 export function setupChatHandler(io: Server, socket: Socket) {
+    console.log(`💬 Chat handler set up for socket ${socket.id}`);
     // Handle new chat message
     socket.on('chat:message', async (data: {
         roomId: number;
@@ -11,6 +12,7 @@ export function setupChatHandler(io: Server, socket: Socket) {
         mediaUrl?: string;
     }) => {
         try {
+            console.log(`💬 chat:message received from ${data.sender} in room ${data.roomId}: "${data.content.substring(0, 50)}"`);
             // Save to database
             const message = await prisma.message.create({
                 data: {
@@ -52,13 +54,15 @@ export function setupChatHandler(io: Server, socket: Socket) {
                     timestamp: new Date().toISOString(),
                 });
             }
+            console.log(`💬 Message saved & broadcast to room_${data.roomId}: id=${message.id}`);
         } catch (error) {
-            console.error('Error handling chat message:', error);
+            console.error('🔥 Error handling chat message:', error);
         }
     });
 
     // Handle typing indicator
     socket.on('chat:typing', (data: { roomId: number; sender: string; isTyping: boolean }) => {
+        console.log(`⌨️ chat:typing: ${data.sender} ${data.isTyping ? 'started' : 'stopped'} typing in room ${data.roomId}`);
         socket.to(`room_${data.roomId}`).emit('chat:typing', data);
     });
 

@@ -10,10 +10,18 @@ export const useSocket = () => {
     const [isConnected, setIsConnected] = useState(false);
 
     useEffect(() => {
-        if (!session) return;
+        if (!session) {
+            console.log('🔌 useSocket: No session, skipping socket connection');
+            return;
+        }
 
         if (!socketInstance) {
-            socketInstance = io(import.meta.env.VITE_API_URL || 'http://localhost:3001', {
+            const socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+            console.log('🔌 useSocket: Creating new socket connection');
+            console.log('   URL:', socketUrl);
+            console.log('   roomId:', session.room.id, '| userId:', session.user.id, '| role:', session.user.role);
+
+            socketInstance = io(socketUrl, {
                 autoConnect: true,
                 query: {
                     roomId: session.room.id,
@@ -23,11 +31,17 @@ export const useSocket = () => {
             });
 
             socketInstance.on('connect', () => {
+                console.log('🔌 Socket CONNECTED! id:', socketInstance?.id);
                 setIsConnected(true);
             });
 
-            socketInstance.on('disconnect', () => {
+            socketInstance.on('disconnect', (reason) => {
+                console.log('🔌 Socket DISCONNECTED! reason:', reason);
                 setIsConnected(false);
+            });
+
+            socketInstance.on('connect_error', (err) => {
+                console.error('🔌 Socket CONNECTION ERROR:', err.message);
             });
         }
 
