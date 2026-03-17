@@ -21,8 +21,10 @@ import { setupMusicSyncHandler } from './sockets/musicSyncHandler';
 import { setupDoodleHandler } from './sockets/doodleHandler';
 import { setupLocationHandler } from './sockets/locationHandler';
 
-// Allowed origins
-const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173').split(',');
+// Allowed origins — trim trailing slashes to prevent CORS mismatch
+const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
+    .split(',')
+    .map(o => o.trim().replace(/\/+$/, ''));
 
 console.log('========================================');
 console.log('🔧 SERVER CONFIG');
@@ -52,7 +54,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // Request logger middleware — logs every incoming request
 app.use((req, _res, next) => {
-    console.log(`📥 ${req.method} ${req.url} | Origin: ${req.headers.origin || 'none'} | Body: ${JSON.stringify(req.body).substring(0, 200)}`);
+    const bodyStr = req.body ? JSON.stringify(req.body).substring(0, 200) : '(empty)';
+    console.log(`📥 ${req.method} ${req.url} | Origin: ${req.headers.origin || 'none'} | Body: ${bodyStr}`);
     next();
 });
 
