@@ -104,7 +104,6 @@ const LoveQuiz: React.FC = () => {
     const [score, setScore] = useState(0);
     const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
     const [showResult, setShowResult] = useState(false);
-    const [isComplete, setIsComplete] = useState(false);
 
     const question = quizQuestions[currentQ];
 
@@ -118,7 +117,6 @@ const LoveQuiz: React.FC = () => {
                 setCurrentQ(prev => prev + 1);
                 setSelectedAnswer(null);
             } else {
-                setIsComplete(true);
                 setShowResult(true);
                 if (score + (index === question.correctIndex ? 1 : 0) >= 8) {
                     import('../shared/ConfettiTrigger').then(({ fireConfetti }) => {
@@ -134,7 +132,6 @@ const LoveQuiz: React.FC = () => {
         setScore(0);
         setSelectedAnswer(null);
         setShowResult(false);
-        setIsComplete(false);
     };
 
     if (showResult) {

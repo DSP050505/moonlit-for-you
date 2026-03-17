@@ -28,14 +28,6 @@ const DustParticles: React.FC = () => {
         return { positions, velocities };
     }, []);
 
-    const sizes = useMemo(() => {
-        const s = new Float32Array(PARTICLE_COUNT);
-        for (let i = 0; i < PARTICLE_COUNT; i++) {
-            s[i] = 0.02 + Math.random() * 0.04;
-        }
-        return s;
-    }, []);
-
     useFrame(({ clock }) => {
         if (!pointsRef.current) return;
         const geo = pointsRef.current.geometry;

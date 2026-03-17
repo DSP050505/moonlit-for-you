@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import NotificationPanel from '../notifications/NotificationPanel';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/useSocket';

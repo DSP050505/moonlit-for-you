@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Card from '../shared/Card';
-
 interface Photo {
     id: number;
     url: string;
