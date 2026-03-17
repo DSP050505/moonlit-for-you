@@ -9,9 +9,9 @@ const StarField3D: React.FC = () => {
     useFrame(({ clock }) => {
         if (!groupRef.current) return;
         const time = clock.getElapsedTime();
-        // Slow majestic rotation of the entire starfield
-        groupRef.current.rotation.y = time * 0.02;
-        groupRef.current.rotation.x = Math.sin(time * 0.01) * 0.05;
+        // Extremely slow majestic rotation of the entire starfield
+        groupRef.current.rotation.y = time * 0.002;
+        groupRef.current.rotation.x = Math.sin(time * 0.002) * 0.02;
     });
 
     return (

@@ -3,7 +3,6 @@ import { Canvas } from '@react-three/fiber';
 import { AdaptiveDpr, Preload } from '@react-three/drei';
 import { EffectComposer, Bloom, Noise } from '@react-three/postprocessing';
 import StarField3D from './StarField3D';
-import Moon3D from './Moon3D';
 import DustParticles from './DustParticles';
 import ShootingStar from './ShootingStar';
 import Nebula from './Nebula';
@@ -69,7 +68,6 @@ const SceneProvider: React.FC<SceneProviderProps> = ({ children }) => {
 
                     {/* 3D Scene elements */}
                     <StarField3D />
-                    <Moon3D />
                     <Nebula />
                     <DustParticles />
                     <ShootingStar />

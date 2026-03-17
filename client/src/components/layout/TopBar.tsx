@@ -26,7 +26,7 @@ const playClinkSound = () => {
 
 const TopBar: React.FC = () => {
     const [notificationsOpen, setNotificationsOpen] = useState(false);
-    const { session } = useAuth();
+    const { session, logout } = useAuth();
     const { socket } = useSocket();
     const [onlineRoles, setOnlineRoles] = useState<string[]>([]);
 
@@ -166,6 +166,31 @@ const TopBar: React.FC = () => {
                     <span>🕐</span>
                     <TimeDisplay />
                 </motion.div>
+
+                {/* Leave Room Button */}
+                <motion.button
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={logout}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '6px 14px',
+                        background: 'rgba(232, 120, 138, 0.1)',
+                        border: '1px solid rgba(232, 120, 138, 0.3)',
+                        borderRadius: 'var(--radius-pill)',
+                        color: 'var(--accent-rose)',
+                        fontSize: '0.8rem',
+                        cursor: 'pointer',
+                        fontFamily: 'var(--font-heading)'
+                    }}
+                >
+                    🚪 Leave
+                </motion.button>
 
                 {/* 3D Metal Notification Bell */}
                 <motion.button
