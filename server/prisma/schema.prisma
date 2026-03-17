@@ -44,6 +44,7 @@ model Room {
   photos    Photo[]
   wishes    Wish[]
   quizzes   QuizQuestion[]
+  playlists Playlist[]
 
   @@map("rooms")
 }
@@ -146,4 +147,33 @@ model QuizQuestion {
   room         Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   @@map("quiz_questions")
+}
+
+model Playlist {
+  id        Int              @id @default(autoincrement())
+  roomId    Int              @map("room_id")
+  name      String
+  createdBy String           @map("created_by")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  room      Room             @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  tracks    PlaylistTrack[]
+
+  @@map("playlists")
+}
+
+model PlaylistTrack {
+  id          Int      @id @default(autoincrement())
+  playlistId  Int      @map("playlist_id")
+  youtubeId   String   @map("youtube_id")
+  title       String
+  channel     String
+  thumbnail   String
+  duration    String   @default("")
+  addedBy     String   @map("added_by")
+  addedAt     DateTime @default(now()) @map("added_at")
+
+  playlist    Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+
+  @@map("playlist_tracks")
 }

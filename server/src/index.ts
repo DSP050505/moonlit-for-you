@@ -14,6 +14,7 @@ import photosRouter from './routes/photos';
 import wishesRouter from './routes/wishes';
 import quizRouter from './routes/quiz';
 import weatherRouter from './routes/weather';
+import musicRouter from './routes/music';
 
 // Import socket handlers
 import { setupChatHandler } from './sockets/chatHandler';
@@ -71,6 +72,7 @@ app.use('/api/photos', photosRouter);
 app.use('/api/wishes', wishesRouter);
 app.use('/api/quiz', quizRouter);
 app.use('/api/weather', weatherRouter);
+app.use('/api/music', musicRouter);
 
 // Health check
 app.get('/api/health', (_req, res) => {
