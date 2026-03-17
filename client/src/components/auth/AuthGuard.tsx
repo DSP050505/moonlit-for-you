@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import type { Role } from '../../context/AuthContext';
-import Card from '../shared/Card';
 
 interface AuthGuardProps {
     children: React.ReactNode;
@@ -16,6 +15,26 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     const [role, setRole] = useState<Role>('Rishika');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [shakeCount, setShakeCount] = useState(0);
+
+    const playErrorSound = () => {
+        try {
+            const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(150, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.2);
+            gain.gain.setValueAtTime(0.1, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.2);
+        } catch (e) {
+            console.warn('AudioContext not supported');
+        }
+    };
 
     if (session) {
         return <>{children}</>;
@@ -77,8 +96,9 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
 
         } catch (err: any) {
             console.error('   🔥 Auth error:', err.message);
-            console.error('   Full error:', err);
             setError(err.message);
+            setShakeCount(prev => prev + 1);
+            playErrorSound();
         } finally {
             setIsLoading(false);
         }
@@ -89,69 +109,63 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
             position: 'fixed',
             inset: 0,
             zIndex: 9999,
-            backgroundColor: 'var(--bg-primary)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             padding: 'var(--space-4)',
         }}>
-            {/* Animated CSS Background */}
-            <div style={{
-                position: 'absolute', inset: 0, zIndex: 0,
-                background: 'radial-gradient(ellipse at 50% 20%, #151A30 0%, #0B0E1A 60%, #060812 100%)',
-                overflow: 'hidden',
-            }}>
-                {/* CSS Stars */}
-                {Array.from({ length: 80 }).map((_, i) => (
-                    <div key={i} style={{
-                        position: 'absolute',
-                        width: `${1 + Math.random() * 2}px`,
-                        height: `${1 + Math.random() * 2}px`,
-                        borderRadius: '50%',
-                        background: i % 5 === 0 ? '#F5D380' : i % 7 === 0 ? '#F2A7C3' : '#C8D0E0',
-                        left: `${Math.random() * 100}%`,
-                        top: `${Math.random() * 100}%`,
-                        opacity: 0.4 + Math.random() * 0.6,
-                        animation: `twinkle ${2 + Math.random() * 3}s ease-in-out infinite`,
-                        animationDelay: `${Math.random() * 3}s`,
-                    }} />
-                ))}
-                {/* CSS Moon */}
-                <div style={{
-                    position: 'absolute',
-                    top: '10%', right: '15%',
-                    width: '60px', height: '60px',
-                    borderRadius: '50%',
-                    background: 'radial-gradient(circle at 35% 35%, #FFF8E7 0%, #F5D380 50%, #D4A855 100%)',
-                    boxShadow: '0 0 40px rgba(245,211,128,0.4), 0 0 80px rgba(245,211,128,0.2)',
-                }} />
-            </div>
+            {/* The background is now fully handled by SceneProvider Global Canvas. 
+                AuthGuard is just a floating HTML overlay without its own opaque background. */}
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(11, 14, 26, 0.4)', backdropFilter: 'blur(8px)', zIndex: 0 }} />
 
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '400px' }}
-                className="auth-card"
+                initial={{ opacity: 0, scale: 0.8, y: 40 }}
+                animate={{ 
+                    opacity: 1, 
+                    scale: 1, 
+                    y: [0, -10, 0],
+                    x: shakeCount > 0 ? [-5, 5, -5, 5, 0] : 0 
+                }}
+                transition={{
+                    opacity: { duration: 0.8, ease: "easeOut" },
+                    scale: { duration: 0.8, type: "spring", bounce: 0.4 },
+                    y: { duration: 6, repeat: Infinity, ease: "easeInOut" },
+                    x: { duration: 0.4 } // Shake duration
+                }}
+                key={shakeCount} // Force re-render of shake animation on error
+                style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '420px', perspective: '1000px' }}
             >
-                <Card glow hover3D={false}>
-                    <div style={{ padding: 'var(--space-8)' }}>
-                        <h1 style={{
-                            fontFamily: 'var(--font-heading)',
-                            color: 'var(--text-primary)',
-                            textAlign: 'center',
-                            fontSize: '2rem',
-                            marginBottom: 'var(--space-2)'
-                        }}>
-                            MoonlitForRishika
+                <div style={{
+                    background: 'rgba(28, 32, 56, 0.4)',
+                    backdropFilter: 'blur(24px)',
+                    WebkitBackdropFilter: 'blur(24px)',
+                    borderRadius: '24px',
+                    border: '1px solid rgba(242, 167, 195, 0.2)',
+                    boxShadow: '0 20px 50px rgba(0,0,0,0.5), inset 0 0 20px rgba(242,167,195,0.05)',
+                    padding: 'var(--space-8)',
+                    transformStyle: 'preserve-3d',
+                }}>
+                    <h1 style={{
+                        fontFamily: 'var(--font-handwriting)',
+                        color: 'var(--text-primary)',
+                        textAlign: 'center',
+                        fontSize: '3.5rem',
+                        marginBottom: 'var(--space-2)',
+                        textShadow: '0 0 15px rgba(242, 167, 195, 0.6)',
+                        letterSpacing: '1px'
+                    }}>
+                        MoonlitForRishika
                         </h1>
                         <p style={{
                             textAlign: 'center',
-                            color: 'var(--accent-pink)',
-                            fontFamily: 'var(--font-handwriting)',
+                            color: 'var(--text-muted)',
+                            fontFamily: 'var(--font-heading)',
                             marginBottom: 'var(--space-6)',
-                            fontSize: '1.2rem'
+                            fontSize: '0.9rem',
+                            letterSpacing: '2px',
+                            textTransform: 'uppercase'
                         }}>
-                            Enter our private sky ✨
+                            Enter our private sky
                         </p>
 
                         <div style={{ display: 'flex', gap: '8px', marginBottom: 'var(--space-6)' }}>
@@ -189,7 +203,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
 
                         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
                             <div>
-                                <label style={{ display: 'block', marginBottom: '4px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>Room Name</label>
+                                <label style={{ display: 'block', marginBottom: '6px', color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Room Name</label>
                                 <input
                                     type="text"
                                     required
@@ -197,19 +211,31 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
                                     onChange={e => setRoomName(e.target.value)}
                                     style={{
                                         width: '100%',
-                                        padding: '12px',
-                                        borderRadius: 'var(--radius-md)',
-                                        border: '1px solid rgba(255,255,255,0.1)',
-                                        background: 'rgba(0,0,0,0.2)',
+                                        padding: '14px',
+                                        borderRadius: '12px',
+                                        border: '1px solid rgba(255,255,255,0.05)',
+                                        background: 'rgba(0,0,0,0.3)',
+                                        boxShadow: 'inset 0 4px 10px rgba(0,0,0,0.5)',
                                         color: 'white',
-                                        fontFamily: 'var(--font-mono)'
+                                        fontFamily: 'var(--font-body)',
+                                        fontSize: '1rem',
+                                        transition: 'border 0.3s ease, box-shadow 0.3s ease',
+                                        outline: 'none',
+                                    }}
+                                    onFocus={(e) => {
+                                        e.target.style.border = '1px solid rgba(242,167,195,0.5)';
+                                        e.target.style.boxShadow = 'inset 0 4px 10px rgba(0,0,0,0.5), 0 0 10px rgba(242,167,195,0.2)';
+                                    }}
+                                    onBlur={(e) => {
+                                        e.target.style.border = '1px solid rgba(255,255,255,0.05)';
+                                        e.target.style.boxShadow = 'inset 0 4px 10px rgba(0,0,0,0.5)';
                                     }}
                                     placeholder="e.g. OurLittleWorld"
                                 />
                             </div>
 
                             <div>
-                                <label style={{ display: 'block', marginBottom: '4px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>Passcode</label>
+                                <label style={{ display: 'block', marginBottom: '6px', color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Passcode</label>
                                 <input
                                     type="password"
                                     required
@@ -217,19 +243,31 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
                                     onChange={e => setPasscode(e.target.value)}
                                     style={{
                                         width: '100%',
-                                        padding: '12px',
-                                        borderRadius: 'var(--radius-md)',
-                                        border: '1px solid rgba(255,255,255,0.1)',
-                                        background: 'rgba(0,0,0,0.2)',
+                                        padding: '14px',
+                                        borderRadius: '12px',
+                                        border: '1px solid rgba(255,255,255,0.05)',
+                                        background: 'rgba(0,0,0,0.3)',
+                                        boxShadow: 'inset 0 4px 10px rgba(0,0,0,0.5)',
                                         color: 'white',
-                                        fontFamily: 'var(--font-mono)'
+                                        fontFamily: 'var(--font-body)',
+                                        fontSize: '1rem',
+                                        transition: 'border 0.3s ease, box-shadow 0.3s ease',
+                                        outline: 'none',
+                                    }}
+                                    onFocus={(e) => {
+                                        e.target.style.border = '1px solid rgba(242,167,195,0.5)';
+                                        e.target.style.boxShadow = 'inset 0 4px 10px rgba(0,0,0,0.5), 0 0 10px rgba(242,167,195,0.2)';
+                                    }}
+                                    onBlur={(e) => {
+                                        e.target.style.border = '1px solid rgba(255,255,255,0.05)';
+                                        e.target.style.boxShadow = 'inset 0 4px 10px rgba(0,0,0,0.5)';
                                     }}
                                     placeholder="Secret key..."
                                 />
                             </div>
 
                             <div>
-                                <label style={{ display: 'block', marginBottom: '4px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>I am...</label>
+                                <label style={{ display: 'block', marginBottom: '6px', color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>I am...</label>
                                 <div style={{ display: 'flex', gap: '8px' }}>
                                     {(['Rishika', 'DSP'] as Role[]).map(r => (
                                         <button
@@ -265,27 +303,31 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
                                 )}
                             </AnimatePresence>
 
-                            <button
+                            <motion.button
+                                whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(242, 167, 195, 0.6)' }}
+                                whileTap={{ scale: 0.98 }}
                                 type="submit"
                                 disabled={isLoading}
                                 style={{
                                     marginTop: '8px',
-                                    padding: '14px',
-                                    borderRadius: 'var(--radius-md)',
-                                    border: 'none',
-                                    background: 'linear-gradient(135deg, var(--accent-rose), var(--accent-pink))',
+                                    padding: '16px',
+                                    borderRadius: '12px',
+                                    border: '1px solid rgba(255,255,255,0.2)',
+                                    background: 'linear-gradient(135deg, rgba(232, 120, 138, 0.9), rgba(242, 167, 195, 0.9))',
                                     color: 'white',
-                                    fontWeight: 'bold',
+                                    fontFamily: 'var(--font-heading)',
+                                    fontSize: '1.1rem',
+                                    letterSpacing: '1px',
                                     cursor: isLoading ? 'not-allowed' : 'pointer',
                                     opacity: isLoading ? 0.7 : 1,
-                                    boxShadow: '0 4px 15px rgba(232, 120, 138, 0.3)',
+                                    textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                                    boxShadow: '0 8px 25px rgba(232, 120, 138, 0.4), inset 0 2px 4px rgba(255,255,255,0.3)'
                                 }}
                             >
                                 {isLoading ? 'Connecting...' : (mode === 'join' ? 'Enter Room' : 'Create & Enter')}
-                            </button>
+                            </motion.button>
                         </form>
-                    </div>
-                </Card>
+                </div>
             </motion.div>
         </div>
     );

@@ -13,6 +13,7 @@
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
     "@react-three/postprocessing": "^3.0.4",
+    "@types/uuid": "^10.0.0",
     "canvas-confetti": "^1.9.4",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.37.0",
@@ -25,7 +26,9 @@
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.13.1",
     "socket.io-client": "^4.8.3",
-    "three": "^0.183.2"
+    "three": "^0.183.2",
+    "three-stdlib": "^2.36.1",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",

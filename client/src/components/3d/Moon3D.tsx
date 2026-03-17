@@ -20,9 +20,9 @@ const Moon3D: React.FC = () => {
         return new THREE.ExtrudeGeometry(shape, {
             depth: 0.15,
             bevelEnabled: true,
-            bevelThickness: 0.03,
-            bevelSize: 0.03,
-            bevelSegments: 3,
+            bevelThickness: 0.05,
+            bevelSize: 0.05,
+            bevelSegments: 8,
         });
     }, []);
 
@@ -30,17 +30,17 @@ const Moon3D: React.FC = () => {
         if (!groupRef.current || !glowRef.current) return;
         const t = clock.getElapsedTime();
 
-        // Slow gentle rotation
-        groupRef.current.rotation.z = Math.sin(t * 0.1) * 0.05;
-        groupRef.current.rotation.y = Math.sin(t * 0.08) * 0.03;
+        // Very slow majestic wobble
+        groupRef.current.rotation.z = Math.sin(t * 0.1) * 0.02;
+        groupRef.current.rotation.y = Math.sin(t * 0.08) * 0.02;
 
-        // Breathing glow
-        const glowScale = 2.5 + Math.sin(t * 0.5) * 0.15;
+        // Breathing optical glow
+        const glowScale = 2.8 + Math.sin(t * 0.4) * 0.1;
         glowRef.current.scale.setScalar(glowScale);
 
-        // Glow opacity breathing
+        // Pulsing Bloom trigger value in material
         const mat = glowRef.current.material as THREE.MeshBasicMaterial;
-        mat.opacity = 0.08 + Math.sin(t * 0.3) * 0.02;
+        mat.opacity = 0.05 + Math.sin(t * 0.4) * 0.02;
     });
 
     return (
@@ -48,11 +48,13 @@ const Moon3D: React.FC = () => {
             {/* Moon body */}
             <mesh geometry={moonGeo}>
                 <meshStandardMaterial
-                    color="#F5D380"
+                    color="#FFDDB0"
                     emissive="#F5D380"
-                    emissiveIntensity={0.4}
-                    roughness={0.8}
-                    metalness={0.1}
+                    emissiveIntensity={1.2}
+                    roughness={0.4}
+                    metalness={0.8}
+                    transparent
+                    opacity={0.95}
                 />
             </mesh>
 
@@ -62,28 +64,28 @@ const Moon3D: React.FC = () => {
                 <meshBasicMaterial
                     color="#F5D380"
                     transparent
-                    opacity={0.08}
+                    opacity={0.06}
                     side={THREE.BackSide}
                     blending={THREE.AdditiveBlending}
                     depthWrite={false}
                 />
             </mesh>
 
-            {/* Point light from moon */}
+            {/* Core point light cast from the moon */}
             <pointLight
                 color="#F5D380"
-                intensity={2}
-                distance={60}
+                intensity={4}
+                distance={100}
                 decay={2}
             />
 
-            {/* Secondary soft light */}
+            {/* Ambient moonlight flood */}
             <pointLight
                 color="#C8D0E0"
-                intensity={0.8}
-                distance={40}
+                intensity={1}
+                distance={50}
                 decay={2}
-                position={[0, 0, 2]}
+                position={[-2, -2, 4]}
             />
         </group>
     );

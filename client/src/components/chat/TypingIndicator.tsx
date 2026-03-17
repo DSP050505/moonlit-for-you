@@ -19,12 +19,16 @@ const TypingIndicator: React.FC<TypingIndicatorProps> = ({ name }) => {
             }}
         >
             <div style={{
-                background: 'rgba(196, 177, 212, 0.2)',
+                background: 'rgba(28, 32, 56, 0.6)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                boxShadow: '0 8px 16px rgba(0,0,0,0.3), inset 0 2px 5px rgba(255,255,255,0.1)',
                 borderRadius: '16px 16px 16px 4px',
                 padding: '10px 16px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '4px',
+                gap: '6px',
             }}>
                 {/* Pulsing dots */}
                 {[0, 1, 2].map((i) => (
@@ -32,20 +36,22 @@ const TypingIndicator: React.FC<TypingIndicatorProps> = ({ name }) => {
                         key={i}
                         animate={{
                             scale: [0.6, 1, 0.6],
-                            opacity: [0.4, 1, 0.4],
+                            opacity: [0.5, 1, 0.5],
+                            y: [0, -4, 0]
                         }}
                         transition={{
-                            duration: 1.2,
+                            duration: 0.8,
                             repeat: Infinity,
-                            delay: i * 0.2,
+                            delay: i * 0.15,
                             ease: 'easeInOut',
                         }}
                         style={{
                             display: 'inline-block',
-                            width: '7px',
-                            height: '7px',
+                            width: '8px',
+                            height: '8px',
                             borderRadius: '50%',
-                            background: 'var(--accent-lavender)',
+                            background: 'radial-gradient(circle at 30% 30%, #fff, #C4B1D4 60%, #81B1EE)',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.3), inset -1px -1px 2px rgba(0,0,0,0.2)',
                         }}
                     />
                 ))}

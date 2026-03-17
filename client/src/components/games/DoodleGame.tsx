@@ -54,6 +54,10 @@ const DoodleGame: React.FC = () => {
         ctx.lineWidth = size;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
+        // Neon glow effect
+        ctx.shadowBlur = size > 3 ? 15 : 8;
+        ctx.shadowColor = color;
+        
         ctx.beginPath();
         ctx.moveTo(points[0].x, points[0].y);
         for (let i = 1; i < points.length; i++) {
@@ -272,31 +276,47 @@ const DoodleGame: React.FC = () => {
                     </div>
 
                     {/* Canvas */}
-                    <Card hover3D={false}>
-                        <div style={{ padding: '8px' }}>
-                            <canvas
-                                ref={canvasRef}
-                                width={600}
-                                height={400}
-                                onMouseDown={startDraw}
-                                onMouseMove={moveDraw}
-                                onMouseUp={endDraw}
-                                onMouseLeave={endDraw}
-                                onTouchStart={startDraw}
-                                onTouchMove={moveDraw}
-                                onTouchEnd={endDraw}
-                                style={{
-                                    width: '100%',
-                                    height: 'auto',
-                                    aspectRatio: '3/2',
-                                    borderRadius: '8px',
-                                    background: 'rgba(0,0,0,0.3)',
-                                    cursor: phase === 'drawing' ? 'crosshair' : 'default',
-                                    touchAction: 'none',
-                                }}
-                            />
-                        </div>
-                    </Card>
+                    <div style={{ perspective: '1000px', marginBottom: 'var(--space-4)' }}>
+                        <motion.div
+                            initial={{ rotateX: 5, rotateZ: -1 }}
+                            whileHover={phase === 'drawing' ? { rotateX: 0, rotateZ: 0 } : {}}
+                            transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+                            style={{ transformStyle: 'preserve-3d' }}
+                        >
+                            <Card hover3D={false}>
+                                <div style={{ 
+                                    padding: '8px', 
+                                    background: 'linear-gradient(135deg, rgba(20, 20, 30, 0.9), rgba(10, 10, 15, 0.95))',
+                                    borderRadius: 'var(--radius-card)',
+                                    boxShadow: 'inset 0 0 20px rgba(0,0,0,0.8), 0 20px 40px rgba(0,0,0,0.5)',
+                                    border: '1px solid rgba(255,255,255,0.05)'
+                                }}>
+                                    <canvas
+                                        ref={canvasRef}
+                                        width={600}
+                                        height={400}
+                                        onMouseDown={startDraw}
+                                        onMouseMove={moveDraw}
+                                        onMouseUp={endDraw}
+                                        onMouseLeave={endDraw}
+                                        onTouchStart={startDraw}
+                                        onTouchMove={moveDraw}
+                                        onTouchEnd={endDraw}
+                                        style={{
+                                            width: '100%',
+                                            height: 'auto',
+                                            aspectRatio: '3/2',
+                                            borderRadius: '8px',
+                                            background: 'rgba(5, 5, 10, 0.6)', // very dark background for neon to pop
+                                            cursor: phase === 'drawing' ? 'crosshair' : 'default',
+                                            touchAction: 'none',
+                                            boxShadow: 'inset 0 0 10px rgba(0,0,0,0.5)',
+                                        }}
+                                    />
+                                </div>
+                            </Card>
+                        </motion.div>
+                    </div>
 
                     {/* Drawing Tools (only for drawer) */}
                     {phase === 'drawing' && (

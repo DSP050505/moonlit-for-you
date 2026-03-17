@@ -1,44 +1,30 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { Cloud, Clouds } from '@react-three/drei';
 import * as THREE from 'three';
 
 const Nebula: React.FC = () => {
-    const groupRef = useRef<THREE.Group>(null);
-
-    const nebulae = useMemo(() => [
-        { pos: [-12, 6, -40] as [number, number, number], color: '#F2A7C3', scale: 15, opacity: 0.03 },
-        { pos: [10, -5, -50] as [number, number, number], color: '#C4B1D4', scale: 18, opacity: 0.025 },
-        { pos: [-8, -8, -60] as [number, number, number], color: '#E8788A', scale: 12, opacity: 0.02 },
-        { pos: [15, 8, -45] as [number, number, number], color: '#F5D380', scale: 10, opacity: 0.015 },
-    ], []);
+    const cloudsRef = useRef<THREE.Group>(null);
 
     useFrame(({ clock }) => {
-        if (!groupRef.current) return;
-        const t = clock.getElapsedTime();
-
-        // Very slow drift
-        groupRef.current.children.forEach((child, i) => {
-            child.position.x += Math.sin(t * 0.02 + i) * 0.002;
-            child.position.y += Math.cos(t * 0.015 + i) * 0.001;
-            child.rotation.z = Math.sin(t * 0.01 + i * 0.5) * 0.02;
-        });
+        if (!cloudsRef.current) return;
+        // Extremely slow drift
+        cloudsRef.current.rotation.y = clock.getElapsedTime() * 0.005;
     });
 
     return (
-        <group ref={groupRef}>
-            {nebulae.map((n, i) => (
-                <mesh key={i} position={n.pos}>
-                    <planeGeometry args={[n.scale, n.scale]} />
-                    <meshBasicMaterial
-                        color={n.color}
-                        transparent
-                        opacity={n.opacity}
-                        blending={THREE.AdditiveBlending}
-                        depthWrite={false}
-                        side={THREE.DoubleSide}
-                    />
-                </mesh>
-            ))}
+        <group ref={cloudsRef} position={[0, -5, -40]}>
+            <Clouds material={THREE.MeshBasicMaterial} limit={400} range={100}>
+                {/* Lavender / Purple nebulous regions */}
+                <Cloud speed={0.2} opacity={0.3} color="#C4B1D4" scale={2} volume={10} position={[-20, 10, -10]} />
+                <Cloud speed={0.2} opacity={0.25} color="#81B1EE" scale={3} volume={15} position={[30, -10, -20]} />
+                
+                {/* Deep Pinkish hues */}
+                <Cloud speed={0.25} opacity={0.15} color="#F2A7C3" scale={2.5} volume={12} position={[0, 20, -15]} />
+                
+                {/* Dark fog layer to blend with sky background */}
+                <Cloud speed={0.1} opacity={0.4} color="#0B0E1A" scale={5} volume={20} position={[0, -20, -30]} />
+            </Clouds>
         </group>
     );
 };

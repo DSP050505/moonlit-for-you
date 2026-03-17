@@ -21,11 +21,68 @@ const LetterWriter: React.FC = () => {
     const [isWriting, setIsWriting] = useState(false);
     const [newLetter, setNewLetter] = useState('');
     const [openLetterId, setOpenLetterId] = useState<number | null>(null);
-    const [sealAnimation, setSealAnimation] = useState(false);
+    const [sealState, setSealState] = useState<'idle' | 'melting' | 'stamped'>('idle');
+
+    // Synthesize a wax melting/stamping sound
+    const playSealSound = () => {
+        try {
+            const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+            
+            // Melt sound (soft sizzling/squishing)
+            const osc = ctx.createOscillator();
+            const filter = ctx.createBiquadFilter();
+            const gain = ctx.createGain();
+            
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(150, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.5);
+            
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(1000, ctx.currentTime);
+            filter.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.5);
+            
+            gain.gain.setValueAtTime(0, ctx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+            
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(ctx.destination);
+            
+            osc.start();
+            osc.stop(ctx.currentTime + 0.6);
+
+            // Stamp sound (heavy thud) setTimeout
+            setTimeout(() => {
+                const thudOsc = ctx.createOscillator();
+                const thudGain = ctx.createGain();
+                thudOsc.type = 'sine';
+                thudOsc.frequency.setValueAtTime(100, ctx.currentTime);
+                thudOsc.frequency.exponentialRampToValueAtTime(20, ctx.currentTime + 0.2);
+                
+                thudGain.gain.setValueAtTime(1, ctx.currentTime);
+                thudGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+                
+                thudOsc.connect(thudGain);
+                thudGain.connect(ctx.destination);
+                thudOsc.start();
+                thudOsc.stop(ctx.currentTime + 0.3);
+            }, 600);
+
+        } catch (e) {
+            console.error(e);
+        }
+    };
 
     const handleSend = () => {
         if (!newLetter.trim()) return;
-        setSealAnimation(true);
+        setSealState('melting');
+        playSealSound();
+
+        // After melting, show stamped
+        setTimeout(() => setSealState('stamped'), 600);
+
+        // Finish and send
         setTimeout(() => {
             setLetters(prev => [{
                 id: Date.now(),
@@ -36,8 +93,8 @@ const LetterWriter: React.FC = () => {
             }, ...prev]);
             setNewLetter('');
             setIsWriting(false);
-            setSealAnimation(false);
-        }, 1500);
+            setSealState('idle');
+        }, 1800);
     };
 
     const handleOpenLetter = (id: number) => {
@@ -158,37 +215,66 @@ const LetterWriter: React.FC = () => {
                                     }}
                                 />
 
-                                {/* Seal Button */}
-                                <div style={{ textAlign: 'center', marginTop: 'var(--space-4)' }}>
+                                {/* 3D Wax Seal Button */}
+                                <div style={{ textAlign: 'center', marginTop: 'var(--space-6)', perspective: '800px' }}>
                                     <motion.button
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.9 }}
-                                        animate={sealAnimation ? { scale: [1, 1.3, 1], rotate: [0, -10, 10, 0] } : {}}
+                                        whileHover={sealState === 'idle' ? { scale: 1.05, rotateX: 10 } : {}}
+                                        whileTap={sealState === 'idle' ? { scale: 0.95 } : {}}
                                         onClick={handleSend}
-                                        disabled={!newLetter.trim()}
+                                        disabled={!newLetter.trim() || sealState !== 'idle'}
+                                        initial={{ borderRadius: '50%' }}
+                                        animate={{
+                                            scale: sealState === 'melting' ? [1, 1.2, 1.4, 1.5] : sealState === 'stamped' ? 1.6 : 1,
+                                            height: sealState === 'melting' ? ['60px', '40px', '30px', '20px'] : sealState === 'stamped' ? '25px' : '60px',
+                                            width: sealState === 'melting' ? ['60px', '70px', '85px', '95px'] : sealState === 'stamped' ? '90px' : '60px',
+                                            borderRadius: sealState === 'idle' ? '50%' : '40% 60% 70% 30% / 40% 50% 60% 50%',
+                                            rotateZ: sealState === 'melting' ? [0, 5, -5, 2] : 0,
+                                            boxShadow: sealState === 'idle' 
+                                                ? '0 10px 20px rgba(180, 20, 20, 0.4), inset 0 5px 10px rgba(255,100,100,0.5)' 
+                                                : sealState === 'melting'
+                                                    ? '0 20px 40px rgba(180, 20, 20, 0.6), inset 0 2px 5px rgba(255,100,100,0.8)'
+                                                    : '0 2px 5px rgba(150, 10, 10, 0.8), inset 0 -2px 5px rgba(0,0,0,0.4)',
+                                            background: sealState === 'idle'
+                                                ? 'radial-gradient(circle at 30% 30%, #ff4b4b, #c41a1a, #8a0b0b)'
+                                                : 'radial-gradient(circle at 50% 50%, #e62e2e, #a31010)'
+                                        }}
+                                        transition={{ duration: sealState === 'melting' ? 0.6 : 0.2 }}
                                         style={{
-                                            background: '#c41a1a',
                                             border: 'none',
-                                            color: 'white',
-                                            padding: '14px 24px',
-                                            borderRadius: '50%',
-                                            width: '60px',
-                                            height: '60px',
-                                            cursor: newLetter.trim() ? 'pointer' : 'default',
-                                            fontSize: '1.5rem',
-                                            boxShadow: '0 4px 15px rgba(196, 26, 26, 0.4)',
+                                            color: '#fff',
+                                            margin: '0 auto',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            cursor: newLetter.trim() && sealState === 'idle' ? 'pointer' : 'default',
                                             opacity: newLetter.trim() ? 1 : 0.5,
+                                            transformStyle: 'preserve-3d',
+                                            position: 'relative'
                                         }}
                                     >
-                                        ❤️
+                                        <motion.span
+                                            animate={{ 
+                                                opacity: sealState === 'stamped' ? 1 : sealState === 'melting' ? 0 : 1,
+                                                scale: sealState === 'stamped' ? 1 : 1.2,
+                                                z: sealState === 'stamped' ? -5 : 10 // push heart into wax
+                                            }}
+                                            style={{
+                                                fontSize: sealState === 'stamped' ? '1.5rem' : '1.8rem',
+                                                textShadow: sealState === 'stamped' ? 'inset 0 2px 4px rgba(0,0,0,0.8)' : '0 2px 4px rgba(0,0,0,0.5)',
+                                                color: sealState === 'stamped' ? '#7a0a0a' : '#fff',
+                                                transformStyle: 'preserve-3d'
+                                            }}
+                                        >
+                                            {sealState === 'stamped' ? '❤️' : '💖'}
+                                        </motion.span>
                                     </motion.button>
                                     <p style={{
-                                        fontSize: '0.75rem',
+                                        fontSize: '0.85rem',
                                         color: '#8a7a6a',
-                                        marginTop: 'var(--space-2)',
+                                        marginTop: 'var(--space-4)',
                                         fontFamily: 'var(--font-handwriting)',
                                     }}>
-                                        Seal with love
+                                        {sealState === 'idle' ? 'Melt wax to seal' : sealState === 'melting' ? 'Melting...' : 'Sealed with love'}
                                     </p>
                                 </div>
                             </div>
@@ -256,7 +342,7 @@ const LetterWriter: React.FC = () => {
                 ))}
             </div>
 
-            {/* Open Letter Modal */}
+            {/* Open Letter Modal (Origami Unfold) */}
             <AnimatePresence>
                 {openLetterId && (
                     <motion.div
@@ -267,50 +353,105 @@ const LetterWriter: React.FC = () => {
                         style={{
                             position: 'fixed',
                             inset: 0,
-                            background: 'rgba(0,0,0,0.7)',
-                            backdropFilter: 'blur(8px)',
+                            background: 'rgba(5, 10, 20, 0.85)',
+                            backdropFilter: 'blur(10px)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             zIndex: 1000,
+                            perspective: '2000px', // deep perspective for folding
                         }}
                     >
+                        {/* Container that rotates into view */}
                         <motion.div
-                            initial={{ scale: 0.8, rotateX: 90 }}
-                            animate={{ scale: 1, rotateX: 0 }}
-                            exit={{ scale: 0.8, opacity: 0 }}
-                            transition={{ type: 'spring', damping: 20, stiffness: 200 }}
+                            initial={{ scale: 0.5, rotateY: -90, z: -500 }}
+                            animate={{ scale: 1, rotateY: 0, z: 0 }}
+                            exit={{ scale: 0.8, y: 100, opacity: 0 }}
+                            transition={{ type: 'spring', damping: 20, stiffness: 100 }}
                             onClick={e => e.stopPropagation()}
                             style={{
-                                background: 'linear-gradient(135deg, #f5e6c8, #ede0c8)',
-                                borderRadius: 'var(--radius-card)',
-                                padding: 'var(--space-8)',
-                                maxWidth: '500px',
                                 width: '90%',
-                                maxHeight: '70vh',
-                                overflowY: 'auto',
-                                boxShadow: '0 8px 40px rgba(0,0,0,0.4)',
+                                maxWidth: '500px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                transformStyle: 'preserve-3d',
                             }}
                         >
-                            <p style={{
-                                fontFamily: 'var(--font-handwriting)',
-                                fontSize: '1.1rem',
-                                color: '#3a2a1a',
-                                lineHeight: 2,
-                                whiteSpace: 'pre-wrap',
-                            }}>
-                                {letters.find(l => l.id === openLetterId)?.content}
-                            </p>
-                            <div style={{ textAlign: 'right', marginTop: 'var(--space-4)' }}>
+                            {/* Top Flap */}
+                            <motion.div
+                                initial={{ rotateX: -179 }}
+                                animate={{ rotateX: 0 }}
+                                transition={{ delay: 0.4, duration: 0.8, type: 'spring' }}
+                                style={{
+                                    background: 'linear-gradient(to bottom, #f5e6c8, #ebe0c8)',
+                                    borderRadius: 'var(--radius-card) var(--radius-card) 0 0',
+                                    padding: 'var(--space-6)',
+                                    transformOrigin: 'bottom',
+                                    borderBottom: '1px dashed rgba(0,0,0,0.1)',
+                                    boxShadow: '0 -10px 30px rgba(0,0,0,0.2)',
+                                    backfaceVisibility: 'hidden',
+                                }}
+                            >
                                 <p style={{
                                     fontFamily: 'var(--font-handwriting)',
                                     color: '#8a6a4a',
                                     fontSize: '1rem',
                                     fontStyle: 'italic',
+                                    textAlign: 'center'
                                 }}>
-                                    With Love, {letters.find(l => l.id === openLetterId)?.sender} ❤️
+                                    To my one and only...
+                                </p>
+                            </motion.div>
+
+                            {/* Center Body */}
+                            <div style={{
+                                background: '#ebe0c8',
+                                padding: 'var(--space-6)',
+                                position: 'relative',
+                                zIndex: 2,
+                                boxShadow: '0 0 30px rgba(0,0,0,0.3)',
+                            }}>
+                                <p style={{
+                                    fontFamily: 'var(--font-handwriting)',
+                                    fontSize: '1.2rem',
+                                    color: '#3a2a1a',
+                                    lineHeight: 2,
+                                    whiteSpace: 'pre-wrap',
+                                }}>
+                                    {letters.find(l => l.id === openLetterId)?.content}
                                 </p>
                             </div>
+
+                            {/* Bottom Flap */}
+                            <motion.div
+                                initial={{ rotateX: 179 }}
+                                animate={{ rotateX: 0 }}
+                                transition={{ delay: 0.6, duration: 0.8, type: 'spring' }}
+                                style={{
+                                    background: 'linear-gradient(to top, #e3d6bc, #ebe0c8)',
+                                    borderRadius: '0 0 var(--radius-card) var(--radius-card)',
+                                    padding: 'var(--space-6)',
+                                    transformOrigin: 'top',
+                                    borderTop: '1px dashed rgba(0,0,0,0.1)',
+                                    boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
+                                    backfaceVisibility: 'hidden',
+                                }}
+                            >
+                                <div style={{ textAlign: 'right' }}>
+                                    <p style={{
+                                        fontFamily: 'var(--font-handwriting)',
+                                        color: '#8a6a4a',
+                                        fontSize: '1.1rem',
+                                        fontStyle: 'italic',
+                                    }}>
+                                        With all my love, <br/>
+                                        <span style={{ fontSize: '1.3rem', color: '#c41a1a' }}>
+                                            {letters.find(l => l.id === openLetterId)?.sender}
+                                        </span>
+                                    </p>
+                                </div>
+                            </motion.div>
+
                         </motion.div>
                     </motion.div>
                 )}

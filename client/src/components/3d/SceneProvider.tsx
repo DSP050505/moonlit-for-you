@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { AdaptiveDpr, Preload } from '@react-three/drei';
+import { EffectComposer, Bloom, Noise } from '@react-three/postprocessing';
 import StarField3D from './StarField3D';
 import Moon3D from './Moon3D';
 import DustParticles from './DustParticles';
@@ -52,7 +53,18 @@ const SceneProvider: React.FC<SceneProviderProps> = ({ children }) => {
                     {/* Ambient lighting */}
                     <ambientLight intensity={0.15} color="#C8D0E0" />
 
-                    {/* Camera controller */}
+                    {/* Post-processing */}
+                    <EffectComposer>
+                        <Bloom
+                            luminanceThreshold={0.2}
+                            luminanceSmoothing={0.9}
+                            intensity={0.8}
+                            mipmapBlur
+                        />
+                        <Noise opacity={0.02} />
+                    </EffectComposer>
+
+                    {/* Camera controller with Parallax drift */}
                     <CameraController currentPage={currentPage} />
 
                     {/* 3D Scene elements */}

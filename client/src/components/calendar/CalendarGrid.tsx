@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isToday, addMonths, subMonths } from 'date-fns';
-import Card from '../shared/Card';
 
 // Curated love quotes (first 30 for now, deterministic by day)
 const loveQuotes = [
@@ -104,13 +103,14 @@ const CalendarGrid: React.FC = () => {
 
             {/* Daily Quote */}
             <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
+                initial={{ opacity: 0, y: 10, rotateX: 20 }}
+                animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
                 style={{
                     textAlign: 'center',
                     padding: 'var(--space-4)',
                     marginBottom: 'var(--space-4)',
+                    perspective: '1000px'
                 }}
             >
                 <p style={{
@@ -123,9 +123,18 @@ const CalendarGrid: React.FC = () => {
                 </p>
             </motion.div>
 
-            {/* Calendar Card */}
-            <Card hover3D={false}>
-                <div style={{ padding: 'var(--space-6)' }}>
+            <div style={{
+                position: 'relative',
+                background: 'rgba(28, 32, 56, 0.4)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.4), inset 0 0 15px rgba(255,255,255,0.02)',
+                borderRadius: '24px',
+                padding: 'var(--space-6)',
+                transformStyle: 'preserve-3d',
+                perspective: '1500px'
+            }}>
                     {/* Month Navigation */}
                     <div style={{
                         display: 'flex',
@@ -210,22 +219,37 @@ const CalendarGrid: React.FC = () => {
                                     onClick={() => setSelectedDate(day)}
                                     style={{
                                         textAlign: 'center',
-                                        padding: '8px 4px',
-                                        borderRadius: 'var(--radius-sm)',
+                                        padding: '12px 6px',
+                                        borderRadius: '12px',
                                         cursor: 'pointer',
                                         background: isSelected
-                                            ? 'rgba(242, 167, 195, 0.15)'
+                                            ? 'linear-gradient(135deg, rgba(242, 167, 195, 0.3), rgba(232, 120, 138, 0.15))'
                                             : today
-                                                ? 'rgba(245, 211, 128, 0.1)'
-                                                : 'transparent',
-                                        border: today ? '1px solid var(--accent-gold)' : '1px solid transparent',
-                                        transition: 'background 0.15s ease',
+                                                ? 'rgba(245, 211, 128, 0.15)'
+                                                : 'rgba(0,0,0,0.2)',
+                                        border: isSelected 
+                                            ? '1px solid rgba(242, 167, 195, 0.6)' 
+                                            : today 
+                                                ? '1px solid var(--accent-gold)' 
+                                                : '1px solid rgba(255,255,255,0.05)',
+                                        boxShadow: isSelected
+                                            ? '0 8px 20px rgba(0,0,0,0.3), inset 0 2px 10px rgba(242, 167, 195, 0.2)'
+                                            : today
+                                                ? '0 4px 12px rgba(0,0,0,0.2), inset 0 2px 5px rgba(245, 211, 128, 0.1)'
+                                                : 'inset 0 2px 5px rgba(255,255,255,0.02)',
+                                        transition: 'all 0.3s ease',
+                                        transformStyle: 'preserve-3d',
                                     }}
                                 >
                                     <span style={{
-                                        fontSize: '0.85rem',
-                                        color: today ? 'var(--accent-gold)' : 'var(--text-primary)',
-                                        fontWeight: today ? 600 : 400,
+                                        fontSize: '0.9rem',
+                                        color: isSelected 
+                                            ? '#fff' 
+                                            : today ? 'var(--accent-gold)' : 'var(--text-primary)',
+                                        fontWeight: today || isSelected ? 600 : 400,
+                                        textShadow: isSelected ? '0 0 10px rgba(242, 167, 195, 0.8)' : 'none',
+                                        display: 'block',
+                                        transform: isSelected ? 'translateZ(10px)' : 'none'
                                     }}>
                                         {format(day, 'd')}
                                     </span>
@@ -257,19 +281,24 @@ const CalendarGrid: React.FC = () => {
                         })}
                     </div>
                 </div>
-            </Card>
-
-            {/* Selected Day Events */}
             <AnimatePresence>
                 {selectedDate && (
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
-                        style={{ marginTop: 'var(--space-4)' }}
+                        style={{ marginTop: 'var(--space-6)', perspective: '1000px' }}
                     >
-                        <Card hover3D={false}>
-                            <div style={{ padding: 'var(--space-4)' }}>
+                        <div style={{
+                            padding: 'var(--space-5)',
+                            background: 'linear-gradient(135deg, rgba(28, 32, 56, 0.6), rgba(11, 14, 26, 0.8))',
+                            backdropFilter: 'blur(16px)',
+                            WebkitBackdropFilter: 'blur(16px)',
+                            border: '1px solid rgba(242, 167, 195, 0.15)',
+                            borderRadius: '20px',
+                            boxShadow: '0 15px 35px rgba(0,0,0,0.5), inset 0 2px 10px rgba(242, 167, 195, 0.05)',
+                            transformStyle: 'preserve-3d',
+                        }}>
                                 <h4 style={{
                                     fontFamily: 'var(--font-heading)',
                                     marginBottom: 'var(--space-3)',
@@ -305,8 +334,7 @@ const CalendarGrid: React.FC = () => {
                                         No events on this day 🌙
                                     </p>
                                 )}
-                            </div>
-                        </Card>
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -343,68 +371,94 @@ const CountdownCard: React.FC<{ event: CalendarEvent }> = ({ event }) => {
     ];
 
     return (
-        <Card glow hover3D={false}>
-            <div style={{
-                padding: 'var(--space-6)',
-                textAlign: 'center',
+        <div style={{
+            padding: 'var(--space-6)',
+            textAlign: 'center',
+            background: 'rgba(28, 32, 56, 0.5)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            border: '1px solid rgba(245, 211, 128, 0.15)',
+            borderRadius: '24px',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.4), inset 0 0 20px rgba(245, 211, 128, 0.05)',
+            marginBottom: 'var(--space-8)',
+            perspective: '1000px',
+            transformStyle: 'preserve-3d',
+        }}>
+            <h3 style={{
+                fontFamily: 'var(--font-heading)',
+                color: 'var(--accent-pink)',
+                fontSize: '1.1rem',
+                marginBottom: 'var(--space-6)',
+                letterSpacing: '2px',
+                textTransform: 'uppercase',
+                textShadow: '0 0 10px rgba(242, 167, 195, 0.5)'
             }}>
-                <h3 style={{
-                    fontFamily: 'var(--font-heading)',
-                    color: 'var(--accent-pink)',
-                    fontSize: '1rem',
-                    marginBottom: 'var(--space-4)',
-                }}>
-                    ✨ Until I See Rishika ✨
-                </h3>
+                ✨ Until I See Rishika ✨
+            </h3>
 
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    gap: 'var(--space-4)',
-                    marginBottom: 'var(--space-3)',
-                }}>
-                    {timeUnits.map(({ label, value }) => (
-                        <div key={label} style={{ textAlign: 'center' }}>
-                            <AnimatePresence mode="wait">
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: 'var(--space-4)',
+                marginBottom: 'var(--space-4)',
+            }}>
+                {timeUnits.map(({ label, value }) => (
+                    <div key={label} style={{ textAlign: 'center', perspective: '800px' }}>
+                        <div style={{
+                            background: 'linear-gradient(180deg, rgba(20,20,30,0.8), rgba(0,0,0,0.8))',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '12px',
+                            padding: '12px 16px',
+                            marginBottom: '8px',
+                            minWidth: '70px',
+                            boxShadow: '0 10px 20px rgba(0,0,0,0.5), inset 0 2px 5px rgba(255,255,255,0.1)',
+                            position: 'relative',
+                            overflow: 'hidden'
+                        }}>
+                            {/* Glass reflection line */}
+                            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '50%', background: 'linear-gradient(180deg, rgba(255,255,255,0.05), transparent)' }} />
+                            
+                            <AnimatePresence mode="popLayout">
                                 <motion.div
                                     key={value}
-                                    initial={{ y: -10, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    exit={{ y: 10, opacity: 0 }}
-                                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                                    initial={{ rotateX: -90, opacity: 0, transformOrigin: 'bottom' }}
+                                    animate={{ rotateX: 0, opacity: 1, transformOrigin: 'bottom' }}
+                                    exit={{ rotateX: 90, opacity: 0, transformOrigin: 'top' }}
+                                    transition={{ type: 'spring', stiffness: 200, damping: 20 }}
                                     style={{
                                         fontFamily: 'var(--font-mono)',
-                                        fontSize: '2rem',
-                                        fontWeight: 600,
+                                        fontSize: '2.5rem',
+                                        fontWeight: 700,
                                         color: 'var(--accent-gold)',
-                                        textShadow: '0 0 10px rgba(245, 211, 128, 0.3)',
-                                        minWidth: '50px',
+                                        textShadow: '0 0 15px rgba(245, 211, 128, 0.6), 0 0 30px rgba(245, 211, 128, 0.3)',
                                     }}
                                 >
                                     {String(value).padStart(2, '0')}
                                 </motion.div>
                             </AnimatePresence>
-                            <span style={{
-                                fontSize: '0.65rem',
-                                color: 'var(--text-muted)',
-                                fontFamily: 'var(--font-heading)',
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.1em',
-                            }}>
-                                {label}
-                            </span>
                         </div>
-                    ))}
-                </div>
-
-                <p style={{
-                    fontSize: '0.8rem',
-                    color: 'var(--text-muted)',
-                }}>
-                    {event.title}
-                </p>
+                        <span style={{
+                            fontSize: '0.7rem',
+                            color: 'var(--text-muted)',
+                            fontFamily: 'var(--font-heading)',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.15em',
+                            fontWeight: 600
+                        }}>
+                            {label}
+                        </span>
+                    </div>
+                ))}
             </div>
-        </Card>
+
+            <p style={{
+                fontSize: '0.9rem',
+                color: 'var(--text-muted)',
+                fontStyle: 'italic'
+            }}>
+                {event.title}
+            </p>
+        </div>
     );
 };
 

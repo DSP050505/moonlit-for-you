@@ -39,12 +39,18 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onLongPress }) =
                         ? '16px 16px 4px 16px'
                         : '16px 16px 16px 4px',
                     background: isYou
-                        ? 'linear-gradient(135deg, var(--accent-rose), rgba(232, 120, 138, 0.8))'
-                        : 'linear-gradient(135deg, var(--accent-lavender), rgba(196, 177, 212, 0.8))',
+                        ? 'linear-gradient(135deg, rgba(232, 120, 138, 0.7), rgba(242, 167, 195, 0.4))'
+                        : 'linear-gradient(135deg, rgba(196, 177, 212, 0.7), rgba(129, 177, 238, 0.4))',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
                     color: isYou ? '#fff' : 'var(--bg-primary)',
-                    boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
+                    boxShadow: isYou 
+                        ? '0 10px 20px rgba(0,0,0,0.3), inset 2px 2px 5px rgba(255,255,255,0.4), inset -2px -2px 5px rgba(232, 120, 138, 0.2)'
+                        : '0 10px 20px rgba(0,0,0,0.3), inset 2px 2px 5px rgba(255,255,255,0.6), inset -2px -2px 5px rgba(129, 177, 238, 0.2)',
+                    border: '1px solid rgba(255,255,255,0.15)',
                     cursor: 'pointer',
                     position: 'relative',
+                    transformStyle: 'preserve-3d',
                 }}
             >
                 {/* Message content */}

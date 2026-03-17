@@ -1,6 +1,6 @@
 import React, { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Line } from '@react-three/drei';
+import { OrbitControls, Line, Html } from '@react-three/drei';
 import * as THREE from 'three';
 
 interface GlobeProps {
@@ -18,23 +18,66 @@ function latLngToVec3(lat: number, lng: number, radius: number): THREE.Vector3 {
     );
 }
 
+// Custom pulsing marker component
+const CityMarker = ({ pos, color, name }: { pos: THREE.Vector3, color: string, name: string }) => {
+    return (
+        <group position={pos}>
+            {/* Core dot */}
+            <mesh>
+                <sphereGeometry args={[0.04, 16, 16]} />
+                <meshBasicMaterial color={color} />
+            </mesh>
+            {/* Outer glow ring */}
+            <mesh>
+                <sphereGeometry args={[0.06, 16, 16]} />
+                <meshBasicMaterial color={color} transparent opacity={0.4} />
+            </mesh>
+            {/* Point Light */}
+            <pointLight distance={3} intensity={2} color={color} />
+            
+            {/* HTML Label */}
+            <Html center distanceFactor={15} style={{ pointerEvents: 'none' }}>
+                <div style={{
+                    background: 'rgba(28, 32, 56, 0.7)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    padding: '4px 8px',
+                    borderRadius: '8px',
+                    border: `1px solid ${color}`,
+                    color: '#fff',
+                    fontFamily: 'var(--font-heading)',
+                    fontSize: '12px',
+                    boxShadow: `0 4px 12px rgba(0,0,0,0.5), 0 0 10px ${color}40`,
+                    whiteSpace: 'nowrap',
+                    transform: 'translateY(-25px)'
+                }}>
+                    {name}
+                </div>
+            </Html>
+        </group>
+    );
+};
+
 function GlobeMesh({ city1, city2 }: GlobeProps) {
     const globeRef = useRef<THREE.Mesh>(null);
     const heartRef = useRef<THREE.Mesh>(null);
     const arcProgress = useRef(0);
 
-    const pos1 = useMemo(() => latLngToVec3(city1.lat, city1.lng, 2), [city1]);
-    const pos2 = useMemo(() => latLngToVec3(city2.lat, city2.lng, 2), [city2]);
+    const globeRadius = 2.5;
+    const pos1 = useMemo(() => latLngToVec3(city1.lat, city1.lng, globeRadius), [city1]);
+    const pos2 = useMemo(() => latLngToVec3(city2.lat, city2.lng, globeRadius), [city2]);
 
     // Create arc curve between cities
     const arcCurve = useMemo(() => {
         const mid = pos1.clone().add(pos2).multiplyScalar(0.5);
-        mid.normalize().multiplyScalar(3); // lift arc above surface
+        // Push the mid point out to create an arch. Distance affects height.
+        const dist = pos1.distanceTo(pos2);
+        mid.normalize().multiplyScalar(globeRadius + (dist * 0.4)); 
         return new THREE.QuadraticBezierCurve3(pos1, mid, pos2);
     }, [pos1, pos2]);
 
     const arcPoints = useMemo(() => {
-        return arcCurve.getPoints(64).map(p => [p.x, p.y, p.z] as [number, number, number]);
+        return arcCurve.getPoints(50);
     }, [arcCurve]);
 
     useFrame(({ clock }) => {
@@ -43,7 +86,7 @@ function GlobeMesh({ city1, city2 }: GlobeProps) {
         }
 
         // Animate heart along arc
-        arcProgress.current = (arcProgress.current + 0.003) % 1;
+        arcProgress.current = (arcProgress.current + 0.002) % 1;
         if (heartRef.current) {
             const p = arcCurve.getPoint(arcProgress.current);
             heartRef.current.position.copy(p);
@@ -52,65 +95,62 @@ function GlobeMesh({ city1, city2 }: GlobeProps) {
     });
 
     return (
-        <group>
-            {/* Globe wireframe */}
-            <mesh ref={globeRef}>
-                <sphereGeometry args={[2, 32, 32]} />
+        <group ref={globeRef}>
+            {/* Dark Oceans Base */}
+            <mesh>
+                <sphereGeometry args={[globeRadius * 0.99, 64, 64]} />
                 <meshStandardMaterial
-                    color="#1C2038"
+                    color="#0B0E1A"
+                    roughness={0.8}
+                />
+            </mesh>
+
+            {/* Wireframe Continents Layer */}
+            <mesh>
+                <sphereGeometry args={[globeRadius, 48, 48]} />
+                <meshStandardMaterial
+                    color="#4A5580"
                     wireframe
                     transparent
                     opacity={0.3}
                 />
             </mesh>
 
-            {/* Globe surface glow */}
+            {/* Subtle atmosphere glow */}
             <mesh>
-                <sphereGeometry args={[1.98, 32, 32]} />
-                <meshStandardMaterial
-                    color="#0B0E1A"
+                <sphereGeometry args={[globeRadius * 1.05, 32, 32]} />
+                <meshBasicMaterial
+                    color="#C4B1D4"
                     transparent
-                    opacity={0.6}
-                    roughness={1}
+                    opacity={0.05}
+                    side={THREE.BackSide}
+                    blending={THREE.AdditiveBlending}
                 />
             </mesh>
 
-            {/* City 1 point */}
-            <mesh position={pos1}>
-                <sphereGeometry args={[0.06, 16, 16]} />
-                <meshBasicMaterial color="#E8788A" />
-            </mesh>
-            <pointLight position={pos1} color="#E8788A" intensity={1} distance={1} />
-
-            {/* City 2 point */}
-            <mesh position={pos2}>
-                <sphereGeometry args={[0.06, 16, 16]} />
-                <meshBasicMaterial color="#F2A7C3" />
-            </mesh>
-            <pointLight position={pos2} color="#F2A7C3" intensity={1} distance={1} />
+            <CityMarker pos={pos1} color="#E8788A" name={city1.name} />
+            <CityMarker pos={pos2} color="#F5D380" name={city2.name} />
 
             {/* Light beam arc */}
             <Line
                 points={arcPoints}
-                color="#F5D380"
-                lineWidth={2}
+                color="#F2A7C3"
+                lineWidth={3}
                 transparent
                 opacity={0.6}
             />
 
-            {/* Traveling heart */}
+            {/* Traveling glowing heart/particle */}
             <mesh ref={heartRef}>
-                <sphereGeometry args={[0.05, 8, 8]} />
-                <meshBasicMaterial
-                    color="#F2A7C3"
-                    transparent
-                    opacity={0.9}
-                />
+                <sphereGeometry args={[0.06, 16, 16]} />
+                <meshBasicMaterial color="#fff" />
+                <pointLight distance={2} intensity={2} color="#F2A7C3" />
             </mesh>
 
-            {/* Ambient light */}
-            <ambientLight intensity={0.3} />
-            <pointLight position={[5, 5, 5]} color="#C8D0E0" intensity={0.8} />
+            {/* Ambient & Rim lighting */}
+            <ambientLight intensity={0.5} />
+            <pointLight position={[10, 10, 10]} color="#C8D0E0" intensity={1} />
+            <pointLight position={[-10, -10, -10]} color="#4A5580" intensity={0.5} />
         </group>
     );
 }
@@ -124,25 +164,30 @@ const Globe3D: React.FC<Globe3DProps> = ({ city1, city2 }) => {
     return (
         <div style={{
             width: '100%',
-            height: '350px',
-            borderRadius: 'var(--radius-lg)',
+            height: '400px',
+            borderRadius: '24px',
             overflow: 'hidden',
-            background: 'rgba(11, 14, 26, 0.5)',
-            border: '1px solid rgba(255,255,255,0.06)',
+            background: 'radial-gradient(circle at center, rgba(28, 32, 56, 0.4) 0%, rgba(11, 14, 26, 0.8) 100%)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.6), inset 0 0 30px rgba(255,255,255,0.02)',
+            transformStyle: 'preserve-3d',
+            perspective: '1000px',
         }}>
             <Canvas
-                camera={{ position: [0, 0, 5], fov: 45 }}
-                dpr={[1, 1.5]}
-                gl={{ antialias: true, alpha: true }}
+                dpr={[1, 2]}
+                camera={{ position: [0, 0, 80], fov: 45 }}
+                gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping }}
             >
                 <GlobeMesh city1={city1} city2={city2} />
                 <OrbitControls
                     enableZoom={false}
                     enablePan={false}
                     autoRotate
-                    autoRotateSpeed={0.3}
-                    maxPolarAngle={Math.PI * 0.75}
-                    minPolarAngle={Math.PI * 0.25}
+                    autoRotateSpeed={0.5}
+                    maxPolarAngle={Math.PI * 0.70}
+                    minPolarAngle={Math.PI * 0.30}
+                    enableDamping
+                    dampingFactor={0.05}
                 />
             </Canvas>
         </div>

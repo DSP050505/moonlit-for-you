@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Card from '../shared/Card';
+import VinylRecord3D from '../3d/VinylRecord3D';
 import { useAuth } from '../../context/AuthContext';
 import { useMusicPlayer } from '../../context/MusicContext';
 import type { MusicTrack } from '../../context/MusicContext';
@@ -138,16 +139,14 @@ const MusicPlayer: React.FC = () => {
             {currentTrack && (
                 <Card glow hover3D={false}>
                     <div style={{ padding: 'var(--space-5)', display: 'flex', gap: 'var(--space-4)', alignItems: 'center' }}>
-                        <motion.div
-                            animate={isPlaying ? { rotate: 360 } : { rotate: 0 }}
-                            transition={isPlaying ? { duration: 8, repeat: Infinity, ease: 'linear' } : { duration: 0.3 }}
+                        <div
                             style={{
-                                width: '80px', height: '80px', borderRadius: '50%', overflow: 'hidden',
-                                border: '3px solid var(--accent-pink)', boxShadow: isPlaying ? '0 0 20px var(--glow)' : 'none', flexShrink: 0,
+                                width: '120px', height: '120px', flexShrink: 0, position: 'relative',
+                                marginLeft: '-10px'
                             }}
                         >
-                            <img src={currentTrack.thumbnail} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        </motion.div>
+                            <VinylRecord3D imageUrl={currentTrack.thumbnail} isPlaying={isPlaying} />
+                        </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                             <h3 style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-primary)', fontSize: '1rem', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                 {currentTrack.title.replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"')}
