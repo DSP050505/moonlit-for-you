@@ -141,7 +141,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
                     x: { duration: 0.4 }
                 }}
                 key={shakeCount}
-                style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '480px' }}
+                style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '440px' }}
             >
                 <div style={{
                     background: 'rgba(23, 27, 48, 0.15)',
@@ -153,7 +153,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
                         0 40px 100px rgba(0,0,0,0.5),
                         inset 0 0 20px rgba(255,255,255,0.02)
                     `,
-                    padding: '50px 40px',
+                    padding: '20px 35px',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center'
@@ -163,7 +163,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
                         color: 'white',
                         textAlign: 'center',
                         fontSize: '4.2rem',
-                        margin: '0 0 12px 0',
+                        margin: '0 0 5px 0',
                         textShadow: '0 0 25px rgba(255, 255, 255, 0.7)',
                         letterSpacing: '0.5px',
                         transform: 'rotate(-2deg)'
@@ -175,8 +175,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
                         textAlign: 'center',
                         color: 'rgba(255, 255, 255, 0.6)',
                         fontFamily: 'var(--font-heading)',
-                        marginBottom: '40px',
-                        fontSize: '1rem',
+                        marginBottom: '20px',
+                        fontSize: '0.9rem',
                         letterSpacing: '3px',
                         textTransform: 'uppercase',
                         fontWeight: '300'
@@ -190,7 +190,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
                         background: 'rgba(255, 255, 255, 0.03)',
                         borderRadius: '0px', // Matches target cleaner look
                         padding: '4px',
-                        marginBottom: '40px'
+                        marginBottom: '20px'
                     }}>
                         <button
                             onClick={() => setMode('join')}
@@ -228,7 +228,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
                         </button>
                     </div>
 
-                    <form onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '30px' }}>
+                    <form onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                         <div>
                             <label style={{ display: 'block', marginBottom: '10px', color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Room Name</label>
                             <input
