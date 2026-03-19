@@ -117,8 +117,10 @@ const CalendarGrid: React.FC = () => {
         // Only allow picking future dates
         if (dayStr <= todayStr) return;
 
-        // We want the countdown to hit exactly at midnight of the selected day
-        const targetDateStr = day.toISOString();
+        // We want the countdown to hit the end of the selected day so it persists throughout the full day
+        const targetDate = new Date(day);
+        targetDate.setHours(23, 59, 59, 999);
+        const targetDateStr = targetDate.toISOString();
 
         // Optimistically set UI
         const newCountdown = { title: 'shared_countdown', date: targetDateStr, type: 'custom' };
@@ -328,7 +330,11 @@ const CalendarGrid: React.FC = () => {
                     {/* Day cells */}
                     {days.map((day) => {
                         const targetDate = activeCountdown ? new Date(activeCountdown.date) : null;
-                        const isSelected = targetDate ? day.toDateString() === targetDate.toDateString() : false;
+                        const isSelected = targetDate ? (
+                            day.getFullYear() === targetDate.getFullYear() &&
+                            day.getMonth() === targetDate.getMonth() &&
+                            day.getDate() === targetDate.getDate()
+                        ) : false;
                         const today = isToday(day);
                         
                         const dayStr = format(day, 'yyyy-MM-dd');
