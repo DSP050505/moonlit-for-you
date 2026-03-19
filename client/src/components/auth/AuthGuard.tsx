@@ -168,7 +168,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
                         letterSpacing: '0.5px',
                         transform: 'rotate(-2deg)'
                     }}>
-                        MoonlitForRishika
+                        BetweenUs
                     </h1>
 
                     <p style={{

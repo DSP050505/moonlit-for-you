@@ -93,7 +93,7 @@ app.use('/api/surprises', surprisesRouter);
 // Health check
 app.get('/api/health', (_req, res) => {
     console.log('💓 Health check hit');
-    res.json({ status: 'ok', message: '🌙 MoonlitForRishika server is alive!', timestamp: new Date().toISOString() });
+    res.json({ status: 'ok', message: '🌙 BetweenUs server is alive!', timestamp: new Date().toISOString() });
 });
 
 // Track who is online per room: Map<roomChannel, Set<role>>
@@ -151,7 +151,7 @@ io.on('connection', (socket) => {
 // Start server
 const PORT = process.env.PORT || 3001;
 httpServer.listen(PORT, () => {
-    console.log(`\n🌙 MoonlitForRishika server running on port ${PORT}`);
+    console.log(`\n🌙 BetweenUs server running on port ${PORT}`);
     console.log(`   API: http://localhost:${PORT}/api`);
     console.log(`   Socket.IO: ws://localhost:${PORT}\n`);
 });

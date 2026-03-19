@@ -25,7 +25,7 @@ const typeConfig: Record<string, { icon: string; color: string }> = {
 
 // Demo notifications
 const initialNotifications: Notification[] = [
-    { id: 1, type: 'system', message: 'Welcome to MoonlitForRishika! 🌙', timestamp: new Date().toISOString(), isRead: false },
+    { id: 1, type: 'system', message: 'Welcome to BetweenUs! 🌙', timestamp: new Date().toISOString(), isRead: false },
     { id: 2, type: 'love', message: 'Rishika just said "I love you" ❤️', timestamp: new Date(Date.now() - 300000).toISOString(), isRead: false },
     { id: 3, type: 'milestone', message: '100 messages exchanged! 🎉 The flowers are blooming!', timestamp: new Date(Date.now() - 600000).toISOString(), isRead: false },
     { id: 4, type: 'letter', message: 'You have a new letter from Rishika 💌', timestamp: new Date(Date.now() - 900000).toISOString(), isRead: true },
