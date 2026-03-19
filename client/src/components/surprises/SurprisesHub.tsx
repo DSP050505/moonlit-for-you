@@ -194,92 +194,152 @@ const SurprisesHub: React.FC = () => {
             {/* Modal */}
             <AnimatePresence>
                 {isModalOpen && (
-                    <>
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setIsModalOpen(false)}
-                            style={{
-                                position: 'fixed',
-                                inset: 0,
-                                background: 'rgba(0,0,0,0.6)',
-                                backdropFilter: 'blur(5px)',
-                                zIndex: 1000
-                            }}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        style={{
+                            position: 'fixed',
+                            inset: 0,
+                            background: 'rgba(0,0,0,0.7)',
+                            backdropFilter: 'blur(12px)',
+                            zIndex: 9999, // Ensure it's above everything
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '20px'
+                        }}
+                    >
+                        {/* Backdrop Click-to-close */}
+                        <div 
+                            style={{ position: 'absolute', inset: 0 }} 
+                            onClick={() => setIsModalOpen(false)} 
                         />
+
                         <motion.div
-                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            initial={{ scale: 0.9, opacity: 0, y: 30 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 30 }}
                             style={{
-                                position: 'fixed',
-                                top: '50%',
-                                left: '50%',
-                                transform: 'translate(-50%, -50%)',
-                                width: '90%',
-                                maxWidth: '500px',
-                                background: 'rgba(20, 24, 45, 0.95)',
-                                backdropFilter: 'blur(20px)',
-                                padding: '32px',
-                                borderRadius: '24px',
+                                position: 'relative', // Relative to the flex container
+                                width: '100%',
+                                maxWidth: '480px',
+                                background: 'rgba(23, 27, 48, 0.98)',
+                                padding: '40px',
+                                borderRadius: '32px',
                                 border: '1px solid rgba(255,255,255,0.1)',
-                                zIndex: 1001,
-                                boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)'
+                                boxShadow: '0 30px 60px rgba(0,0,0,0.5), inset 0 0 20px rgba(255,255,255,0.02)',
+                                zIndex: 10000
                             }}
                         >
-                            <h2 style={{ fontFamily: 'var(--font-heading)', color: 'white', marginBottom: '24px' }}>Hide a New Surprise</h2>
-                            <form onSubmit={handleAddSurprise} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                            <h2 style={{ 
+                                fontFamily: 'var(--font-heading)', 
+                                color: 'white', 
+                                marginBottom: '32px',
+                                fontSize: '1.8rem',
+                                textAlign: 'center'
+                            }}>
+                                Hide a New Surprise
+                            </h2>
+                            
+                            <form onSubmit={handleAddSurprise} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                                 <div>
-                                    <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '8px', fontSize: '0.9rem' }}>Title</label>
+                                    <label style={{ display: 'block', color: 'rgba(255,255,255,0.5)', marginBottom: '10px', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Title</label>
                                     <input 
                                         required
                                         value={title}
                                         onChange={(e) => setTitle(e.target.value)}
                                         placeholder="E.g., A Little Something Special"
-                                        style={{ width: '100%', padding: '12px', borderRadius: '12px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
+                                        style={{ 
+                                            width: '100%', 
+                                            padding: '16px', 
+                                            borderRadius: '16px', 
+                                            background: 'rgba(0,0,0,0.3)', 
+                                            border: '1px solid rgba(255,255,255,0.1)', 
+                                            color: 'white',
+                                            fontSize: '1rem',
+                                            transition: 'border-color 0.3s'
+                                        }}
                                     />
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '8px', fontSize: '0.9rem' }}>The Secret Content</label>
+                                    <label style={{ display: 'block', color: 'rgba(255,255,255,0.5)', marginBottom: '10px', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px' }}>The Secret Content</label>
                                     <textarea 
                                         required
                                         value={content}
                                         onChange={(e) => setContent(e.target.value)}
                                         placeholder="What should be revealed?"
                                         rows={4}
-                                        style={{ width: '100%', padding: '12px', borderRadius: '12px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
+                                        style={{ 
+                                            width: '100%', 
+                                            padding: '16px', 
+                                            borderRadius: '16px', 
+                                            background: 'rgba(0,0,0,0.3)', 
+                                            border: '1px solid rgba(255,255,255,0.1)', 
+                                            color: 'white',
+                                            fontSize: '1rem',
+                                            resize: 'none'
+                                        }}
                                     />
                                 </div>
-                                <div>
-                                    <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '8px', fontSize: '0.9rem' }}>Reveal Date</label>
+                                <div style={{ marginBottom: '8px' }}>
+                                    <label style={{ display: 'block', color: 'rgba(255,255,255,0.5)', marginBottom: '10px', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Reveal Date</label>
                                     <input 
                                         required
                                         type="date"
                                         value={revealDate}
                                         min={new Date().toISOString().split('T')[0]}
                                         onChange={(e) => setRevealDate(e.target.value)}
-                                        style={{ width: '100%', padding: '12px', borderRadius: '12px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
+                                        style={{ 
+                                            width: '100%', 
+                                            padding: '16px', 
+                                            borderRadius: '16px', 
+                                            background: 'rgba(0,0,0,0.3)', 
+                                            border: '1px solid rgba(255,255,255,0.1)', 
+                                            color: 'white',
+                                            fontSize: '1rem'
+                                        }}
                                     />
                                 </div>
-                                <div style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
+                                <div style={{ display: 'flex', gap: '16px', marginTop: '10px' }}>
                                     <button 
                                         type="button"
                                         onClick={() => setIsModalOpen(false)}
-                                        style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', cursor: 'pointer' }}
+                                        style={{ 
+                                            flex: 1, 
+                                            padding: '16px', 
+                                            borderRadius: '16px', 
+                                            background: 'rgba(255,255,255,0.05)', 
+                                            border: '1px solid rgba(255,255,255,0.1)', 
+                                            color: 'white', 
+                                            cursor: 'pointer',
+                                            fontWeight: 'bold',
+                                            letterSpacing: '0.5px'
+                                        }}
                                     >
                                         Cancel
                                     </button>
                                     <button 
                                         type="submit"
-                                        style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'var(--accent-pink)', border: 'none', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}
+                                        style={{ 
+                                            flex: 1, 
+                                            padding: '16px', 
+                                            borderRadius: '16px', 
+                                            background: 'var(--accent-pink)', 
+                                            border: 'none', 
+                                            color: 'white', 
+                                            cursor: 'pointer', 
+                                            fontWeight: 'bold',
+                                            boxShadow: '0 8px 24px rgba(242, 167, 195, 0.4)',
+                                            letterSpacing: '0.5px'
+                                        }}
                                     >
-                                        Hide It! 🌙
+                                        Hide It! ✨
                                     </button>
                                 </div>
                             </form>
                         </motion.div>
-                    </>
+                    </motion.div>
                 )}
             </AnimatePresence>
         </motion.div>
