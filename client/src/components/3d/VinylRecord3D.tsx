@@ -11,50 +11,38 @@ const VinylMesh: React.FC<VinylProps> = ({ imageUrl, isPlaying }) => {
     const groupRef = useRef<THREE.Group>(null);
     const texture = useLoader(THREE.TextureLoader, imageUrl || 'https://via.placeholder.com/300');
     
-    // Ensure texture is circular and mapped correctly
+    // Ensure texture is circular and centered
     texture.center.set(0.5, 0.5);
 
     useFrame((_, delta) => {
         if (isPlaying && groupRef.current) {
-            // Spin record smoothly
-            groupRef.current.rotation.y -= delta * 1.5;
+            // Spin smoothly on the Z axis (same plane as screen)
+            groupRef.current.rotation.z -= delta * 1.5;
         }
     });
 
     return (
-        <group ref={groupRef} rotation={[Math.PI / 10, 0, 0]}>
-            {/* Record Base (Black Disc) */}
+        <group ref={groupRef}>
+            {/* Dark outer ring / border */}
             <mesh>
-                <cylinderGeometry args={[2, 2, 0.02, 64]} />
-                <meshStandardMaterial 
-                    color="#080808" 
-                    roughness={0.1} 
-                    metalness={0.9}
-                />
+                <circleGeometry args={[2.05, 64]} />
+                <meshBasicMaterial color="#000000" transparent opacity={0.6} />
             </mesh>
 
-            {/* Subtle Grooves Layer */}
-            <mesh position={[0, 0.012, 0]}>
-                <ringGeometry args={[0.85, 1.98, 64]} />
-                <meshStandardMaterial
-                    color="#0a0a0a"
-                    roughness={0.3}
-                    metalness={1}
-                    side={THREE.DoubleSide}
-                    transparent
-                    opacity={0.8}
-                />
-            </mesh>
-
-            {/* Album Art Label (slightly inset) */}
-            <mesh position={[0, 0.015, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-                <cylinderGeometry args={[0.8, 0.8, 0.005, 64]} />
+            {/* Album Art Circle */}
+            <mesh position={[0, 0, 0.01]}>
+                <circleGeometry args={[2, 64]} />
                 <meshBasicMaterial map={texture} />
             </mesh>
 
-            {/* Center Hole Decoration */}
-            <mesh position={[0, 0.02, 0]}>
-                <cylinderGeometry args={[0.07, 0.07, 0.01, 32]} />
+            {/* Center decoration (Blue disc like in screenshot) */}
+            <mesh position={[0, 0, 0.02]}>
+                <circleGeometry args={[0.3, 32]} />
+                <meshBasicMaterial color="#4A90E2" />
+            </mesh>
+            
+            <mesh position={[0, 0, 0.03]}>
+                <circleGeometry args={[0.08, 32]} />
                 <meshBasicMaterial color="#000000" />
             </mesh>
         </group>
