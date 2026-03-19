@@ -85,31 +85,56 @@ const SurprisesHub: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="surprises-container"
-            style={{ padding: 'var(--space-6)', maxWidth: '1200px', margin: '0 auto' }}
+            style={{ 
+                padding: 'var(--space-6)', 
+                maxWidth: '1000px', 
+                margin: '0 auto',
+                minHeight: '80vh',
+                display: 'flex',
+                flexDirection: 'column'
+            }}
         >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-10)' }}>
-                <div>
-                    <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '2.5rem', color: 'var(--text-primary)', margin: 0 }}>
-                        Surprises
-                    </h1>
-                    <p style={{ color: 'var(--accent-pink)', opacity: 0.8 }}>Secret moments waiting for the right time...</p>
-                </div>
+            <div style={{ 
+                textAlign: 'center', 
+                marginBottom: 'var(--space-12)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '8px'
+            }}>
+                <h1 style={{ 
+                    fontFamily: 'var(--font-heading)', 
+                    fontSize: '3rem', 
+                    color: 'var(--text-primary)', 
+                    margin: 0,
+                    textShadow: '0 0 20px rgba(242, 167, 195, 0.4)'
+                }}>
+                    Surprises
+                </h1>
+                <p style={{ color: 'var(--accent-pink)', opacity: 0.8, fontSize: '1.1rem' }}>
+                    Secret moments waiting for the right time... ✨
+                </p>
+                
                 <motion.button
-                    whileHover={{ scale: 1.05 }}
+                    whileHover={{ scale: 1.05, boxShadow: '0 12px 24px rgba(242, 167, 195, 0.4)' }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setIsModalOpen(true)}
                     style={{
-                        padding: '12px 24px',
-                        borderRadius: '12px',
+                        marginTop: '24px',
+                        padding: '14px 32px',
+                        borderRadius: '50px',
                         background: 'linear-gradient(135deg, var(--accent-pink), var(--accent-lavender))',
                         color: 'white',
                         border: 'none',
                         fontFamily: 'var(--font-heading)',
+                        fontSize: '1rem',
+                        fontWeight: 'bold',
                         cursor: 'pointer',
-                        boxShadow: '0 8px 16px rgba(242, 167, 195, 0.3)'
+                        boxShadow: '0 8px 16px rgba(242, 167, 195, 0.3)',
+                        letterSpacing: '1px'
                     }}
                 >
-                    + Add Surprise
+                    + HIDE A SURPRISE
                 </motion.button>
             </div>
 
@@ -117,25 +142,52 @@ const SurprisesHub: React.FC = () => {
                 <div style={{ textAlign: 'center', padding: '100px', color: 'var(--text-muted)' }}>Moonlight is loading your secrets...</div>
             ) : (
                 <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-                    gap: '24px'
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '32px',
+                    width: '100%'
                 }}>
                     <AnimatePresence>
-                        {surprises.map((surprise) => (
-                            <SurpriseCard 
-                                key={surprise.id} 
-                                surprise={surprise} 
-                                onDelete={() => deleteSurprise(surprise.id)}
-                            />
-                        ))}
+                        {surprises.length > 0 ? (
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 11fr))',
+                                gap: '32px',
+                                width: '100%',
+                                justifyContent: 'center'
+                            }}>
+                                {surprises.map((surprise) => (
+                                    <SurpriseCard 
+                                        key={surprise.id} 
+                                        surprise={surprise} 
+                                        onDelete={() => deleteSurprise(surprise.id)}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <motion.div 
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                style={{ 
+                                    maxWidth: '500px',
+                                    textAlign: 'center', 
+                                    padding: '60px 40px', 
+                                    background: 'rgba(255,255,255,0.02)', 
+                                    borderRadius: '32px', 
+                                    border: '1px solid rgba(255,255,255,0.05)',
+                                    backdropFilter: 'blur(10px)',
+                                    boxShadow: 'inset 0 0 20px rgba(242, 167, 195, 0.05)'
+                                }}
+                            >
+                                <div style={{ fontSize: '4rem', marginBottom: '24px', filter: 'grayscale(0.5) opacity(0.5)' }}>🎁</div>
+                                <h3 style={{ color: 'var(--text-primary)', marginBottom: '12px' }}>No surprises yet</h3>
+                                <p style={{ color: 'var(--text-muted)', lineHeight: '1.6' }}>
+                                    The box is quiet... for now. Why not hide a little something special for later?
+                                </p>
+                            </motion.div>
+                        )}
                     </AnimatePresence>
-                    
-                    {surprises.length === 0 && (
-                        <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '60px', background: 'rgba(255,255,255,0.03)', borderRadius: '24px', border: '1px dashed rgba(255,255,255,0.1)' }}>
-                            <p style={{ color: 'var(--text-muted)' }}>No surprises hidden yet. Be the first to hide a secret! 🌙</p>
-                        </div>
-                    )}
                 </div>
             )}
 
@@ -244,21 +296,61 @@ const SurpriseCard = ({ surprise, onDelete }: { surprise: Surprise, onDelete: ()
             <motion.div
                 layout
                 style={{
-                    padding: '24px',
-                    minHeight: '200px',
+                    padding: '32px',
+                    minHeight: '260px',
                     display: 'flex',
                     flexDirection: 'column',
-                    position: 'relative'
+                    position: 'relative',
+                    background: 'rgba(255,255,255,0.01)',
+                    borderRadius: '24px'
                 }}
             >
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-                    <span style={{ fontSize: '0.8rem', color: isRevealed ? 'var(--accent-pink)' : 'var(--text-muted)', background: 'rgba(0,0,0,0.2)', padding: '4px 10px', borderRadius: '20px' }}>
-                        {isRevealed ? '✨ Revealed' : '🕒 Reveals ' + day}
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+                    <span style={{ 
+                        fontSize: '0.75rem', 
+                        color: isRevealed ? 'var(--accent-pink)' : 'var(--text-muted)', 
+                        background: isRevealed ? 'rgba(242, 167, 195, 0.1)' : 'rgba(255,255,255,0.05)', 
+                        padding: '6px 12px', 
+                        borderRadius: '20px',
+                        border: '1px solid rgba(255,255,255,0.03)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        fontWeight: 'bold'
+                    }}>
+                        {isRevealed ? '✨ REVEALED' : '🕒 REVEALS ' + day}
                     </span>
-                    <button onClick={onDelete} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.2)', cursor: 'pointer', padding: '4px' }} title="Delete">✕</button>
+                    <button 
+                        onClick={onDelete} 
+                        style={{ 
+                            background: 'rgba(255,255,255,0.05)', 
+                            border: 'none', 
+                            color: 'rgba(255,255,255,0.4)', 
+                            cursor: 'pointer', 
+                            width: '28px',
+                            height: '28px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '0.8rem',
+                            transition: 'all 0.3s'
+                        }} 
+                        className="delete-btn"
+                        title="Delete"
+                    >
+                        ✕
+                    </button>
                 </div>
 
-                <h3 style={{ margin: '0 0 12px 0', color: 'white', fontFamily: 'var(--font-heading)' }}>{surprise.title}</h3>
+                <h3 style={{ 
+                    margin: '0 0 20px 0', 
+                    color: 'white', 
+                    fontFamily: 'var(--font-heading)',
+                    fontSize: '1.4rem',
+                    textAlign: 'center'
+                }}>
+                    {surprise.title}
+                </h3>
 
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {isRevealed ? (
@@ -266,19 +358,32 @@ const SurpriseCard = ({ surprise, onDelete }: { surprise: Surprise, onDelete: ()
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             style={{ 
-                                background: 'rgba(255,255,255,0.05)', 
-                                padding: '16px', 
-                                borderRadius: '16px', 
+                                background: 'rgba(255,255,255,0.03)', 
+                                padding: '24px', 
+                                borderRadius: '20px', 
                                 width: '100%',
                                 textAlign: 'center',
-                                border: '1px solid rgba(242, 167, 195, 0.2)'
+                                border: '1px solid rgba(242, 167, 195, 0.15)',
+                                boxShadow: 'inset 0 0 30px rgba(242, 167, 195, 0.05)'
                             }}
                         >
-                            <p style={{ color: 'var(--text-primary)', fontSize: '1.1rem', fontStyle: 'italic', margin: 0 }}>
+                            <p style={{ 
+                                color: 'var(--text-primary)', 
+                                fontSize: '1.1rem', 
+                                fontStyle: 'italic', 
+                                margin: 0,
+                                lineHeight: '1.5'
+                            }}>
                                 "{surprise.content}"
                             </p>
-                            <div style={{ marginTop: '12px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                From {surprise.createdBy === 'DSP' ? 'Devi Sri Prasad' : 'Rishika'}
+                            <div style={{ 
+                                marginTop: '16px', 
+                                fontSize: '0.75rem', 
+                                color: 'var(--text-muted)',
+                                textTransform: 'uppercase',
+                                letterSpacing: '1px'
+                            }}>
+                                FROM {surprise.createdBy === 'DSP' ? 'DEVI SRI PRASAD' : 'RISHIKA'}
                             </div>
                         </motion.div>
                     ) : (
@@ -287,14 +392,15 @@ const SurpriseCard = ({ surprise, onDelete }: { surprise: Surprise, onDelete: ()
                                 src={giftIcon} 
                                 alt="Gift"
                                 animate={{ 
-                                    y: [0, -10, 0],
-                                    rotate: [0, -2, 2, 0]
+                                    y: [0, -12, 0],
+                                    scale: [1, 1.05, 1],
+                                    rotate: [0, -3, 3, 0]
                                 }}
-                                transition={{ duration: 4, repeat: Infinity }}
-                                style={{ width: '80px', height: '80px', marginBottom: '16px', filter: 'drop-shadow(0 0 15px rgba(242, 167, 195, 0.4))' }}
+                                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                                style={{ width: '100px', height: '100px', marginBottom: '20px', filter: 'drop-shadow(0 0 20px rgba(242, 167, 195, 0.3))' }}
                             />
-                            <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                                Patience is a virtue...
+                            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)', letterSpacing: '0.5px' }}>
+                                A secret is hiding here...
                             </p>
                         </div>
                     )}
@@ -302,9 +408,10 @@ const SurpriseCard = ({ surprise, onDelete }: { surprise: Surprise, onDelete: ()
 
                 {!isRevealed && (
                     <div style={{ 
-                        marginTop: '16px',
-                        height: '2px', 
-                        background: 'rgba(255,255,255,0.1)',
+                        marginTop: '24px',
+                        height: '4px', 
+                        background: 'rgba(255,255,255,0.05)',
+                        borderRadius: '2px',
                         position: 'relative',
                         overflow: 'hidden'
                     }}>
@@ -312,11 +419,12 @@ const SurpriseCard = ({ surprise, onDelete }: { surprise: Surprise, onDelete: ()
                             style={{ 
                                 position: 'absolute',
                                 inset: 0,
-                                background: 'var(--accent-pink)',
-                                width: '30%' // Placeholder for real progress
+                                background: 'linear-gradient(90deg, var(--accent-pink), var(--accent-lavender))',
+                                width: '40%',
+                                borderRadius: '2px'
                             }}
-                            animate={{ x: ['-100%', '350%'] }}
-                            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                            animate={{ x: ['-100%', '300%'] }}
+                            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                         />
                     </div>
                 )}
