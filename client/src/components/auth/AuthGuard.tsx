@@ -141,19 +141,19 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
                     x: { duration: 0.4 }
                 }}
                 key={shakeCount}
-                style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '420px' }}
+                style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '480px' }}
             >
                 <div style={{
                     background: 'rgba(23, 27, 48, 0.15)',
                     backdropFilter: 'blur(20px)',
                     WebkitBackdropFilter: 'blur(20px)',
-                    borderRadius: '40px',
+                    borderRadius: '35px',
                     border: '1.5px solid rgba(255, 255, 255, 0.15)',
                     boxShadow: `
                         0 40px 100px rgba(0,0,0,0.5), 
                         inset 0 0 20px rgba(255,255,255,0.02)
                     `,
-                    padding: '45px 35px',
+                    padding: '75px 50px', // More vertical space to match target
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center'
