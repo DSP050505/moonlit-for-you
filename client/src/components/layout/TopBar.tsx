@@ -77,27 +77,7 @@ const TopBar: React.FC = () => {
                     transformStyle: 'preserve-3d',
                 }}
             >
-                <motion.div
-                    animate={{ rotateY: 360, rotateZ: [0, 10, -10, 0] }}
-                    transition={{ 
-                        rotateY: { duration: 15, repeat: Infinity, ease: "linear" },
-                        rotateZ: { duration: 8, repeat: Infinity, ease: "easeInOut" }
-                    }}
-                    style={{
-                        position: 'relative',
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '50%',
-                        background: 'radial-gradient(circle at 30% 30%, #FFF8E7 0%, #F5D380 40%, #D4A855 80%, #000 100%)',
-                        boxShadow: '0 0 15px rgba(245, 211, 128, 0.6), inset -5px -5px 10px rgba(0,0,0,0.5)',
-                        border: '1px solid rgba(255,255,255,0.4)',
-                        transformStyle: 'preserve-3d',
-                    }}
-                >
-                    {/* Craters for 3D illusion */}
-                    <div style={{ position: 'absolute', top: '20%', left: '20%', width: '6px', height: '6px', borderRadius: '50%', background: 'rgba(0,0,0,0.2)', boxShadow: 'inset 1px 1px 2px rgba(0,0,0,0.3)' }} />
-                    <div style={{ position: 'absolute', bottom: '30%', right: '25%', width: '8px', height: '8px', borderRadius: '50%', background: 'rgba(0,0,0,0.15)', boxShadow: 'inset 1px 1px 2px rgba(0,0,0,0.3)' }} />
-                </motion.div>
+
                 <div>
                     <span style={{ color: 'var(--accent-silver)', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>Moonlit</span>
                     <span style={{ color: 'var(--accent-pink)', textShadow: '0 0 10px rgba(242, 167, 195, 0.5)' }}>ForRishika</span>

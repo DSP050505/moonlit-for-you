@@ -1,22 +1,30 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
+import chatIcon from '../../assets/chat-icon.png';
+import calendarIcon from '../../assets/calendar-icon.png';
+import mapIcon from '../../assets/map-icon.png';
+import musicIcon from '../../assets/music-icon.png';
+import galleryIcon from '../../assets/gallery-icon.png';
+import gamesIcon from '../../assets/games-icon.png';
+import lettersIcon from '../../assets/letters-icon.png';
 
 interface NavItem {
     path: string;
     icon: string;
     label: string;
     color: string;
+    isImage?: boolean;
 }
 
 const navItems: NavItem[] = [
-    { path: '/chat', icon: '💬', label: 'Whisper', color: '#F2A7C3' },
-    { path: '/calendar', icon: '📅', label: 'Our Days', color: '#81B1EE' },
-    { path: '/map', icon: '🗺️', label: 'Between Us', color: '#F5D380' },
-    { path: '/music', icon: '🎵', label: 'Our Song', color: '#C4B1D4' },
-    { path: '/gallery', icon: '📸', label: 'Us', color: '#AEE1C2' },
-    { path: '/letters', icon: '💌', label: 'Letters', color: '#F2A7C3' },
-    { path: '/games', icon: '🎮', label: 'Play', color: '#F5D380' },
+    { path: '/chat', icon: chatIcon, label: 'Whisper', color: '#F2A7C3', isImage: true },
+    { path: '/calendar', icon: calendarIcon, label: 'Our Days', color: '#81B1EE', isImage: true },
+    { path: '/map', icon: mapIcon, label: 'Between Us', color: '#F5D380', isImage: true },
+    { path: '/music', icon: musicIcon, label: 'Our Song', color: '#C4B1D4', isImage: true },
+    { path: '/gallery', icon: galleryIcon, label: 'Us', color: '#AEE1C2', isImage: true },
+    { path: '/letters', icon: lettersIcon, label: 'Letters', color: '#F2A7C3', isImage: true },
+    { path: '/games', icon: gamesIcon, label: 'Play', color: '#F5D380', isImage: true },
 ];
 
 const SidebarItem = ({ item, isActive }: { item: NavItem, isActive: boolean }) => {
@@ -78,14 +86,32 @@ const SidebarItem = ({ item, isActive }: { item: NavItem, isActive: boolean }) =
                     {/* Floating completely off the glass plane */}
                     <motion.div
                         style={{
-                            fontSize: '1.6rem',
+                            fontSize: item.isImage ? '0' : '1.6rem',
                             transform: 'translateZ(25px)',
                             textShadow: isActive ? `0 0 15px ${item.color}` : 'none',
                             filter: isActive ? 'brightness(1.2)' : 'brightness(0.8)',
-                            transition: 'all 0.3s ease'
+                            transition: 'all 0.3s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '100%',
+                            height: '100%'
                         }}
                     >
-                        {item.icon}
+                        {item.isImage ? (
+                            <img 
+                                src={item.icon} 
+                                alt={item.label} 
+                                style={{ 
+                                    width: '48px', 
+                                    height: '48px', 
+                                    objectFit: 'contain',
+                                    filter: isActive ? 'drop-shadow(0 0 10px rgba(242, 167, 195, 0.4))' : 'none'
+                                }} 
+                            />
+                        ) : (
+                            item.icon
+                        )}
                     </motion.div>
                 </motion.div>
 
