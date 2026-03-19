@@ -34,23 +34,35 @@ console.log('========================================');
 console.log('NODE_ENV:', process.env.NODE_ENV);
 console.log('PORT:', process.env.PORT);
 console.log('CLIENT_URL env:', process.env.CLIENT_URL);
-console.log('Allowed CORS origins:', allowedOrigins);
 console.log('DATABASE_URL:', process.env.DATABASE_URL ? '✅ SET (hidden)' : '❌ NOT SET');
 console.log('========================================');
 
 const app = express();
 const httpServer = createServer(app);
-const io = new Server(httpServer, {
-    cors: {
-        origin: allowedOrigins,
-        methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+
+// Relaxed CORS for development/local network access
+const corsOptions: cors.CorsOptions = {
+    origin: (origin, callback) => {
+        // Allow all origins in development for phone/network testing
+        if (!origin || process.env.NODE_ENV !== 'production') {
+            callback(null, true);
+        } else if (allowedOrigins.includes(origin.replace(/\/+$/, ''))) {
+            callback(null, true);
+        } else {
+            console.warn(`⚠️ Blocked by CORS: ${origin}`);
+            callback(new Error('Not allowed by CORS'));
+        }
     },
+    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    credentials: true
+};
+
+const io = new Server(httpServer, {
+    cors: corsOptions
 });
 
 // Middleware
-app.use(cors({
-    origin: allowedOrigins,
-}));
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

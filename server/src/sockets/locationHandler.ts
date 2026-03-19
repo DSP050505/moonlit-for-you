@@ -1,7 +1,5 @@
 import { Server, Socket } from 'socket.io';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../db/database';
 
 export function setupLocationHandler(io: Server, socket: Socket) {
     console.log(`📍 Location handler set up for socket ${socket.id}`);

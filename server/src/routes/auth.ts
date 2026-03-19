@@ -1,8 +1,7 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../db/database';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 // Create Room
 router.post('/create-room', async (req, res) => {
