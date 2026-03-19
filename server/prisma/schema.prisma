@@ -45,6 +45,7 @@ model Room {
   wishes    Wish[]
   quizzes   QuizQuestion[]
   playlists Playlist[]
+  surprises Surprise[]
 
   @@map("rooms")
 }
@@ -179,4 +180,18 @@ model PlaylistTrack {
   playlist    Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
 
   @@map("playlist_tracks")
+}
+
+model Surprise {
+  id          Int      @id @default(autoincrement())
+  roomId      Int      @map("room_id")
+  title       String
+  content     String   @db.Text
+  revealDate  DateTime @map("reveal_date")
+  createdBy   String   @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  room        Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@map("surprises")
 }

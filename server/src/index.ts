@@ -15,6 +15,7 @@ import wishesRouter from './routes/wishes';
 import quizRouter from './routes/quiz';
 import weatherRouter from './routes/weather';
 import musicRouter from './routes/music';
+import surprisesRouter from './routes/surprises';
 
 // Import socket handlers
 import { setupChatHandler } from './sockets/chatHandler';
@@ -84,8 +85,10 @@ app.use('/api/letters', lettersRouter);
 app.use('/api/photos', photosRouter);
 app.use('/api/wishes', wishesRouter);
 app.use('/api/quiz', quizRouter);
+app.use('/api/quizzes', quizRouter);
 app.use('/api/weather', weatherRouter);
 app.use('/api/music', musicRouter);
+app.use('/api/surprises', surprisesRouter);
 
 // Health check
 app.get('/api/health', (_req, res) => {
