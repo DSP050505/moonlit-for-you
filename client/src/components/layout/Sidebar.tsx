@@ -8,6 +8,7 @@ import musicIcon from '../../assets/music-icon.png';
 import galleryIcon from '../../assets/gallery-icon.png';
 import gamesIcon from '../../assets/games-icon.png';
 import lettersIcon from '../../assets/letters-icon.png';
+import surprisesIcon from '../../assets/surprises-icon.png';
 
 interface NavItem {
     path: string;
@@ -25,6 +26,7 @@ const navItems: NavItem[] = [
     { path: '/gallery', icon: galleryIcon, label: 'Us', color: '#AEE1C2', isImage: true },
     { path: '/letters', icon: lettersIcon, label: 'Letters', color: '#F2A7C3', isImage: true },
     { path: '/games', icon: gamesIcon, label: 'Play', color: '#F5D380', isImage: true },
+    { path: '/surprises', icon: surprisesIcon, label: 'Surprises', color: '#C4B1D4', isImage: true },
 ];
 
 const SidebarItem = ({ item, isActive }: { item: NavItem, isActive: boolean }) => {

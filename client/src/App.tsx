@@ -19,6 +19,7 @@ import MusicPlayer from './components/music/MusicPlayer';
 import PhotoGallery from './components/gallery/PhotoGallery';
 import LetterWriter from './components/letters/LetterWriter';
 import GamesHub from './components/games/GamesHub';
+import SurprisesHub from './components/surprises/SurprisesHub';
 
 /** Syncs current route to the 3D camera controller */
 function PageSync() {
@@ -66,6 +67,7 @@ function AppContent() {
                 <Route path="/gallery" element={<PhotoGallery />} />
                 <Route path="/letters" element={<LetterWriter />} />
                 <Route path="/games" element={<GamesHub />} />
+                <Route path="/surprises" element={<SurprisesHub />} />
               </Routes>
             </AnimatePresence>
           </main>
