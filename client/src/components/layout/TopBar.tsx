@@ -78,9 +78,9 @@ const TopBar: React.FC = () => {
                 }}
             >
 
-                <div>
-                    <span style={{ color: 'var(--accent-silver)', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>Moonlit</span>
-                    <span style={{ color: 'var(--accent-pink)', textShadow: '0 0 10px rgba(242, 167, 195, 0.5)' }}>ForRishika</span>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                    <span style={{ color: 'var(--accent-silver)', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>Between</span>
+                    <span style={{ color: 'var(--accent-pink)', textShadow: '0 0 10px rgba(242, 167, 195, 0.5)' }}>Us</span>
                 </div>
             </motion.div>
 

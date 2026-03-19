@@ -30,18 +30,18 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [session, setSession] = useState<RoomSession | null>(() => {
-        const stored = localStorage.getItem('moonlit_session');
+        const stored = localStorage.getItem('betweenus_session');
         return stored ? JSON.parse(stored) : null;
     });
 
     const login = (newSession: RoomSession) => {
         setSession(newSession);
-        localStorage.setItem('moonlit_session', JSON.stringify(newSession));
+        localStorage.setItem('betweenus_session', JSON.stringify(newSession));
     };
 
     const logout = () => {
         setSession(null);
-        localStorage.removeItem('moonlit_session');
+        localStorage.removeItem('betweenus_session');
     };
 
     return (
