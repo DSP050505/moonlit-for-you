@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Card from '../shared/Card';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/useSocket';
@@ -72,7 +72,9 @@ const DistanceMap: React.FC = () => {
             }
         };
         socket.on('location:updated', onPartnerLocation);
-        return () => socket.off('location:updated', onPartnerLocation);
+        return () => {
+             socket.off('location:updated', onPartnerLocation);
+        };
     }, [socket, session]);
 
     const activeMyLoc = myLoc || (isRishika ? DEFAULT_LOCATIONS.Rishika : DEFAULT_LOCATIONS.DSP);
