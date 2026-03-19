@@ -72,7 +72,9 @@ const ChatBox: React.FC = () => {
     useEffect(() => {
         if (!session) return;
 
-        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/messages?roomId=${session.room.id}`)
+        const apiUrl = import.meta.env.VITE_API_URL || 
+            (window.location.hostname === 'localhost' ? 'http://localhost:3001' : `http://${window.location.hostname}:3001`);
+        fetch(`${apiUrl}/api/messages?roomId=${session.room.id}`)
             .then(res => res.json())
             .then(data => {
                 if (data.messages) {

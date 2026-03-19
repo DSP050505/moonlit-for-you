@@ -18,9 +18,9 @@ const Nebula: React.FC = () => {
         <group ref={cloudsRef} position={[0, 0, -35]}>
             <Clouds material={THREE.MeshBasicMaterial} limit={100} range={60}>
                 {/* Top-left wispy cloud — smaller */}
-                <Cloud speed={0.08} opacity={0.04} color="#C4B1D4" scale={2} volume={8} position={[-20, 10, -15]} segments={12} />
+                <Cloud speed={0.1} opacity={0.04} color="#C4B1D4" scale={1.5} volume={6} position={[-20, 10, -15]} segments={12} />
                 {/* Bottom-right wispy cloud */}
-                <Cloud speed={0.08} opacity={0.04} color="#81B1EE" scale={2.5} volume={10} position={[18, -8, -18]} segments={12} />
+                <Cloud speed={0.1} opacity={0.04} color="#81B1EE" scale={2.0} volume={9} position={[18, -8, -18]} segments={11} />
             </Clouds>
         </group>
     );

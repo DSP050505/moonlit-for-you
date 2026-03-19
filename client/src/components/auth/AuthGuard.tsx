@@ -45,7 +45,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
         setError('');
         setIsLoading(true);
 
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+        const apiUrl = import.meta.env.VITE_API_URL || 
+            (window.location.hostname === 'localhost' ? 'http://localhost:3001' : `http://${window.location.hostname}:3001`);
         console.log('🔐 AuthGuard: handleSubmit called');
         console.log('   Mode:', mode);
         console.log('   API URL:', apiUrl);

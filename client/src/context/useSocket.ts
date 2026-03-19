@@ -16,7 +16,8 @@ export const useSocket = () => {
         }
 
         if (!socketInstance) {
-            const socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+            const socketUrl = import.meta.env.VITE_API_URL || 
+                (window.location.hostname === 'localhost' ? 'http://localhost:3001' : `http://${window.location.hostname}:3001`);
             console.log('🔌 useSocket: Creating new socket connection');
             console.log('   URL:', socketUrl);
             console.log('   roomId:', session.room.id, '| userId:', session.user.id, '| role:', session.user.role);
