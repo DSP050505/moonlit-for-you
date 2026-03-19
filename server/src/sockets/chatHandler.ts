@@ -38,21 +38,31 @@ export function setupChatHandler(io: Server, socket: Socket) {
                 confetti: isLoveMessage,
             });
 
+            const { createNotification } = require('../routes/notifications');
+
             // Send notification
             if (isLoveMessage) {
-                io.to(roomChannel).emit('notification:new', {
-                    type: 'love',
-                    message: `${data.sender === 'you' ? 'Devi Sri Prasad' : 'Rishika'} said "I love you" ❤️`,
-                    timestamp: new Date().toISOString(),
-                });
-            }
-
-            if (isMilestone) {
-                io.to(roomChannel).emit('notification:new', {
-                    type: 'milestone',
-                    message: `🎉 You've exchanged ${count} messages! Flowers are blooming!`,
-                    timestamp: new Date().toISOString(),
-                });
+                await createNotification(
+                    data.roomId,
+                    'love',
+                    `${data.sender === 'you' ? 'Devi Sri Prasad' : 'Rishika'} said "I love you" ❤️`,
+                    { messageId: message.id }
+                );
+            } else if (isMilestone) {
+                await createNotification(
+                    data.roomId,
+                    'milestone',
+                    `🎉 You've exchanged ${count} messages! Flowers are blooming!`,
+                    { count }
+                );
+            } else {
+                // Regular message notification
+                await createNotification(
+                    data.roomId,
+                    'love',
+                    `New message from ${data.sender === 'you' ? 'Devi Sri Prasad' : 'Rishika'} 💌`,
+                    { messageId: message.id }
+                );
             }
             console.log(`💬 Message saved & broadcast to room_${data.roomId}: id=${message.id}`);
         } catch (error) {

@@ -1,11 +1,15 @@
 import { Router, Request, Response } from 'express';
 import prisma from '../db/database';
+import { createNotification } from './notifications';
 
 const router = Router();
 
 // GET /api/events — Calendar events for a month
 router.get('/', async (req: Request, res: Response) => {
     try {
+        const roomId = parseInt(req.query.roomId as string);
+        if (!roomId) return res.status(400).json({ error: 'roomId is required' });
+
         const month = parseInt(req.query.month as string);
         const year = parseInt(req.query.year as string);
 
@@ -15,6 +19,7 @@ router.get('/', async (req: Request, res: Response) => {
             const endDate = new Date(year, month, 0);
             events = await prisma.event.findMany({
                 where: {
+                    roomId,
                     date: {
                         gte: startDate,
                         lte: endDate,
@@ -24,6 +29,7 @@ router.get('/', async (req: Request, res: Response) => {
             });
         } else {
             events = await prisma.event.findMany({
+                where: { roomId },
                 orderBy: { date: 'asc' },
             });
         }
@@ -39,10 +45,11 @@ router.get('/', async (req: Request, res: Response) => {
 router.post('/', async (req: Request, res: Response) => {
     try {
         const { roomId, title, date, type, note, createdBy } = req.body;
+        const parsedRoomId = parseInt(roomId);
 
         const event = await prisma.event.create({
             data: {
-                roomId: parseInt(roomId) || 1, // Fallback for legacy requests
+                roomId: parsedRoomId,
                 title,
                 date: new Date(date),
                 type: type || 'custom',
@@ -50,6 +57,14 @@ router.post('/', async (req: Request, res: Response) => {
                 createdBy: createdBy || 'you',
             },
         });
+
+        // Trigger notification
+        await createNotification(
+            parsedRoomId,
+            'milestone',
+            `New event added: "${title}" on ${new Date(date).toLocaleDateString()} 📅`,
+            { eventId: event.id }
+        );
 
         res.status(201).json({ event });
     } catch (error) {

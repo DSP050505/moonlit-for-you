@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import prisma from '../db/database';
+import { createNotification } from './notifications';
 
 const router = Router();
 
@@ -17,9 +18,6 @@ router.get('/', async (req: Request, res: Response) => {
             orderBy: { revealDate: 'asc' },
         });
 
-        // Optional: Hide content if not yet revealed (security)
-        // For now, we'll send it all and rely on the UI, as it's a "romantic" app, not a bank.
-        // But let's add a small flag.
         const now = new Date();
         const processedSurprises = surprises.map((s: any) => ({
             ...s,
@@ -52,6 +50,14 @@ router.post('/', async (req: Request, res: Response) => {
                 createdBy: createdBy || 'unknown',
             },
         });
+
+        // Trigger notification
+        await createNotification(
+            parseInt(roomId),
+            'love', // Using love for surprises
+            `A new surprise has been added! 🎁 It will be revealed on ${new Date(revealDate).toLocaleDateString()}.`,
+            { surpriseId: surprise.id }
+        );
 
         res.status(201).json({ surprise });
     } catch (error) {

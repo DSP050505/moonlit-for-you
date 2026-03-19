@@ -1,18 +1,18 @@
 import { Router, Request, Response } from 'express';
 import prisma from '../db/database';
+import { createNotification } from './notifications';
 
 const router = Router();
 
-// GET /api/quiz — Get quiz questions
+// GET /api/quiz — Get quiz questions for a room
 router.get('/', async (req: Request, res: Response) => {
     try {
-        const limit = parseInt(req.query.limit as string) || 10;
+        const roomId = parseInt(req.query.roomId as string);
+        if (!roomId) return res.status(400).json({ error: 'Room ID required' });
 
-        // Get random questions
-        const totalCount = await prisma.quizQuestion.count();
         const questions = await prisma.quizQuestion.findMany({
-            take: limit,
-            skip: Math.max(0, Math.floor(Math.random() * Math.max(0, totalCount - limit))),
+            where: { roomId },
+            orderBy: { createdAt: 'desc' },
         });
 
         res.json({ questions });
@@ -29,13 +29,21 @@ router.post('/', async (req: Request, res: Response) => {
 
         const quizQuestion = await prisma.quizQuestion.create({
             data: {
-                roomId: parseInt(roomId) || 1,
+                roomId: parseInt(roomId),
                 question,
                 options,
                 correctIndex,
                 createdBy: createdBy || 'you',
             },
         });
+
+        // Trigger notification
+        await createNotification(
+            parseInt(roomId),
+            'love', // Using love icon for quiz for now
+            `${createdBy} added a new quiz question! Can you answer it? ❓`,
+            { quizId: quizQuestion.id }
+        );
 
         res.status(201).json({ question: quizQuestion });
     } catch (error) {

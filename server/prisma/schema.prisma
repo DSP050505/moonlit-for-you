@@ -46,6 +46,7 @@ model Room {
   quizzes   QuizQuestion[]
   playlists Playlist[]
   surprises Surprise[]
+  notifications Notification[]
 
   @@map("rooms")
 }
@@ -194,4 +195,18 @@ model Surprise {
   room        Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   @@map("surprises")
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  roomId    Int      @map("room_id")
+  type      String
+  message   String
+  metadata  Json?
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
 }

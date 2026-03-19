@@ -52,11 +52,11 @@ const TopBar: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '0 var(--space-6)',
-            background: 'rgba(28, 32, 56, 0.45)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            borderBottom: '0.5px solid rgba(255, 255, 255, 0.05)',
+            padding: '14px var(--space-6) 0 var(--space-6)',
+            background: 'transparent',
+            backdropFilter: 'none',
+            WebkitBackdropFilter: 'none',
+            borderBottom: 'none',
         }}>
             {/* App Title with 3D Spinning Moon */}
             <motion.div

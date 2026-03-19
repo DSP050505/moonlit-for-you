@@ -1,12 +1,19 @@
 import { Router, Request, Response } from 'express';
 import prisma from '../db/database';
+import { createNotification } from './notifications';
 
 const router = Router();
 
-// GET /api/letters — All letters (newest first)
-router.get('/', async (_req: Request, res: Response) => {
+// GET /api/letters — All letters for a room (newest first)
+router.get('/', async (req: Request, res: Response) => {
     try {
+        const roomId = req.query.roomId ? parseInt(req.query.roomId as string) : undefined;
+        if (!roomId) {
+            return res.status(400).json({ error: 'Room ID is required' });
+        }
+
         const letters = await prisma.letter.findMany({
+            where: { roomId },
             orderBy: { createdAt: 'desc' },
         });
         res.json({ letters });
@@ -23,7 +30,7 @@ router.post('/', async (req: Request, res: Response) => {
 
         const letter = await prisma.letter.create({
             data: { 
-                roomId: parseInt(roomId) || 1, 
+                roomId: parseInt(roomId), 
                 sender, 
                 content,
                 topFlap: topFlap || undefined,
@@ -31,6 +38,14 @@ router.post('/', async (req: Request, res: Response) => {
                 closing: closing || undefined
             },
         });
+
+        // Trigger notification
+        await createNotification(
+            parseInt(roomId),
+            'letter',
+            `Received a new letter from ${sender}! 💌`,
+            sender
+        );
 
         res.status(201).json({ letter });
     } catch (error) {

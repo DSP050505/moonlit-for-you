@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Card from '../shared/Card';
 import DoodleGame from './DoodleGame';
+import { useAuth } from '../../context/AuthContext';
 
 interface Wish {
     id: number;
@@ -11,23 +12,12 @@ interface Wish {
 }
 
 interface QuizQuestion {
+    id: number;
     question: string;
     options: string[];
     correctIndex: number;
+    createdBy: string;
 }
-
-const quizQuestions: QuizQuestion[] = [
-    { question: "What's Rishika's favorite color?", options: ["Pink", "Lavender", "Blue", "Red"], correctIndex: 1 },
-    { question: "What's our song?", options: ["Perfect", "A Thousand Years", "Can't Help Falling in Love", "All of Me"], correctIndex: 2 },
-    { question: "Where did we first meet?", options: ["College", "Online", "Through friends", "At a café"], correctIndex: 0 },
-    { question: "What's Rishika's favorite food?", options: ["Pizza", "Pasta", "Biryani", "Ice Cream"], correctIndex: 2 },
-    { question: "What animal does Rishika love most?", options: ["Dogs", "Cats", "Rabbits", "Pandas"], correctIndex: 1 },
-    { question: "What's my pet name for Rishika?", options: ["Baby", "Moon", "Love", "Star"], correctIndex: 1 },
-    { question: "What movie did we watch on our first date?", options: ["Titanic", "The Notebook", "A Walk to Remember", "La La Land"], correctIndex: 3 },
-    { question: "What's Rishika's dream travel destination?", options: ["Paris", "Tokyo", "Santorini", "Bali"], correctIndex: 0 },
-    { question: "What time does Rishika usually sleep?", options: ["10 PM", "11 PM", "Midnight", "After midnight"], correctIndex: 2 },
-    { question: "What's Rishika's zodiac sign?", options: ["Aries", "Libra", "Scorpio", "Leo"], correctIndex: 1 },
-];
 
 type GameTab = 'quiz' | 'wishes' | 'doodle';
 
@@ -104,25 +94,83 @@ const GamesHub: React.FC = () => {
 
 /* Love Quiz Component */
 const LoveQuiz: React.FC = () => {
+    const { session } = useAuth();
+    const [questions, setQuestions] = useState<QuizQuestion[]>([]);
     const [currentQ, setCurrentQ] = useState(0);
     const [score, setScore] = useState(0);
     const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
     const [showResult, setShowResult] = useState(false);
+    const [isCreating, setIsCreating] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const question = quizQuestions[currentQ];
+    // New Question Form State
+    const [newQ, setNewQ] = useState('');
+    const [newOptions, setNewOptions] = useState(['', '', '', '']);
+    const [newCorrect, setNewCorrect] = useState(0);
+
+    useEffect(() => {
+        if (!session) return;
+        fetchQuestions();
+    }, [session]);
+
+    const fetchQuestions = async () => {
+        setIsLoading(true);
+        try {
+            const apiUrl = import.meta.env.VITE_API_URL || '';
+            const res = await fetch(`${apiUrl}/api/quiz?roomId=${session?.room.id}`);
+            const data = await res.json();
+            if (data.questions) {
+                setQuestions(data.questions);
+            }
+        } catch (err) {
+            console.error('Failed to fetch quiz questions:', err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleCreateQuestion = async () => {
+        if (!newQ || newOptions.some(opt => !opt) || !session) return;
+
+        try {
+            const apiUrl = import.meta.env.VITE_API_URL || '';
+            const res = await fetch(`${apiUrl}/api/quiz`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    roomId: session.room.id,
+                    question: newQ,
+                    options: newOptions,
+                    correctIndex: newCorrect,
+                    createdBy: session.user.role
+                }),
+            });
+
+            if (res.ok) {
+                await fetchQuestions();
+                setIsCreating(false);
+                setNewQ('');
+                setNewOptions(['', '', '', '']);
+                setNewCorrect(0);
+            }
+        } catch (err) {
+            console.error('Failed to create question:', err);
+        }
+    };
 
     const handleAnswer = (index: number) => {
         setSelectedAnswer(index);
-        if (index === question.correctIndex) {
+        const q = questions[currentQ];
+        if (index === q.correctIndex) {
             setScore(prev => prev + 1);
         }
         setTimeout(() => {
-            if (currentQ < quizQuestions.length - 1) {
+            if (currentQ < questions.length - 1) {
                 setCurrentQ(prev => prev + 1);
                 setSelectedAnswer(null);
             } else {
                 setShowResult(true);
-                if (score + (index === question.correctIndex ? 1 : 0) >= 8) {
+                if (score + (index === q.correctIndex ? 1 : 0) >= questions.length * 0.7) {
                     import('../shared/ConfettiTrigger').then(({ fireConfetti }) => {
                         fireConfetti('stars');
                     });
@@ -138,6 +186,98 @@ const LoveQuiz: React.FC = () => {
         setShowResult(false);
     };
 
+    if (isLoading) return <div style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Loading questions...</div>;
+
+    if (isCreating) {
+        return (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                <Card glow>
+                    <div style={{ padding: 'var(--space-6)' }}>
+                        <h3 style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-primary)', marginBottom: 'var(--space-4)' }}>
+                            Add New Question ❓
+                        </h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+                            <input
+                                placeholder="Enter your question..."
+                                value={newQ}
+                                onChange={(e) => setNewQ(e.target.value)}
+                                style={{
+                                    padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)',
+                                    background: 'rgba(0,0,0,0.2)', color: 'white'
+                                }}
+                            />
+                            {newOptions.map((opt, i) => (
+                                <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                    <input
+                                        type="radio"
+                                        name="correct"
+                                        checked={newCorrect === i}
+                                        onChange={() => setNewCorrect(i)}
+                                    />
+                                    <input
+                                        placeholder={`Option ${i + 1}`}
+                                        value={opt}
+                                        onChange={(e) => {
+                                            const next = [...newOptions];
+                                            next[i] = e.target.value;
+                                            setNewOptions(next);
+                                        }}
+                                        style={{
+                                            flex: 1, padding: '10px', borderRadius: '8px',
+                                            border: '1px solid rgba(255,255,255,0.1)',
+                                            background: 'rgba(0,0,0,0.2)', color: 'white'
+                                        }}
+                                    />
+                                </div>
+                            ))}
+                            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    onClick={handleCreateQuestion}
+                                    style={{
+                                        flex: 1, padding: '12px', borderRadius: 'var(--radius-pill)',
+                                        border: 'none', background: 'var(--accent-pink)', color: 'white', cursor: 'pointer'
+                                    }}
+                                >
+                                    Save Question
+                                </motion.button>
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    onClick={() => setIsCreating(false)}
+                                    style={{
+                                        padding: '12px', borderRadius: 'var(--radius-pill)',
+                                        border: '1px solid rgba(255,255,255,0.2)', background: 'transparent',
+                                        color: 'white', cursor: 'pointer'
+                                    }}
+                                >
+                                    Cancel
+                                </motion.button>
+                            </div>
+                        </div>
+                    </div>
+                </Card>
+            </motion.div>
+        );
+    }
+
+    if (questions.length === 0) {
+        return (
+            <div style={{ textAlign: 'center', padding: 'var(--space-8)' }}>
+                <p style={{ color: 'var(--text-muted)', marginBottom: 'var(--space-4)' }}>No questions yet! Be the first to add one.</p>
+                <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    onClick={() => setIsCreating(true)}
+                    style={{
+                        padding: '12px 24px', borderRadius: 'var(--radius-pill)',
+                        border: 'none', background: 'var(--accent-rose)', color: 'white', cursor: 'pointer'
+                    }}
+                >
+                    Add Question ➕
+                </motion.button>
+            </div>
+        );
+    }
+
     if (showResult) {
         return (
             <motion.div
@@ -152,7 +292,7 @@ const LoveQuiz: React.FC = () => {
                             transition={{ duration: 2, repeat: Infinity }}
                             style={{ fontSize: '4rem', marginBottom: 'var(--space-4)' }}
                         >
-                            {score >= 8 ? '🏆' : score >= 5 ? '⭐' : '💪'}
+                            {score >= questions.length * 0.8 ? '🏆' : score >= questions.length * 0.5 ? '⭐' : '💪'}
                         </motion.div>
                         <h3 style={{
                             fontFamily: 'var(--font-heading)',
@@ -160,34 +300,46 @@ const LoveQuiz: React.FC = () => {
                             fontSize: '2rem',
                             marginBottom: 'var(--space-2)',
                         }}>
-                            {score}/{quizQuestions.length}
+                            {score}/{questions.length}
                         </h3>
                         <p style={{ color: 'var(--text-muted)', marginBottom: 'var(--space-6)' }}>
-                            {score >= 8 ? '🎉 You know Rishika so well! True love!' :
-                                score >= 5 ? '💕 Not bad! Keep learning about each other!' :
+                            {score >= questions.length * 0.8 ? '🎉 You know each other so well! True love!' :
+                                score >= questions.length * 0.5 ? '💕 Not bad! Keep learning about each other!' :
                                     'Time to pay more attention! 😄'}
                         </p>
-                        <motion.button
-                            whileHover={{ scale: 1.05, rotateX: 10, rotateY: 5 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={restart}
-                            style={{
-                                background: 'linear-gradient(135deg, var(--accent-rose), var(--accent-pink))',
-                                border: 'none', color: 'var(--bg-primary)',
-                                padding: '12px 28px', borderRadius: 'var(--radius-pill)',
-                                cursor: 'pointer', fontFamily: 'var(--font-heading)',
-                                fontSize: '0.9rem', fontWeight: 500,
-                                transformStyle: 'preserve-3d',
-                                boxShadow: '0 10px 20px rgba(232, 120, 138, 0.4), inset 0 2px 5px rgba(255,255,255,0.4)'
-                            }}
-                        >
-                            Play Again 🔄
-                        </motion.button>
+                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                onClick={restart}
+                                style={{
+                                    background: 'linear-gradient(135deg, var(--accent-rose), var(--accent-pink))',
+                                    border: 'none', color: 'var(--bg-primary)',
+                                    padding: '12px 28px', borderRadius: 'var(--radius-pill)',
+                                    cursor: 'pointer', fontFamily: 'var(--font-heading)',
+                                    fontSize: '0.9rem', fontWeight: 500,
+                                }}
+                            >
+                                Play Again 🔄
+                            </motion.button>
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                onClick={() => setIsCreating(true)}
+                                style={{
+                                    border: '1px solid rgba(255,255,255,0.2)', color: 'white',
+                                    padding: '12px 28px', borderRadius: 'var(--radius-pill)',
+                                    cursor: 'pointer', background: 'transparent',
+                                }}
+                            >
+                                Add Question ➕
+                            </motion.button>
+                        </div>
                     </div>
                 </Card>
             </motion.div>
         );
     }
+
+    const question = questions[currentQ];
 
     return (
         <motion.div
@@ -195,20 +347,25 @@ const LoveQuiz: React.FC = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
         >
-            {/* Progress */}
-            <div style={{
-                display: 'flex',
-                gap: '3px',
-                marginBottom: 'var(--space-4)',
-            }}>
-                {quizQuestions.map((_, i) => (
-                    <div key={i} style={{
-                        flex: 1, height: '3px',
-                        background: i <= currentQ ? 'var(--accent-pink)' : 'var(--bg-surface)',
-                        borderRadius: 'var(--radius-pill)',
-                        transition: 'background 0.3s ease',
-                    }} />
-                ))}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-4)' }}>
+                <div style={{ display: 'flex', gap: '3px', flex: 1, marginRight: '15px' }}>
+                    {questions.map((_, i) => (
+                        <div key={i} style={{
+                            flex: 1, height: '3px',
+                            background: i <= currentQ ? 'var(--accent-pink)' : 'var(--bg-surface)',
+                            borderRadius: 'var(--radius-pill)',
+                            transition: 'background 0.3s ease',
+                        }} />
+                    ))}
+                </div>
+                <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    onClick={() => setIsCreating(true)}
+                    style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer' }}
+                    title="Add Question"
+                >
+                    ➕
+                </motion.button>
             </div>
 
             <AnimatePresence mode="wait">
@@ -223,9 +380,12 @@ const LoveQuiz: React.FC = () => {
                             <p style={{
                                 fontSize: '0.75rem',
                                 color: 'var(--text-muted)',
-                                marginBottom: 'var(--space-3)',
+                                marginBottom: 'var(--space-1)',
                             }}>
-                                Question {currentQ + 1} of {quizQuestions.length}
+                                Question {currentQ + 1} of {questions.length}
+                            </p>
+                            <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', marginBottom: 'var(--space-3)' }}>
+                                Added by {question.createdBy}
                             </p>
                             <h3 style={{
                                 fontFamily: 'var(--font-heading)',
@@ -308,35 +468,78 @@ const LoveQuiz: React.FC = () => {
 
 /* Wish Jar Component */
 const WishJar: React.FC = () => {
-    const [wishes, setWishes] = useState<Wish[]>([
-        { id: 1, content: 'I wish we could watch the sunset together 🌅', author: 'Devi Sri Prasad', isRevealed: false },
-        { id: 2, content: 'I wish to cook dinner for you someday 🍝', author: 'Rishika', isRevealed: false },
-        { id: 3, content: 'I wish we could travel to Paris together 🗼', author: 'Devi Sri Prasad', isRevealed: false },
-        { id: 4, content: 'I wish to fall asleep on a video call together 🌙', author: 'Rishika', isRevealed: false },
-    ]);
+    const { session } = useAuth();
+    const [wishes, setWishes] = useState<Wish[]>([]);
     const [revealedWish, setRevealedWish] = useState<Wish | null>(null);
     const [newWish, setNewWish] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
 
-    const revealRandom = () => {
+    useEffect(() => {
+        if (!session) return;
+        fetchWishes();
+    }, [session]);
+
+    const fetchWishes = async () => {
+        setIsLoading(true);
+        try {
+            const apiUrl = import.meta.env.VITE_API_URL || '';
+            const res = await fetch(`${apiUrl}/api/wishes?roomId=${session?.room.id}`);
+            const data = await res.json();
+            if (data.wishes) {
+                setWishes(data.wishes);
+            }
+        } catch (err) {
+            console.error('Failed to fetch wishes:', err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const revealRandom = async () => {
         const unrevealed = wishes.filter(w => !w.isRevealed);
         if (unrevealed.length === 0) return;
         const random = unrevealed[Math.floor(Math.random() * unrevealed.length)];
-        setRevealedWish(random);
-        setWishes(prev => prev.map(w => w.id === random.id ? { ...w, isRevealed: true } : w));
+        
+        try {
+            const apiUrl = import.meta.env.VITE_API_URL || '';
+            const res = await fetch(`${apiUrl}/api/wishes/${random.id}/reveal`, {
+                method: 'PATCH',
+            });
+            if (res.ok) {
+                setRevealedWish(random);
+                setWishes(prev => prev.map(w => w.id === random.id ? { ...w, isRevealed: true } : w));
+            }
+        } catch (err) {
+            console.error('Failed to reveal wish:', err);
+        }
     };
 
-    const addWish = () => {
-        if (!newWish.trim()) return;
-        setWishes(prev => [...prev, {
-            id: Date.now(),
-            content: newWish,
-            author: 'Devi Sri Prasad',
-            isRevealed: false,
-        }]);
-        setNewWish('');
+    const addWish = async () => {
+        if (!newWish.trim() || !session) return;
+        try {
+            const apiUrl = import.meta.env.VITE_API_URL || '';
+            const res = await fetch(`${apiUrl}/api/wishes`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    roomId: session.room.id,
+                    content: newWish,
+                    author: session.user.role === 'Rishika' ? 'Rishika' : 'Devi Sri Prasad',
+                }),
+            });
+
+            if (res.ok) {
+                await fetchWishes();
+                setNewWish('');
+            }
+        } catch (err) {
+            console.error('Failed to add wish:', err);
+        }
     };
 
     const unrevealedCount = wishes.filter(w => !w.isRevealed).length;
+
+    if (isLoading) return <div style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Loading wishes...</div>;
 
     return (
         <motion.div
@@ -347,8 +550,8 @@ const WishJar: React.FC = () => {
         >
             {/* 3D Glass Jar */}
             <motion.div
-                whileHover={{ scale: 1.05, rotateZ: 2 }}
-                whileTap={{ scale: 0.95, rotateZ: -2 }}
+                whileHover={unrevealedCount > 0 ? { scale: 1.05, rotateZ: 2 } : {}}
+                whileTap={unrevealedCount > 0 ? { scale: 0.95, rotateZ: -2 } : {}}
                 onClick={revealRandom}
                 style={{
                     display: 'flex',
@@ -373,6 +576,7 @@ const WishJar: React.FC = () => {
                     justifyContent: 'center',
                     position: 'relative',
                     transformStyle: 'preserve-3d',
+                    opacity: unrevealedCount === 0 ? 0.6 : 1,
                 }}>
                     {/* Jar Lid */}
                     <div style={{
@@ -388,23 +592,25 @@ const WishJar: React.FC = () => {
                     }} />
 
                     {/* Glowing Stars inside */}
-                    <div style={{ position: 'relative', zIndex: 1, filter: 'drop-shadow(0 0 10px var(--accent-pink))' }}>
+                    <div style={{ position: 'relative', zIndex: 1, filter: unrevealedCount > 0 ? 'drop-shadow(0 0 10px var(--accent-pink))' : 'none' }}>
                         <motion.div
                             initial={{ y: 0 }}
-                            animate={{ y: [-5, 5, -5] }}
+                            animate={unrevealedCount > 0 ? { y: [-5, 5, -5] } : {}}
                             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                            style={{ fontSize: '3rem' }}
+                            style={{ fontSize: '3rem', opacity: unrevealedCount > 0 ? 1 : 0.3 }}
                         >
-                            ✨
+                            {unrevealedCount > 0 ? '✨' : '🫙'}
                         </motion.div>
-                        <motion.div
-                            initial={{ y: 0 }}
-                            animate={{ y: [3, -3, 3] }}
-                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                            style={{ fontSize: '1.5rem', position: 'absolute', bottom: -10, right: -15, opacity: 0.8 }}
-                        >
-                            💖
-                        </motion.div>
+                        {unrevealedCount > 0 && (
+                            <motion.div
+                                initial={{ y: 0 }}
+                                animate={{ y: [3, -3, 3] }}
+                                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                                style={{ fontSize: '1.5rem', position: 'absolute', bottom: -10, right: -15, opacity: 0.8 }}
+                            >
+                                💖
+                            </motion.div>
+                        )}
                     </div>
 
                     {/* Jar Reflection line */}
@@ -440,13 +646,15 @@ const WishJar: React.FC = () => {
                         initial={{ opacity: 0, y: -50, rotateX: 90, scale: 0.5, z: -200 }}
                         animate={{ opacity: 1, y: 0, rotateX: 0, scale: 1, z: 0 }}
                         exit={{ opacity: 0, scale: 0.8, rotateX: -90, y: 50, z: -100 }}
+                        onClick={() => setRevealedWish(null)}
                         transition={{ type: 'spring', damping: 12, stiffness: 100 }}
                         style={{ 
                             marginBottom: 'var(--space-6)',
                             perspective: '1500px',
                             transformStyle: 'preserve-3d',
                             position: 'relative',
-                            zIndex: 10
+                            zIndex: 10,
+                            cursor: 'pointer'
                         }}
                     >
                         <div style={{
@@ -457,8 +665,7 @@ const WishJar: React.FC = () => {
                             transformStyle: 'preserve-3d',
                             position: 'relative',
                         }}>
-                            {/* Tape mark on note */}
-                            <div style={{
+                             <div style={{
                                 position: 'absolute',
                                 top: '-10px',
                                 left: '50%',

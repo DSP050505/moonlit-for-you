@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../../context/AuthContext';
+import { useSocket } from '../../context/useSocket';
 
 export interface Notification {
     id: number;
-    type: 'love' | 'milestone' | 'music' | 'letter' | 'wish' | 'system';
+    type: 'love' | 'milestone' | 'music' | 'letter' | 'wish' | 'system' | 'surprise' | 'message';
     message: string;
-    timestamp: string;
+    timestamp?: string;
+    createdAt?: string;
     isRead: boolean;
 }
 
@@ -20,28 +23,84 @@ const typeConfig: Record<string, { icon: string; color: string }> = {
     music: { icon: '🎵', color: 'var(--accent-lavender)' },
     letter: { icon: '💌', color: 'var(--accent-rose)' },
     wish: { icon: '⭐', color: 'var(--accent-gold)' },
+    surprise: { icon: '🎁', color: 'var(--accent-pink)' },
+    message: { icon: '💬', color: 'var(--accent-lavender)' },
     system: { icon: '🌙', color: 'var(--accent-silver)' },
 };
 
-// Demo notifications
-const initialNotifications: Notification[] = [
-    { id: 1, type: 'system', message: 'Welcome to BetweenUs! 🌙', timestamp: new Date().toISOString(), isRead: false },
-    { id: 2, type: 'love', message: 'Rishika just said "I love you" ❤️', timestamp: new Date(Date.now() - 300000).toISOString(), isRead: false },
-    { id: 3, type: 'milestone', message: '100 messages exchanged! 🎉 The flowers are blooming!', timestamp: new Date(Date.now() - 600000).toISOString(), isRead: false },
-    { id: 4, type: 'letter', message: 'You have a new letter from Rishika 💌', timestamp: new Date(Date.now() - 900000).toISOString(), isRead: true },
-    { id: 5, type: 'music', message: '🎵 Now playing: A Thousand Years', timestamp: new Date(Date.now() - 1200000).toISOString(), isRead: true },
-];
-
 const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }) => {
-    const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
+    const { session } = useAuth();
+    const { socket } = useSocket();
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        if (!session || !isOpen) return;
+
+        const fetchNotifications = async () => {
+            setIsLoading(true);
+            try {
+                const apiUrl = import.meta.env.VITE_API_URL || '';
+                const res = await fetch(`${apiUrl}/api/notifications?roomId=${session.room.id}`);
+                const data = await res.json();
+                if (data.notifications) {
+                    setNotifications(data.notifications);
+                }
+            } catch (err) {
+                console.error('Failed to fetch notifications:', err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchNotifications();
+    }, [session, isOpen]);
+
+    useEffect(() => {
+        if (!socket) return;
+
+        socket.on('notification:new', (newNotif: Notification) => {
+            setNotifications(prev => [newNotif, ...prev]);
+            
+            // Play a soft sound or something? For now just visual.
+        });
+
+        return () => {
+            socket.off('notification:new');
+        };
+    }, [socket]);
 
     const unreadCount = notifications.filter(n => !n.isRead).length;
 
-    const markAllRead = () => {
-        setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    const markAllRead = async () => {
+        if (!session) return;
+        try {
+            const apiUrl = import.meta.env.VITE_API_URL || '';
+            await fetch(`${apiUrl}/api/notifications/read-all`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ roomId: session.room.id }),
+            });
+            setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+        } catch (err) {
+            console.error('Failed to mark all read:', err);
+        }
     };
 
-    const timeAgo = (timestamp: string) => {
+    const markRead = async (id: number) => {
+        try {
+            const apiUrl = import.meta.env.VITE_API_URL || '';
+            await fetch(`${apiUrl}/api/notifications/${id}/read`, {
+                method: 'PATCH',
+            });
+            setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+        } catch (err) {
+            console.error('Failed to mark read:', err);
+        }
+    };
+
+    const timeAgo = (timestamp?: string) => {
+        if (!timestamp) return 'Just now';
         const diff = Date.now() - new Date(timestamp).getTime();
         const minutes = Math.floor(diff / 60000);
         if (minutes < 1) return 'Just now';
@@ -142,7 +201,16 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }
                             overflowY: 'auto',
                             maxHeight: 'calc(70vh - 60px)',
                         }}>
-                            {notifications.map((notification, i) => {
+                            {isLoading && notifications.length === 0 ? (
+                                <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                                    <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2 }}>🌙</motion.div>
+                                    <p style={{ fontSize: '0.8rem', marginTop: '10px' }}>Looking for updates...</p>
+                                </div>
+                            ) : notifications.length === 0 ? (
+                                <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                                    <p style={{ fontSize: '0.8rem' }}>No notifications yet 🕊️</p>
+                                </div>
+                            ) : notifications.map((notification, i) => {
                                 const config = typeConfig[notification.type] || typeConfig.system;
                                 return (
                                     <motion.div
@@ -150,11 +218,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }
                                         initial={{ opacity: 0, x: 10 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: i * 0.05 }}
-                                        onClick={() => {
-                                            setNotifications(prev =>
-                                                prev.map(n => n.id === notification.id ? { ...n, isRead: true } : n)
-                                            );
-                                        }}
+                                        onClick={() => markRead(notification.id)}
                                         style={{
                                             padding: 'var(--space-3) var(--space-5)',
                                             borderBottom: '1px solid rgba(255,255,255,0.03)',
@@ -187,7 +251,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }
                                                 marginTop: '2px',
                                                 display: 'block',
                                             }}>
-                                                {timeAgo(notification.timestamp)}
+                                                {timeAgo(notification.createdAt || notification.timestamp)}
                                             </span>
                                         </div>
                                         {!notification.isRead && (
