@@ -120,20 +120,20 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat'
         }}>
-            <div style={{ 
-                position: 'absolute', 
-                inset: 0, 
+            <div style={{
+                position: 'absolute',
+                inset: 0,
                 background: 'rgba(0, 0, 0, 0.1)', // Even lighter overlay
-                zIndex: 0 
+                zIndex: 0
             }} />
 
             <motion.div
                 initial={{ opacity: 0, scale: 0.9, y: 30 }}
-                animate={{ 
-                    opacity: 1, 
-                    scale: 1, 
+                animate={{
+                    opacity: 1,
+                    scale: 1,
                     y: 0,
-                    x: shakeCount > 0 ? [-5, 5, -5, 5, 0] : 0 
+                    x: shakeCount > 0 ? [-5, 5, -5, 5, 0] : 0
                 }}
                 transition={{
                     opacity: { duration: 1, ease: "easeOut" },
@@ -141,7 +141,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
                     x: { duration: 0.4 }
                 }}
                 key={shakeCount}
-                style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '480px' }}
+                style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '600px' }}
             >
                 <div style={{
                     background: 'rgba(23, 27, 48, 0.15)',
@@ -170,7 +170,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
                     }}>
                         MoonlitForRishika
                     </h1>
-                    
+
                     <p style={{
                         textAlign: 'center',
                         color: 'rgba(255, 255, 255, 0.6)',
@@ -184,9 +184,9 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
                         Enter our private sky
                     </p>
 
-                    <div style={{ 
-                        display: 'flex', 
-                        width: '100%', 
+                    <div style={{
+                        display: 'flex',
+                        width: '100%',
                         background: 'rgba(255, 255, 255, 0.03)',
                         borderRadius: '0px', // Matches target cleaner look
                         padding: '4px',
