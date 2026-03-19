@@ -87,7 +87,7 @@ router.post('/', upload.single('photo'), async (req: Request, res: Response) => 
 // DELETE /api/photos/:id — Delete a photo
 router.delete('/:id', async (req: Request, res: Response) => {
     try {
-        const id = parseInt(req.params.id);
+        const id = parseInt(req.params.id as string);
         console.log(`🗑️ DELETE /api/photos/${id} requested`);
 
         if (!id || isNaN(id)) {
