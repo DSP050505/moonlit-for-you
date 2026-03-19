@@ -62,14 +62,15 @@ const CalendarGrid: React.FC = () => {
     // Fetch initial countdown
     useEffect(() => {
         if (!session) return;
-        fetch(`/api/events/countdown?roomId=${session.room.id}`)
+        fetch(`/api/events/countdown?roomId=${session.room.id}&t=${Date.now()}`)
             .then(res => res.json())
             .then(data => {
                 if (data.countdown) {
-                    const eventDate = new Date(data.countdown.date);
+                    const exactDateStr = data.countdown.note || data.countdown.date;
+                    const eventDate = new Date(exactDateStr);
                     // Standardize purely on the date portion directly against today at midnight
                     if (eventDate.getTime() > Date.now()) {
-                        setActiveCountdown(data.countdown);
+                        setActiveCountdown({ ...data.countdown, date: exactDateStr });
                         setHasReached(false);
                     } else {
                         setActiveCountdown(null);
@@ -369,7 +370,8 @@ const CountdownCard: React.FC<{ event: CountdownEvent, onExpire: () => void }> =
 
     useEffect(() => {
         const calculateTimeLeft = () => {
-            const diff = new Date(event.date).getTime() - Date.now();
+            const expireDate = new Date(event.date);
+            const diff = expireDate.getTime() - Date.now();
             if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
             return {
                 days: Math.floor(diff / (1000 * 60 * 60 * 24)),

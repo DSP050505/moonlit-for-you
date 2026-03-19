@@ -102,6 +102,7 @@ router.post('/countdown', async (req: Request, res: Response) => {
                 title: 'shared_countdown',
                 date: new Date(date),
                 type: 'custom',
+                note: date, // Preserve the exact ISO timestamp
                 createdBy: createdBy || 'you',
             },
         });
