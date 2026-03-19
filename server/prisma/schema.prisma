@@ -99,7 +99,10 @@ model Letter {
   id        Int      @id @default(autoincrement())
   roomId    Int      @map("room_id")
   sender    String
+  topFlap   String?  @map("top_flap")
+  greeting  String?
   content   String
+  closing   String?
   isRead    Boolean  @default(false) @map("is_read")
   createdAt DateTime @default(now()) @map("created_at")
 

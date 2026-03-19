@@ -19,10 +19,17 @@ router.get('/', async (_req: Request, res: Response) => {
 // POST /api/letters — Send a new letter
 router.post('/', async (req: Request, res: Response) => {
     try {
-        const { roomId, sender, content } = req.body;
+        const { roomId, sender, content, topFlap, greeting, closing } = req.body;
 
         const letter = await prisma.letter.create({
-            data: { roomId: parseInt(roomId) || 1, sender, content },
+            data: { 
+                roomId: parseInt(roomId) || 1, 
+                sender, 
+                content,
+                topFlap: topFlap || undefined,
+                greeting: greeting || undefined,
+                closing: closing || undefined
+            },
         });
 
         res.status(201).json({ letter });
