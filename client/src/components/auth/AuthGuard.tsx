@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import type { Role } from '../../context/AuthContext';
+import loginBg from '../../assets/login-bg.png';
 
 interface AuthGuardProps {
     children: React.ReactNode;
@@ -114,220 +115,228 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
             alignItems: 'center',
             justifyContent: 'center',
             padding: 'var(--space-4)',
+            backgroundImage: `url(${loginBg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
         }}>
-            {/* The background is now fully handled by SceneProvider Global Canvas. 
-                AuthGuard is just a floating HTML overlay without its own opaque background. */}
-            <div style={{ position: 'absolute', inset: 0, background: 'rgba(11, 14, 26, 0.4)', backdropFilter: 'blur(8px)', zIndex: 0 }} />
+            <div style={{ 
+                position: 'absolute', 
+                inset: 0, 
+                background: 'rgba(0, 0, 0, 0.1)', // Even lighter overlay
+                zIndex: 0 
+            }} />
 
             <motion.div
-                initial={{ opacity: 0, scale: 0.8, y: 40 }}
+                initial={{ opacity: 0, scale: 0.9, y: 30 }}
                 animate={{ 
                     opacity: 1, 
                     scale: 1, 
-                    y: [0, -10, 0],
+                    y: 0,
                     x: shakeCount > 0 ? [-5, 5, -5, 5, 0] : 0 
                 }}
                 transition={{
-                    opacity: { duration: 0.8, ease: "easeOut" },
-                    scale: { duration: 0.8, type: "spring", bounce: 0.4 },
-                    y: { duration: 6, repeat: Infinity, ease: "easeInOut" },
-                    x: { duration: 0.4 } // Shake duration
+                    opacity: { duration: 1, ease: "easeOut" },
+                    scale: { duration: 0.8, type: "spring", bounce: 0.3 },
+                    x: { duration: 0.4 }
                 }}
-                key={shakeCount} // Force re-render of shake animation on error
-                style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '420px', perspective: '1000px' }}
+                key={shakeCount}
+                style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '580px' }}
             >
                 <div style={{
-                    background: 'rgba(28, 32, 56, 0.4)',
-                    backdropFilter: 'blur(24px)',
-                    WebkitBackdropFilter: 'blur(24px)',
-                    borderRadius: '24px',
-                    border: '1px solid rgba(242, 167, 195, 0.2)',
-                    boxShadow: '0 20px 50px rgba(0,0,0,0.5), inset 0 0 20px rgba(242,167,195,0.05)',
-                    padding: 'var(--space-8)',
-                    transformStyle: 'preserve-3d',
+                    background: 'rgba(23, 27, 48, 0.15)', // More transparent
+                    backdropFilter: 'blur(20px)', // Less intense blur to show sparks
+                    WebkitBackdropFilter: 'blur(20px)',
+                    borderRadius: '48px',
+                    border: '1.5px solid rgba(255, 255, 255, 0.15)',
+                    boxShadow: `
+                        0 40px 100px rgba(0,0,0,0.5), 
+                        inset 0 0 20px rgba(255,255,255,0.02)
+                    `,
+                    padding: '60px 50px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center'
                 }}>
                     <h1 style={{
                         fontFamily: 'var(--font-handwriting)',
-                        color: 'var(--text-primary)',
+                        color: 'white',
                         textAlign: 'center',
-                        fontSize: '3.5rem',
-                        marginBottom: 'var(--space-2)',
-                        textShadow: '0 0 15px rgba(242, 167, 195, 0.6)',
-                        letterSpacing: '1px'
+                        fontSize: '4.2rem',
+                        margin: '0 0 12px 0',
+                        textShadow: '0 0 25px rgba(255, 255, 255, 0.7)',
+                        letterSpacing: '0.5px',
+                        transform: 'rotate(-2deg)'
                     }}>
                         MoonlitForRishika
-                        </h1>
-                        <p style={{
-                            textAlign: 'center',
-                            color: 'var(--text-muted)',
-                            fontFamily: 'var(--font-heading)',
-                            marginBottom: 'var(--space-6)',
-                            fontSize: '0.9rem',
-                            letterSpacing: '2px',
-                            textTransform: 'uppercase'
-                        }}>
-                            Enter our private sky
-                        </p>
+                    </h1>
+                    
+                    <p style={{
+                        textAlign: 'center',
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        fontFamily: 'var(--font-heading)',
+                        marginBottom: '40px',
+                        fontSize: '1rem',
+                        letterSpacing: '3px',
+                        textTransform: 'uppercase',
+                        fontWeight: '300'
+                    }}>
+                        Enter our private sky
+                    </p>
 
-                        <div style={{ display: 'flex', gap: '8px', marginBottom: 'var(--space-6)' }}>
-                            <button
-                                onClick={() => setMode('join')}
+                    <div style={{ 
+                        display: 'flex', 
+                        width: '100%', 
+                        background: 'rgba(255, 255, 255, 0.03)',
+                        borderRadius: '0px', // Matches target cleaner look
+                        padding: '4px',
+                        marginBottom: '40px'
+                    }}>
+                        <button
+                            onClick={() => setMode('join')}
+                            style={{
+                                flex: 1,
+                                padding: '12px',
+                                border: 'none',
+                                background: mode === 'join' ? 'rgba(255,255,255,0.08)' : 'transparent',
+                                color: mode === 'join' ? 'white' : 'rgba(255,255,255,0.4)',
+                                cursor: 'pointer',
+                                transition: 'all 0.3s',
+                                fontSize: '0.9rem',
+                                fontWeight: mode === 'join' ? '600' : '400',
+                                letterSpacing: '0.5px'
+                            }}
+                        >
+                            Join Room
+                        </button>
+                        <button
+                            onClick={() => setMode('create')}
+                            style={{
+                                flex: 1,
+                                padding: '12px',
+                                border: 'none',
+                                background: mode === 'create' ? 'rgba(255,255,255,0.08)' : 'transparent',
+                                color: mode === 'create' ? 'white' : 'rgba(255,255,255,0.4)',
+                                cursor: 'pointer',
+                                transition: 'all 0.3s',
+                                fontSize: '0.9rem',
+                                fontWeight: mode === 'create' ? '600' : '400',
+                                letterSpacing: '0.5px'
+                            }}
+                        >
+                            Create Room
+                        </button>
+                    </div>
+
+                    <form onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '30px' }}>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '10px', color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Room Name</label>
+                            <input
+                                type="text"
+                                required
+                                value={roomName}
+                                onChange={e => setRoomName(e.target.value)}
                                 style={{
-                                    flex: 1,
-                                    padding: '8px',
-                                    borderRadius: 'var(--radius-md)',
-                                    border: 'none',
-                                    background: mode === 'join' ? 'rgba(255,255,255,0.1)' : 'transparent',
-                                    color: mode === 'join' ? 'var(--text-primary)' : 'var(--text-muted)',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s',
+                                    width: '100%',
+                                    padding: '18px 20px',
+                                    borderRadius: '16px',
+                                    border: '1px solid rgba(255,255,255,0.08)',
+                                    background: 'rgba(0,0,0,0.4)',
+                                    color: 'white',
+                                    fontSize: '1rem',
+                                    outline: 'none',
+                                    transition: 'all 0.3s'
                                 }}
-                            >
-                                Join Room
-                            </button>
-                            <button
-                                onClick={() => setMode('create')}
-                                style={{
-                                    flex: 1,
-                                    padding: '8px',
-                                    borderRadius: 'var(--radius-md)',
-                                    border: 'none',
-                                    background: mode === 'create' ? 'rgba(255,255,255,0.1)' : 'transparent',
-                                    color: mode === 'create' ? 'var(--text-primary)' : 'var(--text-muted)',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s',
-                                }}
-                            >
-                                Create Room
-                            </button>
+                                placeholder="e.g. OurLittleWorld"
+                            />
                         </div>
 
-                        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '6px', color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Room Name</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={roomName}
-                                    onChange={e => setRoomName(e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '14px',
-                                        borderRadius: '12px',
-                                        border: '1px solid rgba(255,255,255,0.05)',
-                                        background: 'rgba(0,0,0,0.3)',
-                                        boxShadow: 'inset 0 4px 10px rgba(0,0,0,0.5)',
-                                        color: 'white',
-                                        fontFamily: 'var(--font-body)',
-                                        fontSize: '1rem',
-                                        transition: 'border 0.3s ease, box-shadow 0.3s ease',
-                                        outline: 'none',
-                                    }}
-                                    onFocus={(e) => {
-                                        e.target.style.border = '1px solid rgba(242,167,195,0.5)';
-                                        e.target.style.boxShadow = 'inset 0 4px 10px rgba(0,0,0,0.5), 0 0 10px rgba(242,167,195,0.2)';
-                                    }}
-                                    onBlur={(e) => {
-                                        e.target.style.border = '1px solid rgba(255,255,255,0.05)';
-                                        e.target.style.boxShadow = 'inset 0 4px 10px rgba(0,0,0,0.5)';
-                                    }}
-                                    placeholder="e.g. OurLittleWorld"
-                                />
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '6px', color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Passcode</label>
-                                <input
-                                    type="password"
-                                    required
-                                    value={passcode}
-                                    onChange={e => setPasscode(e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '14px',
-                                        borderRadius: '12px',
-                                        border: '1px solid rgba(255,255,255,0.05)',
-                                        background: 'rgba(0,0,0,0.3)',
-                                        boxShadow: 'inset 0 4px 10px rgba(0,0,0,0.5)',
-                                        color: 'white',
-                                        fontFamily: 'var(--font-body)',
-                                        fontSize: '1rem',
-                                        transition: 'border 0.3s ease, box-shadow 0.3s ease',
-                                        outline: 'none',
-                                    }}
-                                    onFocus={(e) => {
-                                        e.target.style.border = '1px solid rgba(242,167,195,0.5)';
-                                        e.target.style.boxShadow = 'inset 0 4px 10px rgba(0,0,0,0.5), 0 0 10px rgba(242,167,195,0.2)';
-                                    }}
-                                    onBlur={(e) => {
-                                        e.target.style.border = '1px solid rgba(255,255,255,0.05)';
-                                        e.target.style.boxShadow = 'inset 0 4px 10px rgba(0,0,0,0.5)';
-                                    }}
-                                    placeholder="Secret key..."
-                                />
-                            </div>
-
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '6px', color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>I am...</label>
-                                <div style={{ display: 'flex', gap: '8px' }}>
-                                    {(['Rishika', 'DSP'] as Role[]).map(r => (
-                                        <button
-                                            key={r}
-                                            type="button"
-                                            onClick={() => setRole(r)}
-                                            style={{
-                                                flex: 1,
-                                                padding: '10px',
-                                                borderRadius: 'var(--radius-md)',
-                                                border: `1px solid ${role === r ? 'var(--accent-pink)' : 'rgba(255,255,255,0.1)'}`,
-                                                background: role === r ? 'rgba(242, 167, 195, 0.1)' : 'rgba(0,0,0,0.2)',
-                                                color: role === r ? 'var(--accent-pink)' : 'var(--text-muted)',
-                                                cursor: 'pointer',
-                                            }}
-                                        >
-                                            {r === 'DSP' ? 'Devi Sri Prasad' : r}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <AnimatePresence>
-                                {error && (
-                                    <motion.p
-                                        initial={{ opacity: 0, height: 0 }}
-                                        animate={{ opacity: 1, height: 'auto' }}
-                                        exit={{ opacity: 0, height: 0 }}
-                                        style={{ color: '#ff6b6b', fontSize: '0.85rem', margin: 0, textAlign: 'center' }}
-                                    >
-                                        {error}
-                                    </motion.p>
-                                )}
-                            </AnimatePresence>
-
-                            <motion.button
-                                whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(242, 167, 195, 0.6)' }}
-                                whileTap={{ scale: 0.98 }}
-                                type="submit"
-                                disabled={isLoading}
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '10px', color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Passcode</label>
+                            <input
+                                type="password"
+                                required
+                                value={passcode}
+                                onChange={e => setPasscode(e.target.value)}
                                 style={{
-                                    marginTop: '8px',
-                                    padding: '16px',
-                                    borderRadius: '12px',
-                                    border: '1px solid rgba(255,255,255,0.2)',
-                                    background: 'linear-gradient(135deg, rgba(232, 120, 138, 0.9), rgba(242, 167, 195, 0.9))',
+                                    width: '100%',
+                                    padding: '18px 20px',
+                                    borderRadius: '16px',
+                                    border: '1px solid rgba(255,255,255,0.08)',
+                                    background: 'rgba(0,0,0,0.4)',
                                     color: 'white',
-                                    fontFamily: 'var(--font-heading)',
-                                    fontSize: '1.1rem',
-                                    letterSpacing: '1px',
-                                    cursor: isLoading ? 'not-allowed' : 'pointer',
-                                    opacity: isLoading ? 0.7 : 1,
-                                    textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-                                    boxShadow: '0 8px 25px rgba(232, 120, 138, 0.4), inset 0 2px 4px rgba(255,255,255,0.3)'
+                                    fontSize: '1rem',
+                                    outline: 'none',
+                                    transition: 'all 0.3s'
                                 }}
-                            >
-                                {isLoading ? 'Connecting...' : (mode === 'join' ? 'Enter Room' : 'Create & Enter')}
-                            </motion.button>
-                        </form>
+                                placeholder="Secret key..."
+                            />
+                        </div>
+
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '10px', color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1.5px' }}>I am...</label>
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                {(['Rishika', 'DSP'] as Role[]).map(r => (
+                                    <button
+                                        key={r}
+                                        type="button"
+                                        onClick={() => setRole(r)}
+                                        style={{
+                                            flex: 1,
+                                            padding: '14px',
+                                            borderRadius: '2px', // Sharper look for toggle
+                                            border: `1.5px solid ${role === r ? 'rgba(242, 167, 195, 0.4)' : 'rgba(255,255,255,0.1)'}`,
+                                            background: role === r ? 'rgba(242, 167, 195, 0.05)' : 'rgba(0,0,0,0.2)',
+                                            color: role === r ? 'white' : 'rgba(255,255,255,0.3)',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.3s',
+                                            fontSize: '0.9rem'
+                                        }}
+                                    >
+                                        {r === 'DSP' ? 'Devi Sri Prasad' : r}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <AnimatePresence>
+                            {error && (
+                                <motion.p
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    style={{ color: '#ff7b92', fontSize: '0.9rem', margin: 0, textAlign: 'center' }}
+                                >
+                                    {error}
+                                </motion.p>
+                            )}
+                        </AnimatePresence>
+
+                        <motion.button
+                            whileHover={{ scale: 1.02, boxShadow: '0 0 30px rgba(242, 167, 195, 0.4)' }}
+                            whileTap={{ scale: 0.98 }}
+                            type="submit"
+                            disabled={isLoading}
+                            style={{
+                                marginTop: '10px',
+                                padding: '20px',
+                                borderRadius: '24px',
+                                border: 'none',
+                                background: 'linear-gradient(135deg, #e58a9e, #db97ab)',
+                                color: 'white',
+                                fontFamily: 'var(--font-heading)',
+                                fontSize: '1.2rem',
+                                fontWeight: '600',
+                                letterSpacing: '1px',
+                                cursor: isLoading ? 'not-allowed' : 'pointer',
+                                opacity: isLoading ? 0.7 : 1,
+                                boxShadow: '0 10px 30px rgba(229, 138, 158, 0.3)',
+                                transition: 'all 0.3s'
+                            }}
+                        >
+                            {isLoading ? 'Connecting...' : (mode === 'join' ? 'Enter Room' : 'Create & Enter')}
+                        </motion.button>
+                    </form>
                 </div>
             </motion.div>
         </div>
