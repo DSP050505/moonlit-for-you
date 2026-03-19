@@ -45,7 +45,7 @@ router.patch('/read-all', async (req: Request, res: Response) => {
 // PATCH /api/notifications/:id/read — Mark single as read
 router.patch('/:id/read', async (req: Request, res: Response) => {
     try {
-        const id = parseInt(req.params.id);
+        const id = parseInt(req.params.id as string);
         await prisma.notification.update({
             where: { id },
             data: { isRead: true }
