@@ -70,4 +70,47 @@ router.delete('/:id', async (req: Request, res: Response) => {
     }
 });
 
+// GET /api/events/countdown — Get the active countdown event
+router.get('/countdown', async (req: Request, res: Response) => {
+    try {
+        const roomId = parseInt(req.query.roomId as string) || 1;
+        const countdown = await prisma.event.findFirst({
+            where: { roomId, title: 'shared_countdown', type: 'custom' },
+        });
+        res.json({ countdown });
+    } catch (error) {
+        console.error('Error fetching countdown:', error);
+        res.status(500).json({ error: 'Failed to fetch countdown' });
+    }
+});
+
+// POST /api/events/countdown — Set a new countdown event (replaces old one)
+router.post('/countdown', async (req: Request, res: Response) => {
+    try {
+        const { roomId, date, createdBy } = req.body;
+        const parsedRoomId = parseInt(roomId) || 1;
+
+        // Delete existing
+        await prisma.event.deleteMany({
+            where: { roomId: parsedRoomId, title: 'shared_countdown', type: 'custom' },
+        });
+
+        // Create new
+        const countdown = await prisma.event.create({
+            data: {
+                roomId: parsedRoomId,
+                title: 'shared_countdown',
+                date: new Date(date),
+                type: 'custom',
+                createdBy: createdBy || 'you',
+            },
+        });
+
+        res.status(201).json({ countdown });
+    } catch (error) {
+        console.error('Error setting countdown:', error);
+        res.status(500).json({ error: 'Failed to set countdown' });
+    }
+});
+
 export default router;

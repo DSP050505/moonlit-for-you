@@ -21,6 +21,7 @@ import { setupChatHandler } from './sockets/chatHandler';
 import { setupMusicSyncHandler } from './sockets/musicSyncHandler';
 import { setupDoodleHandler } from './sockets/doodleHandler';
 import { setupLocationHandler } from './sockets/locationHandler';
+import { setupCalendarHandler } from './sockets/calendarHandler';
 
 // Allowed origins — trim trailing slashes to prevent CORS mismatch
 const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
@@ -112,6 +113,7 @@ io.on('connection', (socket) => {
     setupMusicSyncHandler(io, socket);
     setupDoodleHandler(io, socket);
     setupLocationHandler(io, socket);
+    setupCalendarHandler(io, socket);
 
     socket.on('disconnect', () => {
         console.log(`🌙 Disconnected: ${socket.id}`);

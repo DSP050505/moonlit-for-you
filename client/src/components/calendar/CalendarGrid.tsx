@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isToday, addMonths, subMonths } from 'date-fns';
+import { useSocket } from '../../context/useSocket';
+import { useAuth } from '../../context/AuthContext';
 
-// Curated love quotes (first 30 for now, deterministic by day)
+// Curated love quotes
 const loveQuotes = [
     "Rishika, you are my moon and stars ✨",
     "Every mile between us is proof that love knows no distance 🌙",
@@ -42,48 +44,103 @@ const getDailyQuote = (date: Date) => {
     return loveQuotes[dayIndex];
 };
 
-// Event type styles
-const eventTypeConfig: Record<string, { color: string; icon: string }> = {
-    anniversary: { color: 'var(--accent-pink)', icon: '💕' },
-    visit: { color: 'var(--accent-gold)', icon: '✈️' },
-    movie: { color: 'var(--accent-lavender)', icon: '🎬' },
-    call: { color: 'var(--success)', icon: '📞' },
-    custom: { color: 'var(--accent-silver)', icon: '⭐' },
-};
-
-interface CalendarEvent {
-    id: number;
+interface CountdownEvent {
+    id?: number;
     title: string;
     date: string;
     type: string;
-    note?: string;
 }
 
 const CalendarGrid: React.FC = () => {
     const [currentMonth, setCurrentMonth] = useState(new Date());
-    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [activeCountdown, setActiveCountdown] = useState<CountdownEvent | null>(null);
+    const [hasReached, setHasReached] = useState(false);
+    
+    const { socket } = useSocket();
+    const { session } = useAuth();
 
-    // Demo events
-    const [events] = useState<CalendarEvent[]>([
-        { id: 1, title: 'Our Anniversary 💕', date: '2026-03-14', type: 'anniversary' },
-        { id: 2, title: 'Next Visit!', date: '2026-04-15', type: 'visit' },
-        { id: 3, title: 'Movie Night 🎬', date: '2026-03-20', type: 'movie' },
-        { id: 4, title: 'Video Call ❤️', date: '2026-03-18', type: 'call' },
-    ]);
+    // Fetch initial countdown
+    useEffect(() => {
+        if (!session) return;
+        fetch(`/api/events/countdown?roomId=${session.room.id}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.countdown) {
+                    const eventDate = new Date(data.countdown.date);
+                    // Standardize purely on the date portion directly against today at midnight
+                    if (eventDate.getTime() > Date.now()) {
+                        setActiveCountdown(data.countdown);
+                        setHasReached(false);
+                    } else {
+                        setActiveCountdown(null);
+                        setHasReached(true);
+                    }
+                }
+            })
+            .catch(console.error);
+    }, [session]);
 
-    // Next visit countdown
-    const nextVisit = events.find(e => e.type === 'visit' && new Date(e.date) > new Date());
+    // Setup socket listener
+    useEffect(() => {
+        if (!socket) return;
+        
+        const handleUpdate = (data: { date: string, title?: string }) => {
+            const newDate = new Date(data.date);
+            if (newDate.getTime() > Date.now()) {
+                setActiveCountdown({ title: data.title || 'shared_countdown', date: data.date, type: 'custom' });
+                setHasReached(false);
+            }
+        };
 
-    // Calendar days
+        socket.on('countdown:update', handleUpdate);
+
+        return () => {
+             socket.off('countdown:update', handleUpdate);
+        };
+    }, [socket]);
+
+    const handleSelectDate = async (day: Date) => {
+        const todayStr = format(new Date(), 'yyyy-MM-dd');
+        const dayStr = format(day, 'yyyy-MM-dd');
+        
+        // Only allow picking future dates
+        if (dayStr <= todayStr) return;
+
+        // We want the countdown to hit exactly at midnight of the selected day
+        const targetDateStr = day.toISOString();
+
+        // Optimistically set UI
+        const newCountdown = { title: 'shared_countdown', date: targetDateStr, type: 'custom' };
+        setActiveCountdown(newCountdown);
+        setHasReached(false);
+
+        // Notify others
+        if (socket) {
+            socket.emit('countdown:set', { date: targetDateStr });
+        }
+
+        // Save to DB
+        if (session) {
+            try {
+                await fetch('/api/events/countdown', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        roomId: session.room.id,
+                        date: targetDateStr,
+                        createdBy: session.user.role
+                    })
+                });
+            } catch (err) {
+                console.error('Failed to set countdown API', err);
+            }
+        }
+    };
+
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(currentMonth);
     const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
     const startDay = getDay(monthStart);
-
-    const getEventsForDay = (day: Date) => {
-        const dateStr = format(day, 'yyyy-MM-dd');
-        return events.filter(e => e.date === dateStr);
-    };
 
     return (
         <motion.div
@@ -98,30 +155,54 @@ const CalendarGrid: React.FC = () => {
             }}
             className="calendar-container"
         >
-            {/* Countdown Timer */}
-            {nextVisit && <CountdownCard event={nextVisit} />}
+            {/* Title */}
+            <h2 style={{
+                fontFamily: 'var(--font-heading)',
+                color: 'var(--text-primary)',
+                textAlign: 'center',
+                marginBottom: 'var(--space-6)',
+                fontSize: '1.8rem',
+                textShadow: '0 0 15px rgba(242, 167, 195, 0.4)'
+            }}>
+                Getting closer, one day at a time 🌙
+            </h2>
 
-            {/* Daily Quote */}
-            <motion.div
-                initial={{ opacity: 0, y: 10, rotateX: 20 }}
-                animate={{ opacity: 1, y: 0, rotateX: 0 }}
-                transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                style={{
-                    textAlign: 'center',
-                    padding: 'var(--space-4)',
-                    marginBottom: 'var(--space-4)',
-                    perspective: '1000px'
-                }}
-            >
-                <p style={{
-                    fontFamily: 'var(--font-handwriting)',
-                    fontSize: '1.2rem',
-                    color: 'var(--accent-pink)',
-                    fontStyle: 'italic',
-                }}>
-                    "{getDailyQuote(new Date())}"
-                </p>
-            </motion.div>
+            {/* Countdown Timer or Empty State Message */}
+            {activeCountdown ? (
+                <CountdownCard 
+                    event={activeCountdown} 
+                    onExpire={() => {
+                        setActiveCountdown(null);
+                        setHasReached(true);
+                    }} 
+                />
+            ) : (
+                <motion.div 
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    style={{
+                        padding: 'var(--space-5)',
+                        textAlign: 'center',
+                        background: 'rgba(28, 32, 56, 0.3)',
+                        backdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(245, 211, 128, 0.1)',
+                        borderRadius: '24px',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+                        marginBottom: 'var(--space-8)',
+                    }}
+                >
+                    <p style={{
+                        fontFamily: 'var(--font-heading)',
+                        color: 'var(--accent-gold)',
+                        fontSize: '1.2rem',
+                        letterSpacing: '1px',
+                    }}>
+                        {hasReached 
+                            ? "That moment was special 💫… pick our next one" 
+                            : "Pick a date to look forward to ✨"}
+                    </p>
+                </motion.div>
+            )}
 
             <div style={{
                 position: 'relative',
@@ -135,215 +216,155 @@ const CalendarGrid: React.FC = () => {
                 transformStyle: 'preserve-3d',
                 perspective: '1500px'
             }}>
-                    {/* Month Navigation */}
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: 'var(--space-6)',
-                    }}>
-                        <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                            style={{
-                                background: 'none', border: 'none', color: 'var(--text-muted)',
-                                fontSize: '1.2rem', cursor: 'pointer',
-                            }}
-                        >
-                            ←
-                        </motion.button>
-                        <h3 style={{
-                            fontFamily: 'var(--font-heading)',
-                            color: 'var(--text-primary)',
-                            fontSize: '1.2rem',
-                        }}>
-                            {format(currentMonth, 'MMMM yyyy')}
-                        </h3>
-                        <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                            style={{
-                                background: 'none', border: 'none', color: 'var(--text-muted)',
-                                fontSize: '1.2rem', cursor: 'pointer',
-                            }}
-                        >
-                            →
-                        </motion.button>
-                    </div>
-
-                    {/* Day Headers */}
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(7, 1fr)',
-                        gap: '4px',
-                        marginBottom: 'var(--space-2)',
-                    }}>
-                        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                            <div key={day} style={{
-                                textAlign: 'center',
-                                fontSize: '0.7rem',
-                                color: 'var(--text-muted)',
-                                fontFamily: 'var(--font-heading)',
-                                fontWeight: 500,
-                                padding: '4px',
-                            }}>
-                                {day}
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Calendar Grid */}
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(7, 1fr)',
-                        gap: '4px',
-                    }}>
-                        {/* Empty cells for start of month */}
-                        {Array.from({ length: startDay }).map((_, i) => (
-                            <div key={`empty-${i}`} />
-                        ))}
-
-                        {/* Day cells */}
-                        {days.map((day) => {
-                            const dayEvents = getEventsForDay(day);
-                            const isSelected = selectedDate?.toDateString() === day.toDateString();
-                            const today = isToday(day);
-
-                            return (
-                                <motion.div
-                                    key={day.toISOString()}
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={() => setSelectedDate(day)}
-                                    style={{
-                                        textAlign: 'center',
-                                        padding: '12px 6px',
-                                        borderRadius: '12px',
-                                        cursor: 'pointer',
-                                        background: isSelected
-                                            ? 'linear-gradient(135deg, rgba(242, 167, 195, 0.3), rgba(232, 120, 138, 0.15))'
-                                            : today
-                                                ? 'rgba(245, 211, 128, 0.15)'
-                                                : 'rgba(0,0,0,0.2)',
-                                        border: isSelected 
-                                            ? '1px solid rgba(242, 167, 195, 0.6)' 
-                                            : today 
-                                                ? '1px solid var(--accent-gold)' 
-                                                : '1px solid rgba(255,255,255,0.05)',
-                                        boxShadow: isSelected
-                                            ? '0 8px 20px rgba(0,0,0,0.3), inset 0 2px 10px rgba(242, 167, 195, 0.2)'
-                                            : today
-                                                ? '0 4px 12px rgba(0,0,0,0.2), inset 0 2px 5px rgba(245, 211, 128, 0.1)'
-                                                : 'inset 0 2px 5px rgba(255,255,255,0.02)',
-                                        transition: 'all 0.3s ease',
-                                        transformStyle: 'preserve-3d',
-                                    }}
-                                >
-                                    <span style={{
-                                        fontSize: '0.9rem',
-                                        color: isSelected 
-                                            ? '#fff' 
-                                            : today ? 'var(--accent-gold)' : 'var(--text-primary)',
-                                        fontWeight: today || isSelected ? 600 : 400,
-                                        textShadow: isSelected ? '0 0 10px rgba(242, 167, 195, 0.8)' : 'none',
-                                        display: 'block',
-                                        transform: isSelected ? 'translateZ(10px)' : 'none'
-                                    }}>
-                                        {format(day, 'd')}
-                                    </span>
-
-                                    {/* Event dots */}
-                                    {dayEvents.length > 0 && (
-                                        <div style={{
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            gap: '2px',
-                                            marginTop: '2px',
-                                        }}>
-                                            {dayEvents.map(evt => (
-                                                <span
-                                                    key={evt.id}
-                                                    style={{
-                                                        display: 'inline-block',
-                                                        width: '5px',
-                                                        height: '5px',
-                                                        borderRadius: '50%',
-                                                        background: eventTypeConfig[evt.type]?.color || 'var(--accent-silver)',
-                                                    }}
-                                                />
-                                            ))}
-                                        </div>
-                                    )}
-                                </motion.div>
-                            );
-                        })}
-                    </div>
-                </div>
-            <AnimatePresence>
-                {selectedDate && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        style={{ marginTop: 'var(--space-6)', perspective: '1000px' }}
+                {/* Month Navigation */}
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: 'var(--space-6)',
+                }}>
+                    <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+                        style={{
+                            background: 'none', border: 'none', color: 'var(--text-muted)',
+                            fontSize: '1.2rem', cursor: 'pointer',
+                        }}
                     >
-                        <div style={{
-                            padding: 'var(--space-5)',
-                            background: 'linear-gradient(135deg, rgba(28, 32, 56, 0.6), rgba(11, 14, 26, 0.8))',
-                            backdropFilter: 'blur(16px)',
-                            WebkitBackdropFilter: 'blur(16px)',
-                            border: '1px solid rgba(242, 167, 195, 0.15)',
-                            borderRadius: '20px',
-                            boxShadow: '0 15px 35px rgba(0,0,0,0.5), inset 0 2px 10px rgba(242, 167, 195, 0.05)',
-                            transformStyle: 'preserve-3d',
+                        ←
+                    </motion.button>
+                    <h3 style={{
+                        fontFamily: 'var(--font-heading)',
+                        color: 'var(--text-primary)',
+                        fontSize: '1.2rem',
+                    }}>
+                        {format(currentMonth, 'MMMM yyyy')}
+                    </h3>
+                    <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+                        style={{
+                            background: 'none', border: 'none', color: 'var(--text-muted)',
+                            fontSize: '1.2rem', cursor: 'pointer',
+                        }}
+                    >
+                        →
+                    </motion.button>
+                </div>
+
+                {/* Day Headers */}
+                <div style={{
+                    display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: 'var(--space-2)',
+                }}>
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                        <div key={day} style={{
+                            textAlign: 'center', fontSize: '0.7rem', color: 'var(--text-muted)',
+                            fontFamily: 'var(--font-heading)', fontWeight: 500, padding: '4px',
                         }}>
-                                <h4 style={{
-                                    fontFamily: 'var(--font-heading)',
-                                    marginBottom: 'var(--space-3)',
-                                    color: 'var(--text-primary)',
-                                }}>
-                                    {format(selectedDate, 'EEEE, MMMM d')}
-                                </h4>
-                                <p style={{
-                                    fontFamily: 'var(--font-handwriting)',
-                                    color: 'var(--accent-lavender)',
-                                    fontSize: '1rem',
-                                    marginBottom: 'var(--space-3)',
-                                }}>
-                                    "{getDailyQuote(selectedDate)}"
-                                </p>
-                                {getEventsForDay(selectedDate).length > 0 ? (
-                                    getEventsForDay(selectedDate).map(evt => (
-                                        <div key={evt.id} style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 'var(--space-2)',
-                                            padding: 'var(--space-2)',
-                                            background: 'rgba(255,255,255,0.03)',
-                                            borderRadius: 'var(--radius-sm)',
-                                            marginBottom: 'var(--space-2)',
-                                        }}>
-                                            <span>{eventTypeConfig[evt.type]?.icon || '📌'}</span>
-                                            <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>{evt.title}</span>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                                        No events on this day 🌙
-                                    </p>
-                                )}
+                            {day}
                         </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                    ))}
+                </div>
+
+                {/* Calendar Grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px' }}>
+                    {/* Empty cells for start of month */}
+                    {Array.from({ length: startDay }).map((_, i) => <div key={`empty-${i}`} />)}
+
+                    {/* Day cells */}
+                    {days.map((day) => {
+                        const targetDate = activeCountdown ? new Date(activeCountdown.date) : null;
+                        const isSelected = targetDate ? day.toDateString() === targetDate.toDateString() : false;
+                        const today = isToday(day);
+                        
+                        const dayStr = format(day, 'yyyy-MM-dd');
+                        const todayStr = format(new Date(), 'yyyy-MM-dd');
+                        const isPastDay = dayStr <= todayStr;
+
+                        return (
+                            <motion.div
+                                key={day.toISOString()}
+                                whileHover={!isPastDay ? { scale: 1.05 } : {}}
+                                whileTap={!isPastDay ? { scale: 0.95 } : {}}
+                                onClick={() => handleSelectDate(day)}
+                                style={{
+                                    textAlign: 'center',
+                                    padding: '12px 6px',
+                                    borderRadius: '12px',
+                                    cursor: isPastDay ? 'default' : 'pointer',
+                                    opacity: isPastDay && !today ? 0.3 : 1,
+                                    background: isSelected
+                                        ? 'linear-gradient(135deg, rgba(242, 167, 195, 0.4), rgba(232, 120, 138, 0.2))'
+                                        : today
+                                            ? 'rgba(245, 211, 128, 0.15)'
+                                            : 'rgba(0,0,0,0.2)',
+                                    border: isSelected 
+                                        ? '1px solid rgba(242, 167, 195, 0.6)' 
+                                        : today 
+                                            ? '1px solid var(--accent-gold)' 
+                                            : '1px solid rgba(255,255,255,0.05)',
+                                    boxShadow: isSelected
+                                        ? '0 8px 20px rgba(0,0,0,0.4), inset 0 2px 10px rgba(242, 167, 195, 0.3)'
+                                        : today
+                                            ? '0 4px 12px rgba(0,0,0,0.2), inset 0 2px 5px rgba(245, 211, 128, 0.1)'
+                                            : 'inset 0 2px 5px rgba(255,255,255,0.02)',
+                                    transition: 'all 0.3s ease',
+                                    transformStyle: 'preserve-3d',
+                                }}
+                            >
+                                <span style={{
+                                    fontSize: '0.9rem',
+                                    color: isSelected 
+                                        ? '#fff' 
+                                        : today ? 'var(--accent-gold)' : 'var(--text-primary)',
+                                    fontWeight: today || isSelected ? 600 : 400,
+                                    textShadow: isSelected ? '0 0 10px rgba(242, 167, 195, 0.8)' : 'none',
+                                    display: 'block',
+                                    transform: isSelected ? 'translateZ(10px)' : 'none'
+                                }}>
+                                    {format(day, 'd')}
+                                </span>
+                                
+                                {isSelected && (
+                                     <div style={{ display: 'flex', justifyContent: 'center', marginTop: '4px' }}>
+                                         <span style={{ fontSize: '10px' }}>💫</span>
+                                     </div>
+                                )}
+                            </motion.div>
+                        );
+                    })}
+                </div>
+            </div>
+            
+            {/* Daily Quote below the calendar */}
+            <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                style={{
+                    textAlign: 'center',
+                    padding: 'var(--space-6)',
+                    marginTop: 'var(--space-4)',
+                }}
+            >
+                <p style={{
+                    fontFamily: 'var(--font-handwriting)',
+                    fontSize: '1.4rem',
+                    color: 'var(--accent-lavender)',
+                    fontStyle: 'italic',
+                    textShadow: '0 2px 5px rgba(0,0,0,0.3)'
+                }}>
+                    " {getDailyQuote(new Date())} "
+                </p>
+            </motion.div>
         </motion.div>
     );
 };
 
 /* Countdown Card Component */
-const CountdownCard: React.FC<{ event: CalendarEvent }> = ({ event }) => {
+const CountdownCard: React.FC<{ event: CountdownEvent, onExpire: () => void }> = ({ event, onExpire }) => {
     const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
     useEffect(() => {
@@ -358,10 +379,24 @@ const CountdownCard: React.FC<{ event: CalendarEvent }> = ({ event }) => {
             };
         };
 
-        setTimeLeft(calculateTimeLeft());
-        const interval = setInterval(() => setTimeLeft(calculateTimeLeft()), 1000);
+        const initialTime = calculateTimeLeft();
+        setTimeLeft(initialTime);
+        
+        if (initialTime.days === 0 && initialTime.hours === 0 && initialTime.minutes === 0 && initialTime.seconds === 0) {
+            onExpire();
+            return;
+        }
+
+        const interval = setInterval(() => {
+            const newTime = calculateTimeLeft();
+            setTimeLeft(newTime);
+            if (newTime.days === 0 && newTime.hours === 0 && newTime.minutes === 0 && newTime.seconds === 0) {
+                clearInterval(interval);
+                onExpire();
+            }
+        }, 1000);
         return () => clearInterval(interval);
-    }, [event.date]);
+    }, [event.date, onExpire]);
 
     const timeUnits = [
         { label: 'Days', value: timeLeft.days },
@@ -387,21 +422,16 @@ const CountdownCard: React.FC<{ event: CalendarEvent }> = ({ event }) => {
             <h3 style={{
                 fontFamily: 'var(--font-heading)',
                 color: 'var(--accent-pink)',
-                fontSize: '1.1rem',
+                fontSize: '1.2rem',
                 marginBottom: 'var(--space-6)',
                 letterSpacing: '2px',
                 textTransform: 'uppercase',
                 textShadow: '0 0 10px rgba(242, 167, 195, 0.5)'
             }}>
-                ✨ Until I See Rishika ✨
+                ✨ Counting Down ✨
             </h3>
 
-            <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: 'var(--space-4)',
-                marginBottom: 'var(--space-4)',
-            }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--space-4)', marginBottom: 'var(--space-4)' }}>
                 {timeUnits.map(({ label, value }) => (
                     <div key={label} style={{ textAlign: 'center', perspective: '800px' }}>
                         <div style={{
@@ -415,16 +445,15 @@ const CountdownCard: React.FC<{ event: CalendarEvent }> = ({ event }) => {
                             position: 'relative',
                             overflow: 'hidden'
                         }}>
-                            {/* Glass reflection line */}
                             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '50%', background: 'linear-gradient(180deg, rgba(255,255,255,0.05), transparent)' }} />
                             
                             <AnimatePresence mode="popLayout">
                                 <motion.div
                                     key={value}
-                                    initial={{ rotateX: -90, opacity: 0, transformOrigin: 'bottom' }}
-                                    animate={{ rotateX: 0, opacity: 1, transformOrigin: 'bottom' }}
-                                    exit={{ rotateX: 90, opacity: 0, transformOrigin: 'top' }}
-                                    transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+                                    initial={{ y: 20, opacity: 0 }}
+                                    animate={{ y: 0, opacity: 1 }}
+                                    exit={{ y: -20, opacity: 0 }}
+                                    transition={{ duration: 0.2 }}
                                     style={{
                                         fontFamily: 'var(--font-mono)',
                                         fontSize: '2.5rem',
@@ -437,26 +466,21 @@ const CountdownCard: React.FC<{ event: CalendarEvent }> = ({ event }) => {
                                 </motion.div>
                             </AnimatePresence>
                         </div>
-                        <span style={{
-                            fontSize: '0.7rem',
-                            color: 'var(--text-muted)',
-                            fontFamily: 'var(--font-heading)',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.15em',
-                            fontWeight: 600
-                        }}>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'var(--font-heading)', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 600 }}>
                             {label}
                         </span>
                     </div>
                 ))}
             </div>
-
+            
             <p style={{
-                fontSize: '0.9rem',
-                color: 'var(--text-muted)',
-                fontStyle: 'italic'
+                fontSize: '0.95rem',
+                color: 'var(--accent-lavender)',
+                fontFamily: 'var(--font-handwriting)',
+                marginTop: 'var(--space-4)',
+                opacity: 0.8
             }}>
-                {event.title}
+                {"Every second brings us closer 💫"}
             </p>
         </div>
     );
