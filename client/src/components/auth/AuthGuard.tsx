@@ -141,7 +141,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
                     x: { duration: 0.4 }
                 }}
                 key={shakeCount}
-                style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '600px' }}
+                style={{ position: 'relative', zIndex: 1, width: '90vw', maxWidth: '600px' }}
             >
                 <div style={{
                     background: 'rgba(23, 27, 48, 0.15)',
