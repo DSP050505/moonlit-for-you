@@ -9,51 +9,51 @@ const StarField3D: React.FC = () => {
     useFrame(({ clock }) => {
         if (!groupRef.current) return;
         const time = clock.getElapsedTime();
-        // Extremely slow majestic rotation of the entire starfield
-        groupRef.current.rotation.y = time * 0.002;
-        groupRef.current.rotation.x = Math.sin(time * 0.002) * 0.02;
+        // Slow majestic rotation of the entire starfield
+        groupRef.current.rotation.y = time * 0.02;
+        groupRef.current.rotation.x = Math.sin(time * 0.01) * 0.05;
     });
 
     return (
         <group ref={groupRef}>
-            {/* Dense, tiny background white/silver stars */}
+            {/* Minimal, elegant white/silver stars */ }
             <Stars 
                 radius={80} 
                 depth={50} 
-                count={5000} 
-                factor={4} 
+                count={1200} 
+                factor={3} 
                 saturation={0} 
                 fade 
-                speed={1} 
+                speed={0.5} 
             />
 
-            {/* Glowing accent particles (Pink #F2A7C3, Lavender #C4B1D4, Gold #F5D380) */}
+            {/* Subtle, glowing accent particles (Pink #F2A7C3, Lavender #C4B1D4, Gold #F5D380) */}
             <Sparkles 
-                count={200} 
+                count={50} 
                 scale={100} 
                 size={8} 
-                speed={0.4} 
-                opacity={0.8} 
-                color="#F2A7C3" 
-                noise={10} 
-            />
-            <Sparkles 
-                count={150} 
-                scale={120} 
-                size={10} 
                 speed={0.2} 
-                opacity={0.6} 
-                color="#F5D380" 
+                opacity={0.3} 
+                color="#F2A7C3" 
                 noise={5} 
             />
             <Sparkles 
-                count={250} 
+                count={40} 
+                scale={120} 
+                size={10} 
+                speed={0.1} 
+                opacity={0.25} 
+                color="#F5D380" 
+                noise={3} 
+            />
+            <Sparkles 
+                count={60} 
                 scale={150} 
                 size={6} 
-                speed={0.6} 
-                opacity={0.7} 
+                speed={0.3} 
+                opacity={0.3} 
                 color="#C4B1D4" 
-                noise={15} 
+                noise={8} 
             />
         </group>
     );

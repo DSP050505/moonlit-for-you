@@ -26,7 +26,7 @@ const playClinkSound = () => {
 
 const TopBar: React.FC = () => {
     const [notificationsOpen, setNotificationsOpen] = useState(false);
-    const { session, logout } = useAuth();
+    const { session } = useAuth();
     const { socket } = useSocket();
     const [onlineRoles, setOnlineRoles] = useState<string[]>([]);
 
@@ -48,12 +48,15 @@ const TopBar: React.FC = () => {
     const bothOnline = onlineRoles.includes('Rishika') && onlineRoles.includes('DSP');
 
     return (
-        <header className="app-topbar glass" style={{
+        <header className="app-topbar" style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '0 var(--space-6)',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+            background: 'rgba(28, 32, 56, 0.45)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            borderBottom: '0.5px solid rgba(255, 255, 255, 0.05)',
         }}>
             {/* App Title with 3D Spinning Moon */}
             <motion.div
@@ -131,8 +134,8 @@ const TopBar: React.FC = () => {
                 >
                     <span style={{
                         width: '7px', height: '7px', borderRadius: '50%',
-                        background: bothOnline ? '#4CAF50' : partnerOnline ? '#4CAF50' : '#666',
-                        boxShadow: (bothOnline || partnerOnline) ? '0 0 6px #4CAF50' : 'none',
+                        background: bothOnline ? '#43A047' : partnerOnline ? '#43A047' : '#555',
+                        boxShadow: (bothOnline || partnerOnline) ? '0 0 4px #43A047' : 'none',
                         display: 'inline-block',
                     }} />
                     <span style={{ fontFamily: 'var(--font-body)' }}>
@@ -166,31 +169,6 @@ const TopBar: React.FC = () => {
                     <span>🕐</span>
                     <TimeDisplay />
                 </motion.div>
-
-                {/* Leave Room Button */}
-                <motion.button
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={logout}
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        padding: '6px 14px',
-                        background: 'rgba(232, 120, 138, 0.1)',
-                        border: '1px solid rgba(232, 120, 138, 0.3)',
-                        borderRadius: 'var(--radius-pill)',
-                        color: 'var(--accent-rose)',
-                        fontSize: '0.8rem',
-                        cursor: 'pointer',
-                        fontFamily: 'var(--font-heading)'
-                    }}
-                >
-                    🚪 Leave
-                </motion.button>
 
                 {/* 3D Metal Notification Bell */}
                 <motion.button

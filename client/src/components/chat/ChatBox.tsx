@@ -315,7 +315,7 @@ const ChatBox: React.FC = () => {
             {/* Input Area */}
             <div className="chat-input-area" style={{
                 padding: 'var(--space-4)',
-                borderTop: '1px solid rgba(255,255,255,0.06)',
+                borderTop: '0.5px solid rgba(255,255,255,0.04)',
                 display: 'flex',
                 gap: 'var(--space-3)',
                 alignItems: 'center',
@@ -329,13 +329,15 @@ const ChatBox: React.FC = () => {
                     placeholder={`Whisper to ${partnerName}...`}
                     style={{
                         flex: 1,
-                        background: 'var(--bg-surface)',
-                        border: '1px solid rgba(255,255,255,0.08)',
+                        background: 'rgba(28, 32, 56, 0.6)',
+                        backdropFilter: 'blur(20px)',
+                        border: '0.5px solid rgba(255,255,255,0.08)',
                         borderRadius: 'var(--radius-pill)',
                         padding: '12px 20px',
                         color: 'var(--text-primary)',
                         fontFamily: 'var(--font-body)',
                         fontSize: '0.9rem',
+                        boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.2), 0 4px 15px rgba(0,0,0,0.1)',
                     }}
                 />
                 <motion.button
@@ -348,15 +350,16 @@ const ChatBox: React.FC = () => {
                         height: '44px',
                         borderRadius: '50%',
                         background: inputText.trim()
-                            ? 'linear-gradient(135deg, var(--accent-rose), var(--accent-pink))'
-                            : 'var(--bg-surface)',
-                        border: 'none',
+                            ? 'linear-gradient(135deg, rgba(232, 120, 138, 0.9), rgba(242, 167, 195, 0.9))'
+                            : 'rgba(28, 32, 56, 0.6)',
+                        border: '0.5px solid rgba(255,255,255,0.08)',
                         cursor: inputText.trim() ? 'pointer' : 'default',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontSize: '1.2rem',
-                        transition: 'background 0.2s ease',
+                        transition: 'background 0.2s ease, box-shadow 0.2s ease',
+                        boxShadow: inputText.trim() ? '0 0 15px rgba(242, 167, 195, 0.3)' : 'none',
                     }}
                 >
                     <motion.span

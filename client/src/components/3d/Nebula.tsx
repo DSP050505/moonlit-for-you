@@ -8,23 +8,19 @@ const Nebula: React.FC = () => {
 
     useFrame(({ clock }) => {
         if (!cloudsRef.current) return;
-        // Extremely slow drift
-        cloudsRef.current.rotation.y = clock.getElapsedTime() * 0.005;
+        const t = clock.getElapsedTime();
+        // Faster drift across the screen
+        cloudsRef.current.position.x = Math.sin(t * 0.06) * 3;
+        cloudsRef.current.position.y = Math.cos(t * 0.04) * 2;
     });
 
     return (
-        <group ref={cloudsRef} position={[0, -5, -40]}>
-            <Clouds material={THREE.MeshBasicMaterial} limit={400} range={100}>
-                {/* Lavender / Purple nebulous regions moved to sides */}
-                <Cloud speed={0.2} opacity={0.25} color="#C4B1D4" scale={2} volume={10} position={[-45, 10, -10]} />
-                <Cloud speed={0.2} opacity={0.2} color="#81B1EE" scale={3} volume={15} position={[45, -10, -20]} />
-                
-                {/* Deep Pinkish hues moved to sides */}
-                <Cloud speed={0.25} opacity={0.15} color="#F2A7C3" scale={2.5} volume={12} position={[-35, 20, -15]} />
-                <Cloud speed={0.25} opacity={0.15} color="#F2A7C3" scale={2.5} volume={12} position={[35, -20, -15]} />
-                
-                {/* Dark fog layer to blend with sky background */}
-                <Cloud speed={0.1} opacity={0.3} color="#0B0E1A" scale={5} volume={20} position={[0, -30, -30]} />
+        <group ref={cloudsRef} position={[0, 0, -35]}>
+            <Clouds material={THREE.MeshBasicMaterial} limit={100} range={60}>
+                {/* Top-left wispy cloud — smaller */}
+                <Cloud speed={0.08} opacity={0.04} color="#C4B1D4" scale={2} volume={8} position={[-20, 10, -15]} segments={12} />
+                {/* Bottom-right wispy cloud */}
+                <Cloud speed={0.08} opacity={0.04} color="#81B1EE" scale={2.5} volume={10} position={[18, -8, -18]} segments={12} />
             </Clouds>
         </group>
     );

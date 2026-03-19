@@ -2,16 +2,16 @@
    MoonlitForRishika — Reusable Animations
    ======================================== */
 
-/* Star Twinkling */
+/* Star Twinkling - slow, low opacity */
 @keyframes twinkle {
 
     0%,
     100% {
-        opacity: 0.3;
+        opacity: 0.1;
     }
 
     50% {
-        opacity: 1;
+        opacity: 0.4;
     }
 }
 
@@ -147,6 +147,19 @@
     100% {
         transform: scale(1);
         opacity: 1;
+    }
+}
+
+/* Chat Message Slide In */
+@keyframes message-slide-in {
+    0% {
+        opacity: 0;
+        transform: translateY(15px) scale(0.98);
+    }
+    
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
     }
 }
 

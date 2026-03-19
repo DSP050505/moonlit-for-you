@@ -17,9 +17,9 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onLongPress }) =
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            initial={{ opacity: 0, y: 15, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
             style={{
                 display: 'flex',
                 justifyContent: isYou ? 'flex-end' : 'flex-start',
@@ -39,15 +39,15 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onLongPress }) =
                         ? '16px 16px 4px 16px'
                         : '16px 16px 16px 4px',
                     background: isYou
-                        ? 'linear-gradient(135deg, rgba(232, 120, 138, 0.7), rgba(242, 167, 195, 0.4))'
-                        : 'linear-gradient(135deg, rgba(196, 177, 212, 0.7), rgba(129, 177, 238, 0.4))',
-                    backdropFilter: 'blur(12px)',
-                    WebkitBackdropFilter: 'blur(12px)',
-                    color: isYou ? '#fff' : 'var(--bg-primary)',
+                        ? 'linear-gradient(135deg, rgba(232, 120, 138, 0.45), rgba(242, 167, 195, 0.2))'
+                        : 'linear-gradient(135deg, rgba(196, 177, 212, 0.45), rgba(129, 177, 238, 0.2))',
+                    backdropFilter: 'blur(24px)',
+                    WebkitBackdropFilter: 'blur(24px)',
+                    color: '#fff',
                     boxShadow: isYou 
-                        ? '0 10px 20px rgba(0,0,0,0.3), inset 2px 2px 5px rgba(255,255,255,0.4), inset -2px -2px 5px rgba(232, 120, 138, 0.2)'
-                        : '0 10px 20px rgba(0,0,0,0.3), inset 2px 2px 5px rgba(255,255,255,0.6), inset -2px -2px 5px rgba(129, 177, 238, 0.2)',
-                    border: '1px solid rgba(255,255,255,0.15)',
+                        ? '0 8px 24px rgba(0,0,0,0.2), inset 1px 1px 2px rgba(255,255,255,0.3)'
+                        : '0 8px 24px rgba(0,0,0,0.2), inset 1px 1px 2px rgba(255,255,255,0.4)',
+                    border: '0.5px solid rgba(255,255,255,0.1)',
                     cursor: 'pointer',
                     position: 'relative',
                     transformStyle: 'preserve-3d',
@@ -73,7 +73,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onLongPress }) =
                 }}>
                     <span style={{
                         fontSize: '0.65rem',
-                        opacity: 0.7,
+                        opacity: 0.5,
                     }}>
                         {time}
                     </span>
@@ -101,10 +101,10 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onLongPress }) =
                             borderRadius: 'var(--radius-pill)',
                             padding: '2px 6px',
                             fontSize: '0.75rem',
-                            border: '1px solid rgba(255,255,255,0.1)',
+                            border: '0.5px solid rgba(255,255,255,0.1)',
                             display: 'flex',
                             gap: '2px',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.15), 0 0 10px rgba(255,255,255,0.05)',
                         }}
                     >
                         {message.reactions.map((r, i) => (

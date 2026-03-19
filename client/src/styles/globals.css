@@ -40,9 +40,9 @@
   --radius-sm: 8px;
 
   /* Glass Effect */
-  --glass-bg: rgba(28, 32, 56, 0.7);
-  --glass-blur: blur(12px);
-  --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+  --glass-bg: rgba(28, 32, 56, 0.5);
+  --glass-blur: blur(24px);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.05);
 
   /* Typography */
   --font-heading: 'Quicksand', sans-serif;
@@ -97,6 +97,7 @@ body {
   line-height: 1.6;
   color: var(--text-primary);
   background-color: var(--bg-primary);
+  background-image: radial-gradient(circle at 50% 50%, rgba(20, 24, 41, 0.4) 0%, var(--bg-primary) 80%);
   min-height: 100vh;
   overflow-x: hidden;
 }

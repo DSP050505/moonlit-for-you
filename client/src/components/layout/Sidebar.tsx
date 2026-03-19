@@ -63,12 +63,12 @@ const SidebarItem = ({ item, isActive }: { item: NavItem, isActive: boolean }) =
                         width: '100%',
                         height: '100%',
                         borderRadius: '16px',
-                        background: isActive ? `rgba(255,255,255,0.1)` : 'rgba(0,0,0,0.2)',
+                        background: isActive ? `rgba(255,255,255,0.08)` : 'rgba(0,0,0,0.15)',
                         backdropFilter: 'blur(12px)',
-                        border: `1px solid ${isActive ? item.color : 'rgba(255, 255, 255, 0.05)'}`,
+                        border: `0.5px solid ${isActive ? item.color + '40' : 'rgba(255, 255, 255, 0.04)'}`,
                         boxShadow: isActive 
-                            ? `0 10px 20px rgba(0,0,0,0.5), inset 0 0 15px ${item.color}40, 0 0 20px ${item.color}60` 
-                            : '0 4px 10px rgba(0,0,0,0.3)',
+                            ? `0 8px 16px rgba(0,0,0,0.3), inset 0 0 10px ${item.color}20` 
+                            : '0 4px 10px rgba(0,0,0,0.2)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -89,20 +89,19 @@ const SidebarItem = ({ item, isActive }: { item: NavItem, isActive: boolean }) =
                     </motion.div>
                 </motion.div>
 
-                {/* Active indicator dot */}
+                {/* Active indicator strip */}
                 {isActive && (
                     <motion.div
-                        layoutId="activeNavDot"
+                        layoutId="activeNavStrip"
                         style={{
                             position: 'absolute',
-                            right: '-12px',
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            width: '6px',
-                            height: '6px',
-                            borderRadius: '50%',
+                            left: '-4px',
+                            top: '15%',
+                            height: '70%',
+                            width: '3px',
+                            borderRadius: '4px',
                             background: item.color,
-                            boxShadow: `0 0 10px ${item.color}, 0 0 20px ${item.color}`,
+                            boxShadow: `0 0 8px ${item.color}, 0 0 4px ${item.color}`,
                         }}
                         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                     />
@@ -146,7 +145,7 @@ const Sidebar: React.FC = () => {
     return (
         <nav className="app-sidebar" style={{
             background: 'transparent', // The global canvas shines through
-            borderRight: '1px solid rgba(255, 255, 255, 0.03)',
+            borderRight: '0.5px solid rgba(255, 255, 255, 0.03)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',

@@ -51,16 +51,24 @@ const SceneProvider: React.FC<SceneProviderProps> = ({ children }) => {
 
                     {/* Ambient lighting */}
                     <ambientLight intensity={0.15} color="#C8D0E0" />
+                    
+                    {/* Faint directional moonlight from top-left */}
+                    <directionalLight 
+                        position={[-10, 20, 10]} 
+                        intensity={0.4} 
+                        color="#F5D380" 
+                        castShadow={false} 
+                    />
 
                     {/* Post-processing */}
                     <EffectComposer>
                         <Bloom
-                            luminanceThreshold={0.2}
+                            luminanceThreshold={0.4}
                             luminanceSmoothing={0.9}
-                            intensity={0.8}
+                            intensity={0.6}
                             mipmapBlur
                         />
-                        <Noise opacity={0.02} />
+                        <Noise opacity={0.015} />
                     </EffectComposer>
 
                     {/* Camera controller with Parallax drift */}
