@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Card from '../shared/Card';
-import Globe3D from '../3d/Globe3D';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/useSocket';
 
@@ -17,7 +16,7 @@ const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => 
     return Math.round(R * c);
 };
 
-// Default fallback coordinates if neither shares location
+// Default fallback coordinates
 const DEFAULT_LOCATIONS = {
     DSP: { lat: 17.385, lng: 78.4867, city: 'Hyderabad' },
     Rishika: { lat: 28.6139, lng: 77.209, city: 'Delhi' }
@@ -32,7 +31,7 @@ const DistanceMap: React.FC = () => {
     const [partnerLoc, setPartnerLoc] = useState<{ lat: number; lng: number } | null>(null);
 
     const isRishika = session?.user.role === 'Rishika';
-    const partnerName = isRishika ? 'Devi Sri Prasad' : 'Rishika';
+    const partnerName = isRishika ? 'Devi' : 'Rishika';
 
     // Set up live geolocation watch
     useEffect(() => {
@@ -44,24 +43,19 @@ const DistanceMap: React.FC = () => {
         const watchId = navigator.geolocation.watchPosition(
             (position) => {
                 setLocationAccess('granted');
-                const crd = position.coords;
-                setMyLoc({ lat: crd.latitude, lng: crd.longitude });
+                setMyLoc({ lat: position.coords.latitude, lng: position.coords.longitude });
 
-                // Emit live location via socket
                 if (socket && session) {
                     socket.emit('location:update', {
                         roomId: session.room.id,
                         userId: session.user.id,
-                        lat: crd.latitude,
-                        lng: crd.longitude
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
                     });
                 }
             },
             (error) => {
-                console.error("Error watching location:", error);
-                if (error.code === error.PERMISSION_DENIED) {
-                    setLocationAccess('denied');
-                }
+                if (error.code === error.PERMISSION_DENIED) setLocationAccess('denied');
             },
             { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
         );
@@ -72,256 +66,167 @@ const DistanceMap: React.FC = () => {
     // Listen for partner's location updates
     useEffect(() => {
         if (!socket) return;
-
         const onPartnerLocation = (data: any) => {
-            // Check if it's the other user in the room
             if (data.userId !== session?.user.id) {
                 setPartnerLoc({ lat: data.lat, lng: data.lng });
             }
         };
-
         socket.on('location:updated', onPartnerLocation);
-        return () => {
-            socket.off('location:updated', onPartnerLocation);
-        };
+        return () => socket.off('location:updated', onPartnerLocation);
     }, [socket, session]);
 
-    // Compute the displayed active coordinates
     const activeMyLoc = myLoc || (isRishika ? DEFAULT_LOCATIONS.Rishika : DEFAULT_LOCATIONS.DSP);
     const activePartnerLoc = partnerLoc || (isRishika ? DEFAULT_LOCATIONS.DSP : DEFAULT_LOCATIONS.Rishika);
-
     const distance = getDistance(activeMyLoc.lat, activeMyLoc.lng, activePartnerLoc.lat, activePartnerLoc.lng);
 
     return (
         <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
             style={{
                 maxWidth: '800px',
                 margin: '0 auto',
                 padding: 'var(--space-4)',
             }}
-            className="map-container"
         >
             <h2 style={{
                 fontFamily: 'var(--font-heading)',
                 color: 'var(--text-primary)',
                 textAlign: 'center',
-                marginBottom: 'var(--space-6)',
+                marginBottom: 'var(--space-8)',
+                fontSize: '1.5rem',
+                opacity: 0.9
             }}>
-                🗺️ Our Little World
+                🛰️ Live Connection
             </h2>
 
-            {/* Access Denied Warning */}
-            {locationAccess === 'denied' && (
+            {/* Simple Connection Card */}
+            <div style={{
+                background: 'rgba(28, 32, 56, 0.4)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '24px',
+                padding: 'var(--space-10) var(--space-6)',
+                marginBottom: 'var(--space-6)',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+                textAlign: 'center',
+                position: 'relative',
+                overflow: 'hidden'
+            }}>
+                {/* Visual Route */}
                 <div style={{
-                    padding: '12px',
-                    background: 'rgba(232, 120, 138, 0.1)',
-                    border: '1px solid rgba(232, 120, 138, 0.3)',
-                    borderRadius: 'var(--radius-md)',
-                    color: 'var(--accent-rose)',
-                    textAlign: 'center',
-                    marginBottom: 'var(--space-4)',
-                    fontSize: '0.9rem'
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    maxWidth: '500px',
+                    margin: '0 auto var(--space-8) auto',
+                    position: 'relative',
                 }}>
-                    ⚠️ You denied location access. The map is showing a default distance. Please allow location access for real-time tracking!
-                </div>
-            )}
-
-            {!partnerLoc && (
-                <div style={{
-                    padding: '12px',
-                    background: 'rgba(245, 211, 128, 0.1)',
-                    border: '1px solid rgba(245, 211, 128, 0.3)',
-                    borderRadius: 'var(--radius-md)',
-                    color: 'var(--accent-gold)',
-                    textAlign: 'center',
-                    marginBottom: 'var(--space-4)',
-                    fontSize: '0.9rem'
-                }}>
-                    🛰️ Waiting for {partnerName} to share their live location...
-                </div>
-            )}
-
-            {/* 3D Interactive Globe */}
-            <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.1, duration: 0.5 }}
-                style={{ marginBottom: 'var(--space-6)' }}
-            >
-                <Globe3D
-                    city1={{ lat: activeMyLoc.lat, lng: activeMyLoc.lng, name: 'You' }}
-                    city2={{ lat: activePartnerLoc.lat, lng: activePartnerLoc.lng, name: partnerName }}
-                />
-            </motion.div>
-
-            {/* Distance Banner */}
-            <Card glow hover3D={false}>
-                <div style={{
-                    padding: 'var(--space-8)',
-                    textAlign: 'center',
-                }}>
-                    {/* Animated Heart Line */}
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 'var(--space-4)',
-                        marginBottom: 'var(--space-4)',
-                    }}>
-                        <motion.span
-                            animate={{ scale: [1, 1.1, 1] }}
-                            transition={{ duration: 2, repeat: Infinity }}
-                            style={{ fontSize: '2rem' }}
-                        >
-                            📍
-                        </motion.span>
-
-                        {/* Dashed line with animated heart */}
-                        <div style={{
-                            flex: 1,
-                            maxWidth: '300px',
-                            height: '2px',
-                            background: 'repeating-linear-gradient(90deg, var(--accent-pink) 0px, var(--accent-pink) 8px, transparent 8px, transparent 16px)',
-                            position: 'relative',
-                        }}>
-                            <motion.span
-                                animate={{ x: [-20, 280, -20] }}
-                                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                                style={{
-                                    position: 'absolute',
-                                    top: '-10px',
-                                    fontSize: '1.2rem',
-                                }}
-                            >
-                                💗
-                            </motion.span>
-                        </div>
-
-                        <motion.span
-                            animate={{ scale: [1, 1.1, 1] }}
-                            transition={{ duration: 2, repeat: Infinity, delay: 1 }}
-                            style={{ fontSize: '2rem' }}
-                        >
-                            📍
-                        </motion.span>
+                    {/* Left Node */}
+                    <div style={{ position: 'relative', zIndex: 2 }}>
+                        <div style={{ fontSize: '2.5rem', marginBottom: '8px' }}>📍</div>
+                        <div style={{ fontFamily: 'var(--font-heading)', color: 'var(--accent-pink)', fontSize: '0.9rem', fontWeight: 600 }}>Your Heart</div>
                     </div>
 
-                    {/* Distance Text */}
-                    <motion.h1
-                        className="distance-text"
-                        animate={{ textShadow: ['0 0 10px rgba(245,211,128,0.3)', '0 0 20px rgba(245,211,128,0.5)', '0 0 10px rgba(245,211,128,0.3)'] }}
-                        transition={{ duration: 3, repeat: Infinity }}
-                        style={{
-                            fontFamily: 'var(--font-mono)',
-                            fontSize: '3rem',
-                            color: 'var(--accent-gold)',
-                            margin: 0,
-                        }}
-                    >
-                        {distance} km
-                    </motion.h1>
+                    {/* Connecting Line */}
+                    <div style={{
+                        flex: 1,
+                        height: '2px',
+                        background: 'rgba(255,255,255,0.1)',
+                        margin: '0 20px',
+                        position: 'relative',
+                        transform: 'translateY(-15px)'
+                    }}>
+                        <motion.div
+                            animate={{ left: ['0%', '100%'] }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                            style={{
+                                position: 'absolute',
+                                top: '-10px',
+                                fontSize: '1.2rem',
+                            }}
+                        >
+                            ❤️
+                        </motion.div>
+                    </div>
+
+                    {/* Right Node */}
+                    <div style={{ position: 'relative', zIndex: 2 }}>
+                        <div style={{ fontSize: '2.5rem', marginBottom: '8px' }}>📍</div>
+                        <div style={{ fontFamily: 'var(--font-heading)', color: 'var(--accent-gold)', fontSize: '0.9rem', fontWeight: 600 }}>{partnerName}'s Heart</div>
+                    </div>
+                </div>
+
+                {/* Distance Value */}
+                <motion.div
+                    initial={{ scale: 0.9 }}
+                    animate={{ scale: 1 }}
+                    style={{ position: 'relative', zIndex: 2 }}
+                >
+                    <h1 style={{
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: '4.5rem',
+                        color: 'var(--text-primary)',
+                        margin: 0,
+                        fontWeight: 700,
+                        letterSpacing: '-2px'
+                    }}>
+                        {distance}<span style={{ fontSize: '1.5rem', color: 'var(--accent-pink)', marginLeft: '8px' }}>km</span>
+                    </h1>
                     <p style={{
                         fontFamily: 'var(--font-handwriting)',
-                        color: 'var(--accent-pink)',
-                        fontSize: '1.1rem',
-                        marginTop: 'var(--space-2)',
+                        color: 'var(--accent-lavender)',
+                        fontSize: '1.2rem',
+                        marginTop: 'var(--space-2)'
                     }}>
-                        ...but love knows no distance 💕
+                        {distance === 0 ? "You're side by side! ✨" : "Always thinking of you 💫"}
                     </p>
-                </div>
-            </Card>
+                </motion.div>
 
-            {/* City Cards */}
-            <div className="city-cards-grid" style={{
+                {/* Subtle Map-like Grid Pattern Background */}
+                <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    opacity: 0.05,
+                    backgroundImage: 'radial-gradient(var(--text-primary) 1px, transparent 1px)',
+                    backgroundSize: '30px 30px',
+                    pointerEvents: 'none'
+                }} />
+            </div>
+
+            {/* Detail Mini Cards */}
+            <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
                 gap: 'var(--space-4)',
-                marginTop: 'var(--space-6)',
             }}>
-                {/* Your City */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                >
-                    <Card hover3D>
-                        <div style={{ padding: 'var(--space-5)', textAlign: 'center' }}>
-                            <h3 style={{
-                                fontFamily: 'var(--font-heading)',
-                                color: 'var(--accent-rose)',
-                                fontSize: '1.2rem',
-                                marginBottom: '4px'
-                            }}>
-                                You
-                            </h3>
-                            <p style={{
-                                fontFamily: 'var(--font-mono)',
-                                fontSize: '0.85rem',
-                                color: 'var(--text-muted)'
-                            }}>
-                                Lat: {activeMyLoc.lat.toFixed(4)}<br />
-                                Lng: {activeMyLoc.lng.toFixed(4)}
-                            </p>
-                            <p style={{
-                                fontFamily: 'var(--font-handwriting)',
-                                color: 'var(--accent-lavender)',
-                                fontSize: '0.9rem',
-                                marginTop: 'var(--space-3)',
-                                fontStyle: 'italic',
-                            }}>
-                                "Looking at the same sky as you"
-                            </p>
+                <Card glow={false}>
+                    <div style={{ padding: 'var(--space-5)', textAlign: 'center' }}>
+                        <div style={{ color: 'var(--accent-rose)', fontWeight: 600, marginBottom: '4px' }}>Me</div>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                            {activeMyLoc.lat.toFixed(4)}, {activeMyLoc.lng.toFixed(4)}
                         </div>
-                    </Card>
-                </motion.div>
-
-                {/* Partner City */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                >
-                    <Card hover3D>
-                        <div style={{ padding: 'var(--space-5)', textAlign: 'center' }}>
-                            <h3 style={{
-                                fontFamily: 'var(--font-heading)',
-                                color: 'var(--accent-pink)',
-                                fontSize: '1.2rem',
-                                marginBottom: '4px'
-                            }}>
-                                {partnerName} 💕
-                            </h3>
-                            <p style={{
-                                fontFamily: 'var(--font-mono)',
-                                fontSize: '0.85rem',
-                                color: 'var(--text-muted)'
-                            }}>
-                                {partnerLoc ? (
-                                    <>
-                                        Lat: {activePartnerLoc.lat.toFixed(4)}<br />
-                                        Lng: {activePartnerLoc.lng.toFixed(4)}
-                                    </>
-                                ) : (
-                                    <span>Waiting for location...</span>
-                                )}
-                            </p>
-                            <p style={{
-                                fontFamily: 'var(--font-handwriting)',
-                                color: 'var(--accent-lavender)',
-                                fontSize: '0.9rem',
-                                marginTop: 'var(--space-3)',
-                                fontStyle: 'italic',
-                            }}>
-                                "My absolute favorite place"
-                            </p>
+                    </div>
+                </Card>
+                <Card glow={false}>
+                    <div style={{ padding: 'var(--space-5)', textAlign: 'center' }}>
+                        <div style={{ color: 'var(--accent-gold)', fontWeight: 600, marginBottom: '4px' }}>{partnerName}</div>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                            {partnerLoc ? `${activePartnerLoc.lat.toFixed(4)}, ${activePartnerLoc.lng.toFixed(4)}` : "Signal waiting..."}
                         </div>
-                    </Card>
-                </motion.div>
+                    </div>
+                </Card>
             </div>
+            
+            {locationAccess === 'denied' && (
+                <p style={{ textAlign: 'center', marginTop: 'var(--space-4)', fontSize: '0.8rem', color: 'var(--accent-rose)' }}>
+                    Please enable location access for real-time tracking!
+                </p>
+            )}
         </motion.div>
     );
 };

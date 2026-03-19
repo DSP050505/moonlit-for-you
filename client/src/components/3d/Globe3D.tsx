@@ -46,10 +46,10 @@ const CityMarker = ({ pos, color, name }: { pos: THREE.Vector3, color: string, n
                     border: `1px solid ${color}`,
                     color: '#fff',
                     fontFamily: 'var(--font-heading)',
-                    fontSize: '12px',
+                    fontSize: '11px',
                     boxShadow: `0 4px 12px rgba(0,0,0,0.5), 0 0 10px ${color}40`,
                     whiteSpace: 'nowrap',
-                    transform: 'translateY(-25px)'
+                    transform: 'translateY(-20px)'
                 }}>
                     {name}
                 </div>
@@ -112,7 +112,7 @@ function GlobeMesh({ city1, city2 }: GlobeProps) {
                     color="#4A5580"
                     wireframe
                     transparent
-                    opacity={0.3}
+                    opacity={0.2}
                 />
             </mesh>
 
@@ -122,7 +122,7 @@ function GlobeMesh({ city1, city2 }: GlobeProps) {
                 <meshBasicMaterial
                     color="#C4B1D4"
                     transparent
-                    opacity={0.05}
+                    opacity={0.03}
                     side={THREE.BackSide}
                     blending={THREE.AdditiveBlending}
                 />
@@ -135,22 +135,22 @@ function GlobeMesh({ city1, city2 }: GlobeProps) {
             <Line
                 points={arcPoints}
                 color="#F2A7C3"
-                lineWidth={3}
+                lineWidth={2}
                 transparent
-                opacity={0.6}
+                opacity={0.4}
             />
 
             {/* Traveling glowing heart/particle */}
             <mesh ref={heartRef}>
-                <sphereGeometry args={[0.06, 16, 16]} />
+                <sphereGeometry args={[0.04, 16, 16]} />
                 <meshBasicMaterial color="#fff" />
                 <pointLight distance={2} intensity={2} color="#F2A7C3" />
             </mesh>
 
             {/* Ambient & Rim lighting */}
-            <ambientLight intensity={0.5} />
-            <pointLight position={[10, 10, 10]} color="#C8D0E0" intensity={1} />
-            <pointLight position={[-10, -10, -10]} color="#4A5580" intensity={0.5} />
+            <ambientLight intensity={0.4} />
+            <pointLight position={[10, 10, 10]} color="#C8D0E0" intensity={0.8} />
+            <pointLight position={[-10, -10, -10]} color="#4A5580" intensity={0.3} />
         </group>
     );
 }
@@ -164,18 +164,12 @@ const Globe3D: React.FC<Globe3DProps> = ({ city1, city2 }) => {
     return (
         <div style={{
             width: '100%',
-            height: '400px',
-            borderRadius: '24px',
+            height: '100%',
             overflow: 'hidden',
-            background: 'radial-gradient(circle at center, rgba(28, 32, 56, 0.4) 0%, rgba(11, 14, 26, 0.8) 100%)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.6), inset 0 0 30px rgba(255,255,255,0.02)',
-            transformStyle: 'preserve-3d',
-            perspective: '1000px',
         }}>
             <Canvas
                 dpr={[1, 2]}
-                camera={{ position: [0, 0, 80], fov: 45 }}
+                camera={{ position: [0, 0, 7.5], fov: 35 }}
                 gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping }}
             >
                 <GlobeMesh city1={city1} city2={city2} />
