@@ -55,6 +55,7 @@ const CalendarGrid: React.FC = () => {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [activeCountdown, setActiveCountdown] = useState<CountdownEvent | null>(null);
     const [hasReached, setHasReached] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     
     const { socket } = useSocket();
     const { session } = useAuth();
@@ -62,6 +63,7 @@ const CalendarGrid: React.FC = () => {
     // Fetch initial countdown
     useEffect(() => {
         if (!session) return;
+        setIsLoading(true);
         fetch(`/api/events/countdown?roomId=${session.room.id}&t=${Date.now()}`)
             .then(res => res.json())
             .then(data => {
@@ -76,9 +78,17 @@ const CalendarGrid: React.FC = () => {
                         setActiveCountdown(null);
                         setHasReached(true);
                     }
+                } else {
+                    setActiveCountdown(null);
+                    setHasReached(false);
                 }
             })
-            .catch(console.error);
+            .catch(err => {
+                console.error('Fetch error:', err);
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
     }, [session]);
 
     // Setup socket listener
@@ -169,41 +179,82 @@ const CalendarGrid: React.FC = () => {
             </h2>
 
             {/* Countdown Timer or Empty State Message */}
-            {activeCountdown ? (
-                <CountdownCard 
-                    event={activeCountdown} 
-                    onExpire={() => {
-                        setActiveCountdown(null);
-                        setHasReached(true);
-                    }} 
-                />
-            ) : (
-                <motion.div 
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    style={{
-                        padding: 'var(--space-5)',
-                        textAlign: 'center',
-                        background: 'rgba(28, 32, 56, 0.3)',
-                        backdropFilter: 'blur(20px)',
-                        border: '1px solid rgba(245, 211, 128, 0.1)',
-                        borderRadius: '24px',
-                        boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-                        marginBottom: 'var(--space-8)',
-                    }}
-                >
-                    <p style={{
-                        fontFamily: 'var(--font-heading)',
-                        color: 'var(--accent-gold)',
-                        fontSize: '1.2rem',
-                        letterSpacing: '1px',
-                    }}>
-                        {hasReached 
-                            ? "That moment was special 💫… pick our next one" 
-                            : "Pick a date to look forward to ✨"}
-                    </p>
-                </motion.div>
-            )}
+            <div style={{ minHeight: '180px', position: 'relative' }}>
+                <AnimatePresence mode="wait">
+                    {isLoading ? (
+                        <motion.div
+                            key="loading"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            style={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                height: '180px'
+                            }}
+                        >
+                            <div className="loader" style={{ 
+                                width: '40px', 
+                                height: '40px', 
+                                border: '3px solid rgba(255,255,255,0.1)', 
+                                borderTop: '3px solid var(--accent-pink)',
+                                borderRadius: '50%',
+                                animation: 'spin 1s linear infinite'
+                            }} />
+                        </motion.div>
+                    ) : activeCountdown ? (
+                        <motion.div
+                            key="countdown"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                        >
+                            <CountdownCard 
+                                event={activeCountdown} 
+                                onExpire={() => {
+                                    setActiveCountdown(null);
+                                    setHasReached(true);
+                                }} 
+                            />
+                        </motion.div>
+                    ) : (
+                        <motion.div 
+                            key="empty"
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            style={{
+                                padding: 'var(--space-8)',
+                                textAlign: 'center',
+                                background: 'rgba(28, 32, 56, 0.3)',
+                                backdropFilter: 'blur(20px)',
+                                border: '1px solid rgba(245, 211, 128, 0.1)',
+                                borderRadius: '24px',
+                                boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+                                marginBottom: 'var(--space-8)',
+                            }}
+                        >
+                            <p style={{
+                                fontFamily: 'var(--font-heading)',
+                                color: 'var(--accent-gold)',
+                                fontSize: '1.2rem',
+                                letterSpacing: '1px',
+                            }}>
+                                {hasReached 
+                                    ? "That moment was special 💫… pick our next one" 
+                                    : "Pick a date to look forward to ✨"}
+                            </p>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+
+            <style>{`
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            `}</style>
 
             <div style={{
                 position: 'relative',
@@ -372,7 +423,7 @@ const CountdownCard: React.FC<{ event: CountdownEvent, onExpire: () => void }> =
         const calculateTimeLeft = () => {
             const expireDate = new Date(event.date);
             const diff = expireDate.getTime() - Date.now();
-            if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+            if (diff <= 1000) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
             return {
                 days: Math.floor(diff / (1000 * 60 * 60 * 24)),
                 hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
@@ -385,8 +436,9 @@ const CountdownCard: React.FC<{ event: CountdownEvent, onExpire: () => void }> =
         setTimeLeft(initialTime);
         
         if (initialTime.days === 0 && initialTime.hours === 0 && initialTime.minutes === 0 && initialTime.seconds === 0) {
-            onExpire();
-            return;
+            // Buffer to prevent instant expiry if clock drift exists
+            const timer = setTimeout(onExpire, 1000);
+            return () => clearTimeout(timer);
         }
 
         const interval = setInterval(() => {
