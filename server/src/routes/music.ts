@@ -1,9 +1,48 @@
 import { Router } from 'express';
 import prisma from '../db/database';
+import ytdl from '@distube/ytdl-core';
 
 const router = Router();
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+
+// ─── Get audio stream URL for a YouTube video ───
+router.get('/stream/:youtubeId', async (req, res) => {
+    const { youtubeId } = req.params;
+    if (!youtubeId) {
+        return res.status(400).json({ error: 'Missing youtubeId' });
+    }
+
+    try {
+        console.log(`🎵 Getting audio stream for: ${youtubeId}`);
+        const url = `https://www.youtube.com/watch?v=${youtubeId}`;
+        const info = await ytdl.getInfo(url);
+
+        // Try to get audio-only format first
+        let audioFormat = ytdl.chooseFormat(info.formats, { quality: 'highestaudio', filter: 'audioonly' });
+        
+        if (!audioFormat) {
+            // Fallback: try any format with audio
+            audioFormat = ytdl.chooseFormat(info.formats, { quality: 'lowestvideo' });
+        }
+
+        if (!audioFormat || !audioFormat.url) {
+            console.error(`❌ No audio format found for ${youtubeId}`);
+            return res.status(404).json({ error: 'No audio stream found' });
+        }
+
+        console.log(`✅ Audio stream found for ${youtubeId} (${audioFormat.mimeType})`);
+        res.json({
+            audioUrl: audioFormat.url,
+            mimeType: audioFormat.mimeType,
+            duration: parseInt(info.videoDetails.lengthSeconds) || 0,
+            title: info.videoDetails.title,
+        });
+    } catch (err: any) {
+        console.error(`❌ Stream error for ${youtubeId}:`, err.message);
+        res.status(500).json({ error: 'Failed to get audio stream', details: err.message });
+    }
+});
 
 // ─── YouTube Search Proxy (keeps API key safe on server) ───
 router.get('/search', async (req, res) => {
