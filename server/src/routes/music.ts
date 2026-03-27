@@ -1,47 +1,76 @@
 import { Router } from 'express';
 import prisma from '../db/database';
-import ytdl from '@distube/ytdl-core';
 
 const router = Router();
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 
-// ─── Get audio stream URL for a YouTube video ───
+// Invidious instances (public YouTube API proxies — no bot detection)
+const INVIDIOUS_INSTANCES = [
+    'https://inv.nadeko.net',
+    'https://invidious.privacyredirect.com',
+    'https://iv.nbohr.land',
+    'https://invidious.protokolla.fi',
+];
+
+// ─── Get audio stream URL via Invidious API ───
 router.get('/stream/:youtubeId', async (req, res) => {
     const { youtubeId } = req.params;
     if (!youtubeId) {
         return res.status(400).json({ error: 'Missing youtubeId' });
     }
 
-    try {
-        console.log(`🎵 Getting audio stream for: ${youtubeId}`);
-        const url = `https://www.youtube.com/watch?v=${youtubeId}`;
-        const info = await ytdl.getInfo(url);
+    console.log(`🎵 Getting audio stream for: ${youtubeId}`);
 
-        // Try to get audio-only format first
-        let audioFormat = ytdl.chooseFormat(info.formats, { quality: 'highestaudio', filter: 'audioonly' });
-        
-        if (!audioFormat) {
-            // Fallback: try any format with audio
-            audioFormat = ytdl.chooseFormat(info.formats, { quality: 'lowestvideo' });
+    // Try each Invidious instance until one works
+    for (const instance of INVIDIOUS_INSTANCES) {
+        try {
+            const url = `${instance}/api/v1/videos/${youtubeId}`;
+            console.log(`   Trying: ${instance}...`);
+
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 8000);
+
+            const response = await fetch(url, {
+                signal: controller.signal,
+                headers: { 'User-Agent': 'Mozilla/5.0' },
+            });
+            clearTimeout(timeout);
+
+            if (!response.ok) {
+                console.log(`   ❌ ${instance} returned ${response.status}`);
+                continue;
+            }
+
+            const data: any = await response.json();
+
+            // Find best audio-only format
+            const audioFormats = (data.adaptiveFormats || [])
+                .filter((f: any) => f.type?.startsWith('audio/'))
+                .sort((a: any, b: any) => (b.bitrate || 0) - (a.bitrate || 0));
+
+            if (audioFormats.length === 0) {
+                console.log(`   ❌ No audio formats from ${instance}`);
+                continue;
+            }
+
+            const best = audioFormats[0];
+            console.log(`✅ Audio stream found via ${instance} (${best.type}, ${best.bitrate}bps)`);
+
+            return res.json({
+                audioUrl: best.url,
+                mimeType: best.type,
+                duration: data.lengthSeconds || 0,
+                title: data.title || '',
+            });
+        } catch (err: any) {
+            console.log(`   ❌ ${instance} failed: ${err.message}`);
+            continue;
         }
-
-        if (!audioFormat || !audioFormat.url) {
-            console.error(`❌ No audio format found for ${youtubeId}`);
-            return res.status(404).json({ error: 'No audio stream found' });
-        }
-
-        console.log(`✅ Audio stream found for ${youtubeId} (${audioFormat.mimeType})`);
-        res.json({
-            audioUrl: audioFormat.url,
-            mimeType: audioFormat.mimeType,
-            duration: parseInt(info.videoDetails.lengthSeconds) || 0,
-            title: info.videoDetails.title,
-        });
-    } catch (err: any) {
-        console.error(`❌ Stream error for ${youtubeId}:`, err.message);
-        res.status(500).json({ error: 'Failed to get audio stream', details: err.message });
     }
+
+    console.error(`❌ All Invidious instances failed for ${youtubeId}`);
+    res.status(502).json({ error: 'Failed to get audio stream from all sources' });
 });
 
 // ─── YouTube Search Proxy (keeps API key safe on server) ───
