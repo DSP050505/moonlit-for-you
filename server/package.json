@@ -26,9 +26,11 @@
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "multer": "^2.1.1",
+    "play-dl": "^1.9.7",
     "prisma": "^6.19.2",
     "socket.io": "^4.8.3",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "youtube-dl-exec": "^3.1.4"
   }
 }
