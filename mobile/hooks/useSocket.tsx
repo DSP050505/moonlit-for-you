@@ -37,8 +37,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 roomId: session.room.id,
                 userId: session.user.id,
                 role: session.user.role,
-            },
-            transports: ['websocket'],
+            }
         });
 
         newSocket.on('connect', () => {
