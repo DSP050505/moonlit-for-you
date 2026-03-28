@@ -33,19 +33,19 @@ export default function CalendarScreen() {
     }, [session]);
 
     const renderEvent = ({ item }: { item: Event }) => (
-        <View className="mb-4 bg-secondary p-5 rounded-3xl border border-white/5 shadow-sm">
-            <View className="flex-row justify-between items-start mb-2">
-                <Text className="text-white text-lg font-bold flex-1 mr-2">{item.title}</Text>
-                <View className="bg-pink/10 px-3 py-1 rounded-full border border-pink/20">
-                    <Text className="text-pink text-[10px] font-bold uppercase tracking-wider">
+        <View style={{ marginBottom: 16, backgroundColor: '#141829', padding: 20, borderRadius: 24, borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)' }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold', flex: 1, marginRight: 8 }}>{item.title}</Text>
+                <View style={{ backgroundColor: 'rgba(242, 167, 195, 0.1)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 999, borderWidth: 1, borderColor: 'rgba(242, 167, 195, 0.2)' }}>
+                    <Text style={{ color: '#F2A7C3', fontSize: 10, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1 }}>
                         {new Date(item.date).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                     </Text>
                 </View>
             </View>
             {item.description ? (
-                <Text className="text-muted text-sm leading-5">{item.description}</Text>
+                <Text style={{ color: '#8A8FA8', fontSize: 14, lineHeight: 20 }}>{item.description}</Text>
             ) : null}
-            <Text className="text-muted/40 text-[10px] mt-3">
+            <Text style={{ color: 'rgba(138, 143, 168, 0.4)', fontSize: 10, marginTop: 12 }}>
                 Created on {new Date(item.date).getFullYear()}
             </Text>
         </View>
@@ -53,29 +53,29 @@ export default function CalendarScreen() {
 
     if (isLoading) {
         return (
-            <View className="flex-1 bg-primary justify-center items-center">
+            <View style={{ flex: 1, backgroundColor: '#0B0E1A', justifyContent: 'center', alignItems: 'center' }}>
                 <ActivityIndicator color="#F2A7C3" />
             </View>
         );
     }
 
     return (
-        <View className="flex-1 bg-primary">
+        <View style={{ flex: 1, backgroundColor: '#0B0E1A' }}>
             <FlatList
                 data={events}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={renderEvent}
                 contentContainerStyle={{ padding: 16 }}
                 ListEmptyComponent={
-                    <View className="items-center justify-center mt-20">
-                        <Text className="text-white/20 text-5xl mb-4">📅</Text>
-                        <Text className="text-muted text-base">No special moments yet.</Text>
-                        <Text className="text-muted/60 text-sm">Add one to start our timeline!</Text>
+                    <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 80 }}>
+                        <Text style={{ color: 'rgba(255,255,255,0.2)', fontSize: 48, marginBottom: 16 }}>📅</Text>
+                        <Text style={{ color: '#8A8FA8', fontSize: 16 }}>No special moments yet.</Text>
+                        <Text style={{ color: 'rgba(138, 143, 168, 0.6)', fontSize: 14 }}>Add one to start our timeline!</Text>
                     </View>
                 }
             />
             
-            <TouchableOpacity className="absolute bottom-6 right-6 w-14 h-14 bg-rose rounded-full items-center justify-center shadow-lg shadow-rose/40">
+            <TouchableOpacity style={{ position: 'absolute', bottom: 24, right: 24, width: 56, height: 56, backgroundColor: '#E8788A', borderRadius: 28, alignItems: 'center', justifyContent: 'center', shadowColor: '#E8788A', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 10, elevation: 5 }}>
                 <Plus size={28} color="white" />
             </TouchableOpacity>
         </View>

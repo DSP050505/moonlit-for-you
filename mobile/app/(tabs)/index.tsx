@@ -54,8 +54,17 @@ export default function ChatScreen() {
     }, [socket]);
 
     const handleSend = () => {
-        if (!inputText.trim() || !socket || !session) return;
+        if (!inputText.trim()) return;
+        if (!socket) {
+            console.warn('📱 Chat: Cannot send message, socket is disconnected or missing');
+            return;
+        }
+        if (!session) {
+            console.warn('📱 Chat: Cannot send message, session is missing');
+            return;
+        }
 
+        console.log(`📱 Chat: Emitting message "${inputText}" as ${isRishika ? 'Rishika' : 'DSP'}`);
         const senderEnum = isRishika ? 'her' : 'you';
         socket.emit('chat:message', {
             roomId: session.room.id,
@@ -74,16 +83,24 @@ export default function ChatScreen() {
         if (!isRishika && item.sender === 'you') isMe = true;
 
         return (
-            <View className={`mb-4 flex-row ${isMe ? 'justify-end' : 'justify-start'}`}>
+            <View style={{ marginBottom: 16, flexDirection: 'row', justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
                 <View 
-                    className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                        isMe ? 'bg-rose rounded-tr-none' : 'bg-surface rounded-tl-none border border-white/5'
-                    }`}
+                    style={{
+                        maxWidth: '80%',
+                        borderRadius: 16,
+                        paddingHorizontal: 16,
+                        paddingVertical: 12,
+                        backgroundColor: isMe ? '#E8788A' : '#1C2038',
+                        borderTopRightRadius: isMe ? 0 : 16,
+                        borderTopLeftRadius: isMe ? 16 : 0,
+                        borderWidth: isMe ? 0 : 1,
+                        borderColor: 'rgba(255,255,255,0.05)'
+                    }}
                 >
-                    <Text className={`text-sm ${isMe ? 'text-white' : 'text-textDefault'}`}>
+                    <Text style={{ fontSize: 14, color: isMe ? 'white' : '#EDE9F5' }}>
                         {item.content}
                     </Text>
-                    <Text className={`text-[10px] mt-1 opacity-50 ${isMe ? 'text-white' : 'text-muted'}`}>
+                    <Text style={{ fontSize: 10, marginTop: 4, opacity: 0.5, color: isMe ? 'white' : '#8A8FA8' }}>
                         {new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </Text>
                 </View>
@@ -93,7 +110,7 @@ export default function ChatScreen() {
 
     if (isLoading) {
         return (
-            <View className="flex-1 bg-primary justify-center items-center">
+            <View style={{ flex: 1, backgroundColor: '#0B0E1A', justifyContent: 'center', alignItems: 'center' }}>
                 <ActivityIndicator color="#F2A7C3" />
             </View>
         );
@@ -103,7 +120,7 @@ export default function ChatScreen() {
         <KeyboardAvoidingView 
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
-            className="flex-1 bg-primary"
+            style={{ flex: 1, backgroundColor: '#0B0E1A' }}
         >
             <FlatList
                 ref={flatListRef}
@@ -114,20 +131,29 @@ export default function ChatScreen() {
                 onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
             />
 
-            <View className="p-4 bg-secondary border-t border-white/5 flex-row items-center space-x-3">
+            <View style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: Platform.OS === 'ios' ? 32 : 36, backgroundColor: '#141829', borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.05)', flexDirection: 'row', alignItems: 'center' }}>
                 <TextInput
                     value={inputText}
                     onChangeText={setInputText}
                     placeholder="Whisper something..."
                     placeholderTextColor="#8A8FA8"
-                    className="flex-1 bg-surface border border-white/10 rounded-full px-5 py-3 text-white"
+                    onSubmitEditing={handleSend}
+                    returnKeyType="send"
+                    blurOnSubmit={false}
+                    style={{ flex: 1, backgroundColor: '#1C2038', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 25, paddingHorizontal: 20, paddingVertical: 12, color: 'white' }}
                 />
                 <TouchableOpacity 
                     onPress={handleSend}
                     disabled={!inputText.trim()}
-                    className={`w-12 h-12 rounded-full justify-center items-center ${
-                        inputText.trim() ? 'bg-rose' : 'bg-white/5'
-                    }`}
+                    style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 24,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backgroundColor: inputText.trim() ? '#E8788A' : 'rgba(255, 255, 255, 0.05)',
+                        marginLeft: 12
+                    }}
                 >
                     <Send size={20} color={inputText.trim() ? 'white' : '#8A8FA8'} />
                 </TouchableOpacity>

@@ -50,38 +50,38 @@ export default function MapScreen() {
     }, [locations, session, partnerRole]);
 
     return (
-        <View className="flex-1 bg-primary p-6 items-center justify-center">
-            <View className="bg-secondary p-10 rounded-[50px] items-center border border-white/5 shadow-2xl w-full">
-                <View className="w-20 h-20 bg-pink/10 rounded-full items-center justify-center mb-6 border border-pink/20">
+        <View style={{ flex: 1, backgroundColor: '#0B0E1A', padding: 24, alignItems: 'center', justifyContent: 'center' }}>
+            <View style={{ backgroundColor: '#141829', padding: 40, borderRadius: 50, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)', width: '100%', elevation: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.3, shadowRadius: 20 }}>
+                <View style={{ width: 80, height: 80, backgroundColor: 'rgba(242, 167, 195, 0.1)', borderRadius: 40, alignItems: 'center', justifyContent: 'center', marginBottom: 24, borderWidth: 1, borderColor: 'rgba(242, 167, 195, 0.2)' }}>
                     <Compass size={40} color="#F2A7C3" />
                 </View>
                 
-                <Text className="text-white/60 uppercase tracking-[4px] text-xs mb-2">Distance Between Us</Text>
+                <Text style={{ color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: 4, fontSize: 12, marginBottom: 8 }}>Distance Between Us</Text>
                 
                 {distance !== null ? (
-                    <View className="items-center">
-                        <Text className="text-white text-7xl font-bold mb-2">{distance}</Text>
-                        <Text className="text-pink text-2xl font-semibold">Kilometers</Text>
+                    <View style={{ alignItems: 'center' }}>
+                        <Text style={{ color: 'white', fontSize: 72, fontWeight: 'bold', marginBottom: 8 }}>{distance}</Text>
+                        <Text style={{ color: '#F2A7C3', fontSize: 24, fontWeight: '600' }}>Kilometers</Text>
                     </View>
                 ) : (
-                    <View className="items-center py-6">
-                        <ActivityIndicator color="#F2A7C3" className="mb-4" />
-                        <Text className="text-muted text-center leading-5 px-6">
+                    <View style={{ alignItems: 'center', paddingVertical: 24 }}>
+                        <ActivityIndicator color="#F2A7C3" style={{ marginBottom: 16 }} />
+                        <Text style={{ color: '#8A8FA8', textAlign: 'center', lineHeight: 20, paddingHorizontal: 24 }}>
                             Waiting for someone to share their location...
                         </Text>
-                        <Text className="text-pink/60 text-xs mt-2 italic">Connect on web to sync!</Text>
+                        <Text style={{ color: 'rgba(242, 167, 195, 0.6)', fontSize: 12, marginTop: 8, fontStyle: 'italic' }}>Connect on web to sync!</Text>
                     </View>
                 )}
                 
-                <View className="mt-12 w-full pt-8 border-t border-white/5">
-                    <Text className="text-white/30 text-center text-xs italic">
+                <View style={{ marginTop: 48, width: '100%', paddingTop: 32, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.05)' }}>
+                    <Text style={{ color: 'rgba(255,255,255,0.3)', textAlign: 'center', fontSize: 12, fontStyle: 'italic' }}>
                         "Distance means so little when someone means so much."
                     </Text>
                 </View>
             </View>
 
-            <View className="mt-8 px-6">
-                <Text className="text-muted/40 text-center text-[10px] leading-4">
+            <View style={{ marginTop: 32, paddingHorizontal: 24 }}>
+                <Text style={{ color: 'rgba(138, 143, 168, 0.4)', textAlign: 'center', fontSize: 10, lineHeight: 16 }}>
                     Mobile app location sharing coming soon. Use the web app to update your current position.
                 </Text>
             </View>

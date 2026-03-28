@@ -2,6 +2,7 @@
   "expo": {
     "name": "BetweenUs",
     "slug": "between-us-mobile",
+    "scheme": "betweenus",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

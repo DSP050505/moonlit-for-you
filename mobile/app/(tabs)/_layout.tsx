@@ -1,21 +1,70 @@
 import React from 'react';
-import { Tabs } from 'expo-router';
-import { MessageSquare, Calendar, MapPin, LayoutGrid } from 'lucide-react-native';
-import { View } from 'react-native';
+import { Drawer } from 'expo-router/drawer';
+import { DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer';
+import { MessageSquare, Calendar, MapPin, Music, LogOut, Menu, Image as ImageIcon, Gamepad2, Gift } from 'lucide-react-native';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { useAuth } from '../../hooks/useAuth';
+import { useRouter } from 'expo-router';
 
-export default function TabLayout() {
+function CustomDrawerContent(props: any) {
+  const { logout } = useAuth();
+  const router = useRouter();
+
+  const handleExitRoom = () => {
+    Alert.alert(
+      "Exit Room",
+      "Are you sure you want to leave this private sky?",
+      [
+        { text: "Stay", style: "cancel" },
+        { 
+          text: "Exit", 
+          style: "destructive",
+          onPress: async () => {
+            await logout();
+            router.replace('/(auth)/login');
+          }
+        }
+      ]
+    );
+  };
+
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: '#F2A7C3',
-        tabBarInactiveTintColor: '#8A8FA8',
-        tabBarStyle: {
-          backgroundColor: '#141829',
-          borderTopWidth: 1,
-          borderTopColor: 'rgba(255, 255, 255, 0.05)',
-          height: 64,
-          paddingBottom: 8,
-          paddingTop: 8,
+    <View style={{ flex: 1, backgroundColor: '#0B0E1A' }}>
+      <DrawerContentScrollView {...props}>
+        <View style={{ padding: 20, marginBottom: 10, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)' }}>
+          <Text style={{ fontFamily: 'Caveat', color: 'white', fontSize: 24 }}>BetweenUs</Text>
+          <Text style={{ color: '#8A8FA8', fontSize: 10, textTransform: 'uppercase', letterSpacing: 1 }}>Our Private Sky</Text>
+        </View>
+        <DrawerItemList {...props} />
+      </DrawerContentScrollView>
+      
+      <View style={{ padding: 20, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.05)' }}>
+        <TouchableOpacity 
+          onPress={handleExitRoom}
+          style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 10 }}
+        >
+          <LogOut size={20} color="#E8788A" />
+          <Text style={{ color: '#E8788A', marginLeft: 15, fontWeight: '600' }}>Exit Room</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
+export default function SidebarLayout() {
+  return (
+    <Drawer
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
+      screenOptions={({ navigation }) => ({
+        drawerStyle: {
+          backgroundColor: '#0B0E1A',
+          width: 280,
+        },
+        drawerActiveTintColor: '#F2A7C3',
+        drawerInactiveTintColor: '#8A8FA8',
+        drawerLabelStyle: {
+          marginLeft: -10,
+          fontWeight: '600',
         },
         headerStyle: {
           backgroundColor: '#0B0E1A',
@@ -30,36 +79,83 @@ export default function TabLayout() {
           fontSize: 18,
         },
         headerTitleAlign: 'center',
-      }}
+        headerLeft: () => null,
+        headerRight: () => (
+          <TouchableOpacity 
+            onPress={() => navigation.toggleDrawer()}
+            style={{ marginRight: 15 }}
+          >
+            <Menu size={24} color="#EDE9F5" />
+          </TouchableOpacity>
+        ),
+      })}
     >
-      <Tabs.Screen
-        name="chat"
+      <Drawer.Screen
+        name="index"
         options={{
+          drawerLabel: 'Chat',
           title: 'Whisper',
-          tabBarIcon: ({ color }) => <MessageSquare size={24} color={color} />,
+          drawerIcon: ({ color }) => <MessageSquare size={20} color={color} />,
         }}
       />
-      <Tabs.Screen
+      <Drawer.Screen
         name="calendar"
         options={{
+          drawerLabel: 'Calendar',
           title: 'Moments',
-          tabBarIcon: ({ color }) => <Calendar size={24} color={color} />,
+          drawerIcon: ({ color }) => <Calendar size={20} color={color} />,
         }}
       />
-      <Tabs.Screen
+      <Drawer.Screen
         name="map"
         options={{
+          drawerLabel: 'Distance',
           title: 'Distance',
-          tabBarIcon: ({ color }) => <MapPin size={24} color={color} />,
+          drawerIcon: ({ color }) => <MapPin size={20} color={color} />,
         }}
       />
-      <Tabs.Screen
-        name="hub"
+      <Drawer.Screen
+        name="music/index"
         options={{
-          title: 'Hub',
-          tabBarIcon: ({ color }) => <LayoutGrid size={24} color={color} />,
+          drawerLabel: 'Music',
+          title: 'Our Music',
+          drawerIcon: ({ color }) => <Music size={20} color={color} />,
         }}
       />
-    </Tabs>
+      <Drawer.Screen
+        name="gallery/index"
+        options={{
+          drawerLabel: 'Gallery',
+          title: 'Gallery',
+          drawerIcon: ({ color }) => <ImageIcon size={20} color={color} />,
+        }}
+      />
+      <Drawer.Screen
+        name="games/index"
+        options={{
+          drawerLabel: 'Games',
+          title: 'Play Together',
+          drawerIcon: ({ color }) => <Gamepad2 size={20} color={color} />,
+        }}
+      />
+      <Drawer.Screen
+        name="surprises/index"
+        options={{
+          drawerLabel: 'Surprises',
+          title: 'Surprises',
+          drawerIcon: ({ color }) => <Gift size={20} color={color} />,
+        }}
+      />
+      {/* Hide Hub and Letters from drawer but keep files to avoid route errors */}
+      <Drawer.Screen
+        name="hub"
+        options={{ drawerItemStyle: { display: 'none' } }}
+      />
+      <Drawer.Screen
+        name="letters/index"
+        options={{ drawerItemStyle: { display: 'none' } }}
+      />
+    </Drawer>
   );
 }
+

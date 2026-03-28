@@ -36,7 +36,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             query: {
                 roomId: session.room.id,
                 userId: session.user.id,
-                role: session.user.role,
+                userRole: session.user.role,
             }
         });
 

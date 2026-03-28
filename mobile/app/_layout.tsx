@@ -1,9 +1,12 @@
+import "react-native-gesture-handler";
 import { Stack } from "expo-router";
 import { AuthProvider, useAuth } from "../hooks/useAuth";
 import { SocketProvider } from "../hooks/useSocket";
 import { useEffect } from "react";
 import { useRouter, useSegments } from "expo-router";
-import { View, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator, LogBox } from "react-native";
+
+LogBox.ignoreLogs(['Unable to activate keep awake', 'Exception in HostObject']);
 import "../global.css";
 
 function RootLayoutNav() {
@@ -21,7 +24,7 @@ function RootLayoutNav() {
       router.replace("/(auth)/login");
     } else if (session && inAuthGroup) {
       // Redirect to home if user is signed in and in auth group
-      router.replace("/(tabs)/chat");
+      router.replace("/");
     }
   }, [session, isLoading, segments]);
 
@@ -37,7 +40,7 @@ function RootLayoutNav() {
     <SocketProvider>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(auth)" options={{ animation: 'fade' }} />
-        <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
+        {/* Let Expo Router handle (tabs) group layout automatically */}
       </Stack>
     </SocketProvider>
   );

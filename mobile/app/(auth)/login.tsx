@@ -61,7 +61,7 @@ export default function LoginScreen() {
             }
             
             console.log('📱 Login: Success');
-            router.replace('/(tabs)/chat');
+            router.replace('/');
         } catch (err: any) {
             console.error('📱 Login: Error', err.message);
             setError(err.message);
@@ -74,92 +74,103 @@ export default function LoginScreen() {
     return (
         <KeyboardAvoidingView 
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            className="flex-1 bg-[#0B0E1A]"
+            style={{ flex: 1, backgroundColor: '#0B0E1A' }}
         >
-            <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="px-6 py-12 justify-center">
-                <View className="items-center mb-10">
-                    <Text className="text-white text-6xl font-bold mb-2" style={{ fontFamily: 'Caveat' }}>
+            <ScrollView style={{ paddingHorizontal: 24, paddingVertical: 48 }} contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
+                <View style={{ alignItems: 'center', marginBottom: 40 }}>
+                    <Text style={{ color: 'white', fontSize: 48, fontWeight: 'bold', marginBottom: 8, fontFamily: 'Caveat', textAlign: 'center' }}>
                         BetweenUs
                     </Text>
-                    <Text className="text-[#8A8FA8] uppercase tracking-[3px] text-xs">
+                    <Text style={{ color: '#8A8FA8', textTransform: 'uppercase', letterSpacing: 3, fontSize: 12, textAlign: 'center' }}>
                         Enter our private sky
                     </Text>
                 </View>
 
-                <View className="bg-[#141829]/50 border border-white/10 rounded-[40px] p-8 shadow-2xl">
-                    <View className="flex-row bg-white/5 rounded-full p-1 mb-6">
+                <View style={{ backgroundColor: 'rgba(20, 24, 41, 0.5)', borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.1)', borderRadius: 40, padding: 32, shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.5, shadowRadius: 20, elevation: 10 }}>
+                    <View style={{ flexDirection: 'row', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: 999, padding: 4, marginBottom: 24 }}>
                         <TouchableOpacity 
                             onPress={() => setMode('join')}
-                            className={`flex-1 py-3 rounded-full ${mode === 'join' ? 'bg-white/10' : ''}`}
+                            style={{ flex: 1, paddingVertical: 12, borderRadius: 999, backgroundColor: mode === 'join' ? 'rgba(255,255,255,0.1)' : 'transparent' }}
                         >
-                            <Text className={`text-center font-semibold ${mode === 'join' ? 'text-white' : 'text-white/40'}`}>
+                            <Text style={{ textAlign: 'center', fontWeight: '600', color: mode === 'join' ? 'white' : 'rgba(255,255,255,0.4)' }}>
                                 Join Room
                             </Text>
                         </TouchableOpacity>
                         <TouchableOpacity 
                             onPress={() => setMode('create')}
-                            className={`flex-1 py-3 rounded-full ${mode === 'create' ? 'bg-white/10' : ''}`}
+                            style={{ flex: 1, paddingVertical: 12, borderRadius: 999, backgroundColor: mode === 'create' ? 'rgba(255,255,255,0.1)' : 'transparent' }}
                         >
-                            <Text className={`text-center font-semibold ${mode === 'create' ? 'text-white' : 'text-white/40'}`}>
+                            <Text style={{ textAlign: 'center', fontWeight: '600', color: mode === 'create' ? 'white' : 'rgba(255,255,255,0.4)' }}>
                                 Create Room
                             </Text>
                         </TouchableOpacity>
                     </View>
 
-                    <View className="space-y-4">
+                    <View style={{ gap: 16 }}>
                         <View>
-                            <Text className="text-white/40 text-xs uppercase tracking-widest mb-2 ml-1">Room Name</Text>
+                            <Text style={{ color: 'rgba(255, 255, 255, 0.4)', fontSize: 12, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 8, marginLeft: 4 }}>Room Name</Text>
                             <TextInput
                                 value={roomName}
                                 onChangeText={setRoomName}
                                 placeholder="e.g. OurLittleWorld"
                                 placeholderTextColor="#444"
-                                className="bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white text-base"
+                                style={{ backgroundColor: 'rgba(0,0,0,0.4)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 16, paddingHorizontal: 20, paddingVertical: 16, color: 'white', fontSize: 16 }}
                                 autoCapitalize="none"
                             />
                         </View>
 
                         <View>
-                            <Text className="text-white/40 text-xs uppercase tracking-widest mb-2 ml-1">Passcode</Text>
+                            <Text style={{ color: 'rgba(255, 255, 255, 0.4)', fontSize: 12, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 8, marginLeft: 4 }}>Passcode</Text>
                             <TextInput
                                 value={passcode}
                                 onChangeText={setPasscode}
                                 placeholder="Secret key..."
                                 placeholderTextColor="#444"
-                                className="bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white text-base"
+                                style={{ backgroundColor: 'rgba(0,0,0,0.4)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 16, paddingHorizontal: 20, paddingVertical: 16, color: 'white', fontSize: 16 }}
                                 secureTextEntry
                             />
                         </View>
 
                         <View>
-                            <Text className="text-white/40 text-xs uppercase tracking-widest mb-2 ml-1">I am...</Text>
-                            <View className="flex-row space-x-3">
+                            <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: 10, letterSpacing: 2, marginBottom: 8, marginLeft: 4 }}>I am...</Text>
+                            <View style={{ flexDirection: 'row', gap: 12 }}>
                                 <TouchableOpacity 
                                     onPress={() => setRole('Rishika')}
-                                    className={`flex-1 py-4 border rounded-lg ${role === 'Rishika' ? 'border-pink/40 bg-pink/5' : 'border-white/10 bg-black/20'}`}
+                                    style={{ flex: 1, paddingVertical: 16, borderWidth: 1, borderRadius: 8, borderColor: role === 'Rishika' ? 'rgba(242, 167, 195, 0.4)' : 'rgba(255,255,255,0.1)', backgroundColor: role === 'Rishika' ? 'rgba(242, 167, 195, 0.05)' : 'rgba(0,0,0,0.2)' }}
                                 >
-                                    <Text className={`text-center ${role === 'Rishika' ? 'text-white' : 'text-white/30'}`}>Rishika</Text>
+                                    <Text style={{ textAlign: 'center', color: role === 'Rishika' ? 'white' : 'rgba(255,255,255,0.3)' }}>Rishika</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity 
                                     onPress={() => setRole('DSP')}
-                                    className={`flex-1 py-4 border rounded-lg ${role === 'DSP' ? 'border-pink/40 bg-pink/5' : 'border-white/10 bg-black/20'}`}
+                                    style={{ flex: 1, paddingVertical: 16, borderWidth: 1, borderRadius: 8, borderColor: role === 'DSP' ? 'rgba(242, 167, 195, 0.4)' : 'rgba(255,255,255,0.1)', backgroundColor: role === 'DSP' ? 'rgba(242, 167, 195, 0.05)' : 'rgba(0,0,0,0.2)' }}
                                 >
-                                    <Text className={`text-center ${role === 'DSP' ? 'text-white' : 'text-white/30'}`}>DSP</Text>
+                                    <Text style={{ textAlign: 'center', color: role === 'DSP' ? 'white' : 'rgba(255,255,255,0.3)' }}>DSP</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
 
-                        {error ? <Text className="text-rose text-center text-sm">{error}</Text> : null}
+                        {error ? <Text style={{ color: '#E8788A', textAlign: 'center', fontSize: 14 }}>{error}</Text> : null}
 
                         <TouchableOpacity 
                             onPress={handleSubmit}
                             disabled={isLoading}
-                            className={`mt-4 py-4 rounded-3xl bg-rose shadow-lg shadow-rose/30 ${isLoading ? 'opacity-70' : ''}`}
+                            style={{ 
+                                marginTop: 16, 
+                                paddingVertical: 16, 
+                                borderRadius: 100, 
+                                backgroundColor: '#E8788A',
+                                opacity: isLoading ? 0.7 : 1,
+                                shadowColor: '#E8788A',
+                                shadowOffset: { width: 0, height: 4 },
+                                shadowOpacity: 0.3,
+                                shadowRadius: 10,
+                                elevation: 5
+                            }}
                         >
                             {isLoading ? (
                                 <ActivityIndicator color="white" />
                             ) : (
-                                <Text className="text-white text-center font-bold text-lg tracking-wider">
+                                <Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold', fontSize: 18, letterSpacing: 1.5 }}>
                                     {mode === 'join' ? 'Enter Room' : 'Create & Enter'}
                                 </Text>
                             )}

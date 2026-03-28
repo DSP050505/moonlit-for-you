@@ -16,41 +16,41 @@ export default function HubScreen() {
     ];
 
     return (
-        <ScrollView className="flex-1 bg-primary p-6">
-            <View className="mb-10 items-center">
-                <View className="w-20 h-20 bg-white/5 rounded-full items-center justify-center border border-white/10 mb-4 shadow-sm">
+        <ScrollView style={{ flex: 1, backgroundColor: '#0B0E1A', padding: 24 }}>
+            <View style={{ marginBottom: 40, alignItems: 'center' }}>
+                <View style={{ width: 80, height: 80, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 40, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', marginBottom: 16 }}>
                     <Heart size={32} color="#E8788A" fill="#E8788A" />
                 </View>
-                <Text className="text-white text-2xl font-bold font-heading">Our Hub</Text>
-                <Text className="text-muted text-sm mt-1">Everything shared, just for us.</Text>
+                <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold' }}>Our Hub</Text>
+                <Text style={{ color: '#8A8FA8', fontSize: 14, marginTop: 4 }}>Everything shared, just for us.</Text>
             </View>
 
-            <View className="flex-row flex-wrap justify-between">
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
                 {features.map((item) => (
                     <TouchableOpacity
                         key={item.id}
                         onPress={() => router.push(item.route as any)}
-                        className="w-[47%] bg-secondary aspect-square rounded-[40px] p-6 mb-6 items-center justify-center border border-white/5 shadow-md"
+                        style={{ width: '47%', backgroundColor: '#141829', aspectRatio: 1, borderRadius: 40, padding: 24, marginBottom: 24, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)' }}
                         activeOpacity={0.7}
                     >
-                        <View style={{ backgroundColor: `${item.color}15` }} className="p-4 rounded-3xl mb-3 border" borderColor={`${item.color}30`}>
+                        <View style={{ backgroundColor: `${item.color}15`, padding: 16, borderRadius: 24, marginBottom: 12, borderWidth: 1, borderColor: `${item.color}30` }}>
                             <item.icon size={28} color={item.color} />
                         </View>
-                        <Text className="text-white font-semibold text-base">{item.title}</Text>
+                        <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>{item.title}</Text>
                     </TouchableOpacity>
                 ))}
             </View>
 
-            <View className="mt-8 mb-12">
+            <View style={{ marginTop: 32, marginBottom: 48 }}>
                 <TouchableOpacity 
                     onPress={() => logout()}
-                    className="flex-row items-center justify-center bg-white/5 p-5 rounded-3xl border border-white/10"
+                    style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.05)', padding: 20, borderRadius: 24, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}
                 >
-                    <LogOut size={20} color="#8A8FA8" className="mr-3" />
-                    <Text className="text-[#8A8FA8] font-semibold ml-2">Sign Out of Room</Text>
+                    <LogOut size={20} color="#8A8FA8" style={{ marginRight: 12 }} />
+                    <Text style={{ color: '#8A8FA8', fontWeight: 'bold', marginLeft: 8 }}>Sign Out of Room</Text>
                 </TouchableOpacity>
                 
-                <Text className="text-muted/20 text-center mt-6 text-[10px] uppercase tracking-widest">
+                <Text style={{ color: 'rgba(138, 143, 168, 0.2)', textAlign: 'center', marginTop: 24, fontSize: 10, letterSpacing: 2, textTransform: 'uppercase' }}>
                     BetweenUs Mobile • v1.0.0
                 </Text>
             </View>
