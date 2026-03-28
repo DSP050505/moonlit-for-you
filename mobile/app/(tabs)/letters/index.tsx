@@ -52,7 +52,7 @@ export default function LettersScreen() {
     );
 
     return (
-        <View style={{ flex: 1, backgroundColor: '#0B0E1A' }}>
+        <View style={{ flex: 1, backgroundColor: 'transparent' }}>
             {/* Custom Header */}
             <View style={{ paddingHorizontal: 24, paddingTop: 48, paddingBottom: 24, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)' }}>
                 <TouchableOpacity onPress={() => router.back()} style={{ width: 40, height: 40, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}>

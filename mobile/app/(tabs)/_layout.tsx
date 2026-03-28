@@ -153,7 +153,7 @@ export default function SidebarLayout() {
           fontWeight: '600',
         },
         headerStyle: {
-          backgroundColor: '#0B0E1A',
+          backgroundColor: 'transparent',
           elevation: 0,
           shadowOpacity: 0,
           borderBottomWidth: 1,

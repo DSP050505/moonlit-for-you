@@ -1,5 +1,6 @@
 import "react-native-gesture-handler";
 import { Stack } from "expo-router";
+import { ThemeProvider, DarkTheme } from "@react-navigation/native";
 import { AuthProvider, useAuth } from "../hooks/useAuth";
 import { SocketProvider } from "../hooks/useSocket";
 import { MusicProvider } from "../hooks/useMusic";
@@ -11,11 +12,20 @@ LogBox.ignoreLogs(['Unable to activate keep awake', 'Exception in HostObject']);
 import "../global.css";
 
 import { GlobalCallNotification } from "../components/GlobalCallNotification";
+import BackgroundSky from "../components/layout/BackgroundSky";
 
 function RootLayoutNav() {
   const { session, isLoading } = useAuth();
   const segments = useSegments();
   const router = useRouter();
+
+  const TransparentTheme = {
+    ...DarkTheme,
+    colors: {
+      ...DarkTheme.colors,
+      background: 'transparent',
+    },
+  };
 
   useEffect(() => {
     if (isLoading) return;
@@ -40,10 +50,16 @@ function RootLayoutNav() {
   return (
     <SocketProvider>
       <MusicProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(auth)" options={{ animation: 'fade' }} />
-        </Stack>
-        <GlobalCallNotification />
+        <View style={{ flex: 1, backgroundColor: '#0B0E1A' }}>
+          <BackgroundSky />
+          <ThemeProvider value={TransparentTheme}>
+            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' }, animation: 'fade' }}>
+              <Stack.Screen name="(auth)" options={{ animation: 'fade' }} />
+              <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
+            </Stack>
+          </ThemeProvider>
+          <GlobalCallNotification />
+        </View>
       </MusicProvider>
     </SocketProvider>
   );

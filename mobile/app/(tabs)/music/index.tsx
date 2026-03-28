@@ -134,7 +134,7 @@ export default function MusicScreen() {
     ];
 
     return (
-        <View style={{ flex: 1, backgroundColor: '#0B0E1A' }}>
+        <View style={{ flex: 1, backgroundColor: 'transparent' }}>
             {/* Tab Switcher */}
             <View style={{ flexDirection: 'row', justifyContent: 'center', paddingVertical: 16, gap: 8, paddingHorizontal: 16 }}>
                 {tabs.map(tab => (

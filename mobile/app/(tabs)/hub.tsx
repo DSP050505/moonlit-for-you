@@ -18,7 +18,7 @@ export default function HubScreen() {
     ];
 
     return (
-        <ScrollView style={{ flex: 1, backgroundColor: '#0B0E1A', padding: 24 }}>
+        <ScrollView style={{ flex: 1, backgroundColor: 'transparent', padding: 24 }}>
             <View style={{ marginBottom: 40, alignItems: 'center' }}>
                 <View style={{ width: 80, height: 80, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 40, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', marginBottom: 16 }}>
                     <Heart size={32} color="#E8788A" fill="#E8788A" />

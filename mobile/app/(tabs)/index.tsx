@@ -163,7 +163,7 @@ export default function ChatScreen() {
 
     if (isLoading) {
         return (
-            <View style={{ flex: 1, backgroundColor: '#0B0E1A', justifyContent: 'center', alignItems: 'center' }}>
+            <View style={{ flex: 1, backgroundColor: 'transparent', justifyContent: 'center', alignItems: 'center' }}>
                 <ActivityIndicator color="#F2A7C3" />
             </View>
         );
@@ -205,7 +205,7 @@ export default function ChatScreen() {
         <KeyboardAvoidingView 
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             keyboardVerticalOffset={Platform.OS === 'ios' ? (currentTrack ? 140 : 90) : 0}
-            style={{ flex: 1, backgroundColor: '#0B0E1A' }}
+            style={{ flex: 1, backgroundColor: 'transparent' }}
         >
             <FlatList
                 ref={flatListRef}

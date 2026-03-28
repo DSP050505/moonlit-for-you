@@ -135,7 +135,7 @@ export default function CalendarScreen() {
     };
 
     return (
-        <View style={{ flex: 1, backgroundColor: '#0B0E1A' }}>
+        <View style={{ flex: 1, backgroundColor: 'transparent' }}>
             <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: currentTrack ? 120 : 20 }}>
                 {/* Header */}
                 <Text style={{ fontFamily: 'Quicksand', color: 'white', fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginBottom: 24 }}>

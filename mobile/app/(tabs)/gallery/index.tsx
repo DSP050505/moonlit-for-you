@@ -157,7 +157,7 @@ export default function GalleryScreen() {
     };
 
     return (
-        <View style={{ flex: 1, backgroundColor: '#0B0E1A' }}>
+        <View style={{ flex: 1, backgroundColor: 'transparent' }}>
             {isLoading ? (
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <ActivityIndicator color="#F2A7C3" />

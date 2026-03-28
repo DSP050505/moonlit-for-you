@@ -75,11 +75,11 @@ export default function SurprisesScreen() {
     };
 
     if (isLoading) {
-        return <View style={{ flex: 1, backgroundColor: '#0B0E1A', justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator color="#F2A7C3" /></View>;
+        return <View style={{ flex: 1, backgroundColor: 'transparent', justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator color="#F2A7C3" /></View>;
     }
 
     return (
-        <View style={{ flex: 1, backgroundColor: '#0B0E1A' }}>
+        <View style={{ flex: 1, backgroundColor: 'transparent' }}>
             <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: currentTrack ? 120 : 16 }}>
                 {/* Header */}
                 <View style={{ alignItems: 'center', marginBottom: 24, paddingTop: 8 }}>

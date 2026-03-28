@@ -28,7 +28,7 @@ export default function MapScreen() {
     });
 
     return (
-        <View style={{ flex: 1, backgroundColor: '#0B0E1A' }}>
+        <View style={{ flex: 1, backgroundColor: 'transparent' }}>
             <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: currentTrack ? 120 : 20 }}>
             <Text style={{ fontFamily: 'Quicksand', color: 'white', fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginBottom: 32, opacity: 0.9 }}>
                 🛰️ Live Connection
