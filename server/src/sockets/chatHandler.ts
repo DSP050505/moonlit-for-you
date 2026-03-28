@@ -172,4 +172,15 @@ export function setupChatHandler(io: Server, socket: Socket) {
         console.log(`🔔 invite:section: ${data.senderRole} invited partner to ${data.sectionName}`);
         socket.to(`room_${data.roomId}`).emit('invite:section', data);
     });
+
+    // Handle music synchronized playback
+    socket.on('music:state_sync', (data: { roomId: number; isPlaying: boolean; track: any; senderRole: string }) => {
+        // Broadcast to everyone in the room EXCEPT the sender
+        socket.to(`room_${data.roomId}`).emit('music:state_sync', data);
+    });
+
+    // Handle music sync requests
+    socket.on('music:request_sync', (data: { roomId: number; requesterRole: string }) => {
+        socket.to(`room_${data.roomId}`).emit('music:request_sync', data);
+    });
 }
