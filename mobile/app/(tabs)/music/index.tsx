@@ -201,6 +201,7 @@ export default function MusicScreen() {
                                 <Text style={{ color: 'rgba(138,143,168,0.5)', fontSize: 13, marginTop: 4 }}>Results will appear here</Text>
                             </View>
                         }
+                        ListFooterComponent={<View style={{ height: 100 }} />}
                     />
                 </View>
             )}
@@ -232,6 +233,7 @@ export default function MusicScreen() {
                                     </TouchableOpacity>
                                 </View>
                             )}
+                            ListFooterComponent={<View style={{ height: 100 }} />}
                         />
                     )}
                 </View>
@@ -294,7 +296,7 @@ export default function MusicScreen() {
                             </View>
                         ))
                     )}
-                    <View style={{ height: 40 }} />
+                    <View style={{ height: 120 }} />
                 </ScrollView>
             )}
         </View>

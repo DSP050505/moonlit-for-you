@@ -4,6 +4,7 @@ import { useAuth } from '../../../hooks/useAuth';
 import { ArrowLeft, Camera, Heart, X, Trash2, Image as ImageIcon } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+import { useMusic } from '../../../hooks/useMusic';
 
 const { width, height } = Dimensions.get('window');
 const columnWidth = (width - 48) / 2;
@@ -11,6 +12,7 @@ const columnWidth = (width - 48) / 2;
 export default function GalleryScreen() {
     const { session } = useAuth();
     const router = useRouter();
+    const { currentTrack } = useMusic();
     const [photos, setPhotos] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -183,7 +185,7 @@ export default function GalleryScreen() {
                 />
             )}
             
-            <View style={{ position: 'absolute', bottom: 32, left: 0, right: 0, alignItems: 'center' }} pointerEvents="none">
+            <View style={{ position: 'absolute', bottom: currentTrack ? 120 : 32, left: 0, right: 0, alignItems: 'center' }} pointerEvents="none">
                 <View style={{ backgroundColor: 'rgba(20, 24, 41, 0.9)', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 999, borderWidth: 1, borderColor: 'rgba(242, 167, 195, 0.2)', flexDirection: 'row', alignItems: 'center' }}>
                     <Heart size={14} color="#F2A7C3" fill="#F2A7C3" style={{ marginRight: 8 }} />
                     <Text style={{ color: '#F2A7C3', fontSize: 12, fontWeight: 'bold', letterSpacing: 2, textTransform: 'uppercase' }}>{photos.length} Captured</Text>
@@ -193,7 +195,7 @@ export default function GalleryScreen() {
             {/* Floating Action Button for Upload */}
             <TouchableOpacity 
                 onPress={pickImage} 
-                style={{ position: 'absolute', bottom: 32, right: 24, width: 56, height: 56, backgroundColor: '#E8788A', borderRadius: 28, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5 }}
+                style={{ position: 'absolute', bottom: currentTrack ? 120 : 32, right: 24, width: 56, height: 56, backgroundColor: '#E8788A', borderRadius: 28, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5 }}
             >
                 <Camera size={24} color="white" />
             </TouchableOpacity>

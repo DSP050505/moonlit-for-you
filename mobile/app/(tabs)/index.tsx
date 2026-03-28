@@ -228,7 +228,13 @@ export default function ChatScreen() {
                 </View>
 
                 {/* ── Input Bar ── */}
-                <View style={{ paddingHorizontal: 16, paddingTop: 6, paddingBottom: currentTrack ? 10 : (Platform.OS === 'ios' ? 32 : 36), flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{ 
+                    paddingHorizontal: 16, 
+                    paddingTop: 6, 
+                    paddingBottom: currentTrack ? (Platform.OS === 'ios' ? 110 : 90) : (Platform.OS === 'ios' ? 32 : 36), 
+                    flexDirection: 'row', 
+                    alignItems: 'center' 
+                }}>
                     <TextInput
                         value={inputText}
                         onChangeText={setInputText}

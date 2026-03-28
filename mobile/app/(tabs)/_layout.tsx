@@ -235,19 +235,24 @@ export default function SidebarLayout() {
     {/* Global Now Playing Bar — visible on every screen */}
     {currentTrack && (
       <View style={{ 
-        backgroundColor: '#141829', 
-        borderTopWidth: 1, 
-        borderTopColor: 'rgba(255,255,255,0.08)', 
+        position: 'absolute',
+        bottom: Platform.OS === 'ios' ? 50 : 30, // Lifted even higher as requested
+        left: 14,
+        right: 14,
+        backgroundColor: '#1C2038', 
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.12)',
+        borderRadius: 24, 
         paddingHorizontal: 16, 
-        paddingTop: 12, 
-        paddingBottom: Platform.OS === 'ios' ? 28 : 12, // Handle safe area
+        paddingVertical: 12, 
         flexDirection: 'row', 
         alignItems: 'center',
-        elevation: 10,
+        elevation: 15,
         shadowColor: 'black',
-        shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.4,
+        shadowRadius: 10,
+        zIndex: 1000
       }}>
         <Image source={{ uri: currentTrack.thumbnail }} style={{ width: 44, height: 33, borderRadius: 6, marginRight: 12 }} />
         <View style={{ flex: 1, marginRight: 12 }}>

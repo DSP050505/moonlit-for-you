@@ -3,10 +3,12 @@ import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Image, Heart, Gift, Mail, Gamepad2, Sparkles, LogOut } from 'lucide-react-native';
 import { useAuth } from '../../hooks/useAuth';
+import { useMusic } from '../../hooks/useMusic';
 
 export default function HubScreen() {
     const router = useRouter();
     const { logout, session } = useAuth();
+    const { currentTrack } = useMusic();
 
     const features = [
         { id: 'gallery', title: 'Gallery', icon: Image, color: '#C4B1D4', route: '/gallery' },
@@ -53,6 +55,8 @@ export default function HubScreen() {
                 <Text style={{ color: 'rgba(138, 143, 168, 0.2)', textAlign: 'center', marginTop: 24, fontSize: 10, letterSpacing: 2, textTransform: 'uppercase' }}>
                     BetweenUs Mobile • v1.0.0
                 </Text>
+
+                {currentTrack && <View style={{ height: 100 }} />}
             </View>
         </ScrollView>
     );

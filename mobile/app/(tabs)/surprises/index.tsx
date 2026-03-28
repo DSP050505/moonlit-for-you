@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator,
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useAuth } from '../../../hooks/useAuth';
 import { Gift, Plus, X, Trash2 } from 'lucide-react-native';
+import { useMusic } from '../../../hooks/useMusic';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -18,6 +19,7 @@ interface Surprise {
 export default function SurprisesScreen() {
     const { session } = useAuth();
     const roomId = session?.room.id;
+    const { currentTrack } = useMusic();
     const [surprises, setSurprises] = useState<Surprise[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -78,7 +80,7 @@ export default function SurprisesScreen() {
 
     return (
         <View style={{ flex: 1, backgroundColor: '#0B0E1A' }}>
-            <ScrollView contentContainerStyle={{ padding: 16 }}>
+            <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: currentTrack ? 120 : 16 }}>
                 {/* Header */}
                 <View style={{ alignItems: 'center', marginBottom: 24, paddingTop: 8 }}>
                     <Text style={{ color: '#F2A7C3', fontSize: 14, marginBottom: 16 }}>Secret moments waiting for the right time... ✨</Text>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useAuth } from '../../../hooks/useAuth';
 import { DoodleGame } from '../../../components/games/DoodleGame';
+import { useMusic } from '../../../hooks/useMusic';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -64,6 +65,7 @@ export default function GamesScreen() {
 function LoveQuiz() {
     const { session } = useAuth();
     const roomId = session?.room.id;
+    const { currentTrack } = useMusic();
     const [questions, setQuestions] = useState<QuizQuestion[]>([]);
     const [currentQ, setCurrentQ] = useState(0);
     const [score, setScore] = useState(0);
@@ -128,7 +130,7 @@ function LoveQuiz() {
     // CREATE FORM
     if (isCreating) {
         return (
-            <ScrollView style={{ flex: 1, padding: 16 }}>
+            <ScrollView style={{ flex: 1, padding: 16 }} contentContainerStyle={{ paddingBottom: currentTrack ? 120 : 0 }}>
                 <View style={{ backgroundColor: '#141829', borderRadius: 24, padding: 24, borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)' }}>
                     <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold', marginBottom: 20 }}>Add New Question ❓</Text>
                     <TextInput value={newQ} onChangeText={setNewQ} placeholder="Enter your question..."
@@ -200,7 +202,7 @@ function LoveQuiz() {
     // QUIZ PLAY
     const question = questions[currentQ];
     return (
-        <ScrollView style={{ flex: 1, padding: 16 }}>
+        <ScrollView style={{ flex: 1, padding: 16 }} contentContainerStyle={{ paddingBottom: currentTrack ? 120 : 0 }}>
             {/* Progress Bar */}
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
                 <View style={{ flex: 1, flexDirection: 'row', gap: 3, marginRight: 12 }}>
@@ -246,6 +248,7 @@ function LoveQuiz() {
 function WishJar() {
     const { session } = useAuth();
     const roomId = session?.room.id;
+    const { currentTrack } = useMusic();
     const [wishes, setWishes] = useState<Wish[]>([]);
     const [revealedWish, setRevealedWish] = useState<Wish | null>(null);
     const [newWish, setNewWish] = useState('');
@@ -297,7 +300,7 @@ function WishJar() {
     if (isLoading) return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator color="#F2A7C3" /></View>;
 
     return (
-        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 24, alignItems: 'center' }}>
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 24, alignItems: 'center', paddingBottom: currentTrack ? 120 : 24 }}>
             {/* Jar */}
             <TouchableOpacity onPress={revealRandom} disabled={unrevealedCount === 0} activeOpacity={0.7}
                 style={{ alignItems: 'center', marginBottom: 32 }}>

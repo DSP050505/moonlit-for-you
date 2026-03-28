@@ -2,9 +2,11 @@ import React from 'react';
 import { View, Text, StyleSheet, Dimensions, Animated, Easing, ActivityIndicator, ScrollView } from 'react-native';
 import { Compass } from 'lucide-react-native';
 import { useLocationDistance } from '../../hooks/useLocationDistance';
+import { useMusic } from '../../hooks/useMusic';
 
 export default function MapScreen() {
     const { distance, locationAccess, myLoc, partnerLoc, isRishika, partnerName } = useLocationDistance();
+    const { currentTrack } = useMusic();
 
     // Heart animation
     const heartAnim = React.useRef(new Animated.Value(0)).current;
@@ -27,7 +29,7 @@ export default function MapScreen() {
 
     return (
         <View style={{ flex: 1, backgroundColor: '#0B0E1A' }}>
-            <ScrollView contentContainerStyle={{ padding: 20 }}>
+            <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: currentTrack ? 120 : 20 }}>
             <Text style={{ fontFamily: 'Quicksand', color: 'white', fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginBottom: 32, opacity: 0.9 }}>
                 🛰️ Live Connection
             </Text>

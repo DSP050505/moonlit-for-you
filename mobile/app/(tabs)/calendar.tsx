@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
 import { useAuth } from '../../hooks/useAuth';
 import { useSocket } from '../../hooks/useSocket';
+import { useMusic } from '../../hooks/useMusic';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -53,6 +54,7 @@ interface CountdownEvent {
 export default function CalendarScreen() {
     const { session } = useAuth();
     const { socket } = useSocket();
+    const { currentTrack } = useMusic();
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [activeCountdown, setActiveCountdown] = useState<CountdownEvent | null>(null);
     const [hasReached, setHasReached] = useState(false);
@@ -134,7 +136,7 @@ export default function CalendarScreen() {
 
     return (
         <View style={{ flex: 1, backgroundColor: '#0B0E1A' }}>
-            <ScrollView contentContainerStyle={{ padding: 20 }}>
+            <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: currentTrack ? 120 : 20 }}>
                 {/* Header */}
                 <Text style={{ fontFamily: 'Quicksand', color: 'white', fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginBottom: 24 }}>
                     Getting closer, one day at a time 🌙

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from 'react-native';
-import { motion, AnimatePresence } from 'framer-motion'; // Framer motion doesn't work well in RN, using standard RN View for now or Moti if needed. 
-// For now, I'll use standard RN components with Tailwind (NativeWind)
+// For now, I'll use standard RN components
 import { useAuth, Role } from '../../hooks/useAuth';
 import { useRouter } from 'expo-router';
 
