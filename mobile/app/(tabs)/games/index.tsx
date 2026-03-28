@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useAuth } from '../../../hooks/useAuth';
 import { FloatingPingAction } from '../../../components/FloatingPingAction';
+import { DoodleGame } from '../../../components/games/DoodleGame';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -53,7 +54,7 @@ export default function GamesScreen() {
 
             {activeTab === 'quiz' && <LoveQuiz />}
             {activeTab === 'wishes' && <WishJar />}
-            {activeTab === 'doodle' && <DoodlePlaceholder />}
+            {activeTab === 'doodle' && <DoodleGame />}
             <FloatingPingAction />
         </View>
     );
@@ -341,17 +342,3 @@ function WishJar() {
     );
 }
 
-/* ═══════════════════════════════════
-   DOODLE PLACEHOLDER
-   ═══════════════════════════════════ */
-function DoodlePlaceholder() {
-    return (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
-            <Text style={{ fontSize: 64, marginBottom: 16 }}>🎨</Text>
-            <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', marginBottom: 8 }}>Doodle Together</Text>
-            <Text style={{ color: '#8A8FA8', textAlign: 'center', lineHeight: 22 }}>
-                The drawing canvas is optimized for the web experience. Open BetweenUs on your browser to doodle together!
-            </Text>
-        </View>
-    );
-}
