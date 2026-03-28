@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { useAuth } from '../../hooks/useAuth';
 import { useSocket } from '../../hooks/useSocket';
+import { usePathname } from 'expo-router';
 import { Send, Heart } from 'lucide-react-native';
 
 interface Message {
@@ -9,18 +10,27 @@ interface Message {
     sender: 'you' | 'her';
     content: string;
     type: 'text' | 'voice' | 'image';
+    readAt?: string;
     createdAt: string;
 }
 
 export default function ChatScreen() {
     const { session } = useAuth();
     const { socket } = useSocket();
+    const pathname = usePathname();
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputText, setInputText] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const flatListRef = useRef<FlatList>(null);
 
     const isRishika = session?.user.role === 'Rishika';
+
+    // Mark as read when focused
+    useEffect(() => {
+        if (pathname === '/' && socket && session) {
+            socket.emit('chat:read', { roomId: session.room.id, sender: isRishika ? 'her' : 'you' });
+        }
+    }, [pathname, socket, session]);
 
     // Fetch history
     useEffect(() => {
@@ -33,6 +43,11 @@ export default function ChatScreen() {
             .then(data => {
                 if (data.messages) setMessages(data.messages);
                 setIsLoading(false);
+                
+                // Once loaded, mark all messages from partner as read
+                if (socket && session) {
+                    socket.emit('chat:read', { roomId: session.room.id, sender: isRishika ? 'her' : 'you' });
+                }
             })
             .catch(err => {
                 console.error('📱 Chat: Fetch error', err);
@@ -46,10 +61,33 @@ export default function ChatScreen() {
 
         socket.on('chat:message', (msg: Message) => {
             setMessages(prev => [...prev, msg]);
+            // If message is from partner, mark all as read automatically
+            const partnerSender = isRishika ? 'you' : 'her';
+            if (msg.sender === partnerSender && session) {
+                socket.emit('chat:read', { roomId: session.room.id, sender: isRishika ? 'her' : 'you' });
+            }
+        });
+
+        socket.on('chat:read', (data: { reader: string }) => {
+            const partnerReader = data.reader; // 'her' or 'you'
+            const isMeReading = (isRishika && partnerReader === 'her') || (!isRishika && partnerReader === 'you');
+            
+            if (!isMeReading) {
+                // The partner read my messages! Update local state to reflect this
+                setMessages(prev => prev.map(m => {
+                    // Map local perspective
+                    const isMessageFromMe = (isRishika && m.sender === 'her') || (!isRishika && m.sender === 'you');
+                    if (isMessageFromMe && !m.readAt) {
+                        return { ...m, readAt: new Date().toISOString() };
+                    }
+                    return m;
+                }));
+            }
         });
 
         return () => {
             socket.off('chat:message');
+            socket.off('chat:read');
         };
     }, [socket]);
 
@@ -90,11 +128,11 @@ export default function ChatScreen() {
                         borderRadius: 16,
                         paddingHorizontal: 16,
                         paddingVertical: 12,
-                        backgroundColor: isMe ? '#E8788A' : '#1C2038',
+                        backgroundColor: isMe ? (item.readAt ? '#E8788A' : 'rgba(232, 120, 138, 0.2)') : '#1C2038',
                         borderTopRightRadius: isMe ? 0 : 16,
                         borderTopLeftRadius: isMe ? 16 : 0,
-                        borderWidth: isMe ? 0 : 1,
-                        borderColor: 'rgba(255,255,255,0.05)'
+                        borderWidth: isMe ? (item.readAt ? 0 : 1) : 1,
+                        borderColor: isMe ? (item.readAt ? 'transparent' : '#E8788A') : 'rgba(255,255,255,0.05)'
                     }}
                 >
                     <Text style={{ fontSize: 14, color: isMe ? 'white' : '#EDE9F5' }}>

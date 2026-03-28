@@ -106,15 +106,27 @@ export function setupChatHandler(io: Server, socket: Socket) {
     });
 
     // Handle read receipts
-    socket.on('chat:read', async (data: { roomId: number; messageId: number }) => {
+    socket.on('chat:read', async (data: { roomId: number; sender: string }) => {
         try {
-            await prisma.message.update({
-                where: { id: data.messageId },
-                data: { readAt: new Date() },
+            console.log(`💬 chat:read: ${data.sender} in room ${data.roomId} read all messages`);
+            const partnerSender = data.sender === 'you' ? 'her' : 'you';
+            
+            await prisma.message.updateMany({
+                where: {
+                    roomId: data.roomId,
+                    sender: partnerSender,
+                    readAt: null
+                },
+                data: { readAt: new Date() }
             });
-            io.to(`room_${data.roomId}`).emit('chat:read', data);
+
+            // Notify the partner that their messages have been read
+            socket.to(`room_${data.roomId}`).emit('chat:read', { 
+                roomId: data.roomId, 
+                reader: data.sender 
+            });
         } catch (error) {
-            console.error('Error handling read receipt:', error);
+            console.error('🔥 Error handling read receipt:', error);
         }
     });
 
