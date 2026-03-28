@@ -90,33 +90,53 @@ function HeaderPingButton() {
   );
 }
 
+const MusicPlayerInternal = React.memo(({ isPlaying, videoId, onStateChange, setPlayerReady }: any) => {
+  const playerRef = React.useRef<any>(null);
+
+  React.useEffect(() => {
+    if (playerRef.current) {
+        if (isPlaying) {
+            playerRef.current.playVideo?.();
+        } else {
+            playerRef.current.pauseVideo?.();
+        }
+    }
+  }, [isPlaying]);
+
+  return (
+    <View style={{ position: 'absolute', top: -300, left: 0, opacity: 0, zIndex: -1 }} pointerEvents="none">
+      <YoutubePlayer
+        ref={playerRef}
+        height={200}
+        width={300}
+        play={isPlaying}
+        videoId={videoId}
+        onChangeState={onStateChange}
+        onReady={() => setPlayerReady(true)}
+        onError={(error: string) => console.error(`🎵 Global: YouTube ERROR: ${error}`)}
+        initialPlayerParams={{
+          preventFullScreen: true,
+          controls: false,
+        }}
+      />
+    </View>
+  );
+});
+
 export default function SidebarLayout() {
   const { distance } = useLocationDistance();
   const { currentTrack, isPlaying, playerReady, togglePlayPause, playNext, onStateChange, setPlayerReady } = useMusic();
 
   return (
     <View style={{ flex: 1 }}>
-      {/* YouTube Player - off-screen but with real dimensions for audio */}
+      {/* YouTube Player - off-screen but stable */}
       {currentTrack && (
-        <View style={{ position: 'absolute', top: -300, left: 0, opacity: 0, zIndex: -1 }} pointerEvents="none">
-          <YoutubePlayer
-            height={200}
-            width={300}
-            play={isPlaying}
-            videoId={currentTrack.youtubeId}
-            onChangeState={onStateChange}
-            onReady={() => {
-              console.log(`🎵 Global: YouTube READY for "${currentTrack.title}" (${currentTrack.youtubeId})`);
-              setPlayerReady(true);
-            }}
-            onError={(error: string) => {
-              console.error(`🎵 Global: YouTube ERROR: ${error}`);
-            }}
-            initialPlayerParams={{
-              preventFullScreen: true,
-            }}
-          />
-        </View>
+        <MusicPlayerInternal 
+          isPlaying={isPlaying} 
+          videoId={currentTrack.youtubeId}
+          onStateChange={onStateChange}
+          setPlayerReady={setPlayerReady}
+        />
       )}
 
       <Drawer
@@ -263,7 +283,10 @@ export default function SidebarLayout() {
             {playerReady ? '♪ Playing' : '⏳ Loading...'} · {currentTrack.channel}
           </Text>
         </View>
-        <TouchableOpacity onPress={togglePlayPause} style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: '#E8788A', alignItems: 'center', justifyContent: 'center', marginRight: 8 }}>
+        <TouchableOpacity 
+          onPress={togglePlayPause} 
+          style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: '#E8788A', alignItems: 'center', justifyContent: 'center', marginRight: 8 }}
+        >
           {isPlaying ? <Pause size={16} color="white" /> : <Play size={16} color="white" />}
         </TouchableOpacity>
         <TouchableOpacity onPress={playNext} style={{ padding: 4 }}>

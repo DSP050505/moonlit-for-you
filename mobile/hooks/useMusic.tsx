@@ -31,7 +31,6 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
     const [queue, setQueue] = useState<Track[]>([]);
 
     const playTrack = useCallback((track: Track) => {
-        console.log(`🎵 Music: playTrack "${track.title}" (id: ${track.youtubeId})`);
         setCurrentTrack(track);
         setIsPlaying(true);
         setPlayerReady(false);
@@ -39,7 +38,6 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
 
     const addToQueue = useCallback((track: Track) => {
         setQueue(prev => [...prev, track]);
-        console.log(`🎵 Music: Added "${track.title}" to queue`);
     }, []);
 
     const removeFromQueue = useCallback((index: number) => {
@@ -50,7 +48,6 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
         setQueue(prev => {
             if (prev.length > 0) {
                 const [next, ...rest] = prev;
-                console.log(`🎵 Music: playNext → "${next.title}"`);
                 setCurrentTrack(next);
                 setIsPlaying(true);
                 setPlayerReady(false);
@@ -64,12 +61,10 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     const togglePlayPause = useCallback(() => {
-        console.log(`🎵 Music: togglePlayPause ${isPlaying} → ${!isPlaying}`);
         setIsPlaying(prev => !prev);
-    }, [isPlaying]);
+    }, []);
 
     const onStateChange = useCallback((state: string) => {
-        console.log(`🎵 Music: YouTube state → "${state}"`);
         if (state === 'ended') {
             playNext();
         }
