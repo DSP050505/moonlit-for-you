@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 
 // Matches Prisma schema
-export type Role = 'Rishika' | 'DSP';
+export type Role = 'Juliet' | 'Romeo';
 
 export interface RoomSession {
     room: {

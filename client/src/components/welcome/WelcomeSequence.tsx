@@ -43,7 +43,7 @@ const WelcomeSequence: React.FC<WelcomeSequenceProps> = ({ onComplete }) => {
 
     // Typewriter for main text
     const mainText = useTypewriter(
-        'I ♥ Rishika to the Moon & Back',
+        'I ♥ Juliet to the Moon & Back',
         80,
         phase === 'text' ? 0 : 999999 // Only start when in text phase
     );
@@ -194,7 +194,7 @@ const WelcomeSequence: React.FC<WelcomeSequenceProps> = ({ onComplete }) => {
                                     letterSpacing: '0.05em',
                                 }}
                             >
-                                From Devi Sri Prasad
+                                From Romeo
                             </motion.p>
 
                             {/* Floating Hearts */}

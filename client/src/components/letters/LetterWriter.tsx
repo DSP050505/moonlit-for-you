@@ -20,10 +20,10 @@ const LetterWriter: React.FC = () => {
     
     // Form state
     const [topFlap, setTopFlap] = useState('To my one and only...');
-    const [greeting, setGreeting] = useState('My Dearest Rishika,');
+    const [greeting, setGreeting] = useState('My Dearest Juliet,');
     const [content, setContent] = useState('');
     const [closing, setClosing] = useState('With all my love,');
-    const [sender, setSender] = useState('Devi Sri Prasad');
+    const [sender, setSender] = useState('Romeo');
 
     const [openLetterId, setOpenLetterId] = useState<number | null>(null);
     const [sealState, setSealState] = useState<'idle' | 'melting' | 'stamped'>('idle');
@@ -104,7 +104,7 @@ const LetterWriter: React.FC = () => {
                 }
                 setContent('');
                 setTopFlap('To my one and only...');
-                setGreeting('My Dearest Rishika,');
+                setGreeting('My Dearest Juliet,');
                 setClosing('With all my love,');
                 setIsWriting(false);
                 setSealState('idle');

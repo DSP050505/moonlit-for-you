@@ -42,7 +42,7 @@ export default function LettersScreen() {
             </Text>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: 16, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.05)' }}>
                 <Text style={{ color: 'rgba(138, 143, 168, 0.4)', fontSize: 10, fontWeight: 'bold', letterSpacing: 1.5, textTransform: 'uppercase' }}>
-                    DEAR {item.recipient === 'Rishika' ? 'RISHIKA' : 'DSP'}
+                    DEAR {item.recipient === 'Juliet' ? 'JULIET' : 'ROMEO'}
                 </Text>
                 <Text style={{ color: 'rgba(242, 167, 195, 0.6)', fontSize: 10, fontWeight: 'bold' }}>
                     {new Date(item.date || Date.now()).toLocaleDateString()}

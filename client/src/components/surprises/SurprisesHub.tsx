@@ -443,7 +443,7 @@ const SurpriseCard = ({ surprise, onDelete }: { surprise: Surprise, onDelete: ()
                                 textTransform: 'uppercase',
                                 letterSpacing: '1px'
                             }}>
-                                FROM {surprise.createdBy === 'DSP' ? 'DEVI SRI PRASAD' : 'RISHIKA'}
+                                FROM {surprise.createdBy === 'Romeo' ? 'ROMEO' : 'JULIET'}
                             </div>
                         </motion.div>
                     ) : (

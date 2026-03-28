@@ -105,7 +105,7 @@ export function GlobalCallNotification() {
                     </View>
                     <View style={{ flex: 1 }}>
                         <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 2 }}>
-                            {callData.senderRole === 'DSP' ? 'Devi Sri Prasad' : 'Rishika'} is calling
+                            {callData.senderRole === 'Romeo' ? 'Romeo' : 'Juliet'} is calling
                         </Text>
                         <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>
                             Come to {callData.sectionName}! ✨

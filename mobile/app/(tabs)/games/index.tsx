@@ -288,7 +288,7 @@ function WishJar() {
                 body: JSON.stringify({
                     roomId,
                     content: newWish,
-                    author: session.user.role === 'Rishika' ? 'Rishika' : 'Devi Sri Prasad',
+                    author: session.user.role === 'Juliet' ? 'Juliet' : 'Romeo',
                 }),
             });
             if (res.ok) { await fetchWishes(); setNewWish(''); }

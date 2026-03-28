@@ -4,8 +4,8 @@ import { useAuth } from './useAuth';
 import { useSocket } from './useSocket';
 
 const DEFAULT_LOCATIONS = {
-    DSP: { lat: 17.385, lng: 78.4867, city: 'Hyderabad' },
-    Rishika: { lat: 28.6139, lng: 77.209, city: 'Delhi' }
+    Romeo: { lat: 17.385, lng: 78.4867, city: 'Hyderabad' },
+    Juliet: { lat: 28.6139, lng: 77.209, city: 'Delhi' }
 };
 
 // Approximate distance calculation (Haversine formula)
@@ -28,7 +28,7 @@ export function useLocationDistance() {
     const [myLoc, setMyLoc] = useState<{ lat: number; lng: number } | null>(null);
     const [partnerLoc, setPartnerLoc] = useState<{ lat: number; lng: number } | null>(null);
 
-    const isRishika = session?.user.role === 'Rishika';
+    const isJuliet = session?.user.role === 'Juliet';
 
     // Set up live geolocation watch
     useEffect(() => {
@@ -95,8 +95,8 @@ export function useLocationDistance() {
         };
     }, [socket, session]);
 
-    const activeMyLoc = myLoc || (isRishika ? { lat: DEFAULT_LOCATIONS.Rishika.lat, lng: DEFAULT_LOCATIONS.Rishika.lng } : { lat: DEFAULT_LOCATIONS.DSP.lat, lng: DEFAULT_LOCATIONS.DSP.lng });
-    const activePartnerLoc = partnerLoc || (isRishika ? { lat: DEFAULT_LOCATIONS.DSP.lat, lng: DEFAULT_LOCATIONS.DSP.lng } : { lat: DEFAULT_LOCATIONS.Rishika.lat, lng: DEFAULT_LOCATIONS.Rishika.lng });
+    const activeMyLoc = myLoc || (isJuliet ? { lat: DEFAULT_LOCATIONS.Juliet.lat, lng: DEFAULT_LOCATIONS.Juliet.lng } : { lat: DEFAULT_LOCATIONS.Romeo.lat, lng: DEFAULT_LOCATIONS.Romeo.lng });
+    const activePartnerLoc = partnerLoc || (isJuliet ? { lat: DEFAULT_LOCATIONS.Romeo.lat, lng: DEFAULT_LOCATIONS.Romeo.lng } : { lat: DEFAULT_LOCATIONS.Juliet.lat, lng: DEFAULT_LOCATIONS.Juliet.lng });
     
     const distance = calculateDistance(activeMyLoc.lat, activeMyLoc.lng, activePartnerLoc.lat, activePartnerLoc.lng);
 
@@ -105,7 +105,7 @@ export function useLocationDistance() {
         locationAccess,
         myLoc: activeMyLoc,
         partnerLoc: activePartnerLoc,
-        isRishika,
-        partnerName: isRishika ? 'Devi' : 'Rishika'
+        isJuliet,
+        partnerName: isJuliet ? 'Romeo' : 'Juliet'
     };
 }

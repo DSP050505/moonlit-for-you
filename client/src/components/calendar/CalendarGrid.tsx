@@ -6,9 +6,9 @@ import { useAuth } from '../../context/AuthContext';
 
 // Curated love quotes
 const loveQuotes = [
-    "Rishika, you are my moon and stars ✨",
+    "Juliet, you are my moon and stars ✨",
     "Every mile between us is proof that love knows no distance 🌙",
-    "I found my forever in you, Rishika 💕",
+    "I found my forever in you, Juliet 💕",
     "You make even the darkest nights feel warm 🌟",
     "My favorite place is next to you 💗",
     "Under this same moon, I'm thinking of you 🌙",
@@ -33,7 +33,7 @@ const loveQuotes = [
     "I'm so lucky the universe gave me you 💕",
     "You are the best thing that's ever happened to me 💗",
     "Together is my favorite place to be 🌟",
-    "You complete my story, Rishika 📖",
+    "You complete my story, Juliet 📖",
     "Every moment with you is a treasure 💎",
     "You make distance feel like nothing 💕",
     "I love you to infinity and beyond 🚀",

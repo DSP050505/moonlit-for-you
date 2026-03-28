@@ -13,7 +13,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     const [mode, setMode] = useState<'join' | 'create'>('join');
     const [roomName, setRoomName] = useState('');
     const [passcode, setPasscode] = useState('');
-    const [role, setRole] = useState<Role>('Rishika');
+    const [role, setRole] = useState<Role>('Juliet');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [shakeCount, setShakeCount] = useState(0);
@@ -276,7 +276,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
                         <div>
                             <label style={{ display: 'block', marginBottom: '10px', color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1.5px' }}>I am...</label>
                             <div style={{ display: 'flex', gap: '12px' }}>
-                                {(['Rishika', 'DSP'] as Role[]).map(r => (
+                                {(['Juliet', 'Romeo'] as Role[]).map(r => (
                                     <button
                                         key={r}
                                         type="button"
@@ -293,7 +293,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
                                             fontSize: '0.9rem'
                                         }}
                                     >
-                                        {r === 'DSP' ? 'Devi Sri Prasad' : r}
+                                        {r}
                                     </button>
                                 ))}
                             </div>

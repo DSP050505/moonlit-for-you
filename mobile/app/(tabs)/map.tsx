@@ -5,7 +5,7 @@ import { useLocationDistance } from '../../hooks/useLocationDistance';
 import { useMusic } from '../../hooks/useMusic';
 
 export default function MapScreen() {
-    const { distance, locationAccess, myLoc, partnerLoc, isRishika, partnerName } = useLocationDistance();
+    const { distance, locationAccess, myLoc, partnerLoc, isJuliet, partnerName } = useLocationDistance();
     const { currentTrack } = useMusic();
 
     // Heart animation

@@ -18,8 +18,8 @@ const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => 
 
 // Default fallback coordinates
 const DEFAULT_LOCATIONS = {
-    DSP: { lat: 17.385, lng: 78.4867, city: 'Hyderabad' },
-    Rishika: { lat: 28.6139, lng: 77.209, city: 'Delhi' }
+    Romeo: { lat: 17.385, lng: 78.4867, city: 'Hyderabad' },
+    Juliet: { lat: 28.6139, lng: 77.209, city: 'Delhi' }
 };
 
 const DistanceMap: React.FC = () => {
@@ -30,8 +30,8 @@ const DistanceMap: React.FC = () => {
     const [myLoc, setMyLoc] = useState<{ lat: number; lng: number } | null>(null);
     const [partnerLoc, setPartnerLoc] = useState<{ lat: number; lng: number } | null>(null);
 
-    const isRishika = session?.user.role === 'Rishika';
-    const partnerName = isRishika ? 'Devi' : 'Rishika';
+    const isJuliet = session?.user.role === 'Juliet';
+    const partnerName = isJuliet ? 'Romeo' : 'Juliet';
 
     // Set up live geolocation watch
     useEffect(() => {
@@ -77,8 +77,8 @@ const DistanceMap: React.FC = () => {
         };
     }, [socket, session]);
 
-    const activeMyLoc = myLoc || (isRishika ? DEFAULT_LOCATIONS.Rishika : DEFAULT_LOCATIONS.DSP);
-    const activePartnerLoc = partnerLoc || (isRishika ? DEFAULT_LOCATIONS.DSP : DEFAULT_LOCATIONS.Rishika);
+    const activeMyLoc = myLoc || (isJuliet ? DEFAULT_LOCATIONS.Juliet : DEFAULT_LOCATIONS.Romeo);
+    const activePartnerLoc = partnerLoc || (isJuliet ? DEFAULT_LOCATIONS.Romeo : DEFAULT_LOCATIONS.Juliet);
     const distance = getDistance(activeMyLoc.lat, activeMyLoc.lng, activePartnerLoc.lat, activePartnerLoc.lng);
 
     return (

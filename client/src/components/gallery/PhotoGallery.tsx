@@ -441,7 +441,7 @@ const PhotoGallery: React.FC = () => {
     const [loading, setLoading] = useState(true);
 
     const roomId = session?.room.id || 1;
-    const userRole = session?.user.role || 'DSP';
+    const userRole = session?.user.role || 'Romeo';
 
     const fetchPhotos = useCallback(async () => {
         try {

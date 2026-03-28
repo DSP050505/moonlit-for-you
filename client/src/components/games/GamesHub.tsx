@@ -524,7 +524,7 @@ const WishJar: React.FC = () => {
                 body: JSON.stringify({
                     roomId: session.room.id,
                     content: newWish,
-                    author: session.user.role === 'Rishika' ? 'Rishika' : 'Devi Sri Prasad',
+                    author: session.user.role === 'Juliet' ? 'Juliet' : 'Romeo',
                 }),
             });
 

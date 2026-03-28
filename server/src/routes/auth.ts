@@ -62,7 +62,7 @@ router.post('/join-room', async (req, res) => {
         console.log(`   ✅ Passcode verified`);
 
         // Find or create user for this role in this room
-        // Valid roles: "Rishika" or "DSP" (Devi Sri Prasad)
+        // Valid roles: "Juliet" or "Romeo"
         console.log(`   Looking for existing user: role="${role}" in room ${room.id}`);
         let user = await prisma.user.findFirst({
             where: { roomId: room.id, role }

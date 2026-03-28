@@ -34,9 +34,9 @@ const ChatBox: React.FC = () => {
     const inputRef = useRef<HTMLInputElement>(null);
     const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const isRishika = session?.user.role === 'Rishika';
-    const partnerRole = isRishika ? 'DSP' : 'Rishika';
-    const partnerName = isRishika ? 'Devi Sri Prasad' : 'Rishika';
+    const isJuliet = session?.user.role === 'Juliet';
+    const partnerRole = isJuliet ? 'Romeo' : 'Juliet';
+    const partnerName = isJuliet ? 'Romeo' : 'Juliet';
     const partnerOnline = onlineRoles.includes(partnerRole);
 
     // Listen for presence updates
@@ -102,7 +102,7 @@ const ChatBox: React.FC = () => {
             setMessages(prev => [...prev, msg]);
 
             // If the message is from the partner, send read receipt
-            if (msg.sender !== (isRishika ? 'her' : 'you')) { // This logic needs to match what's sent
+            if (msg.sender !== (isJuliet ? 'her' : 'you')) { // This logic needs to match what's sent
                 // Simplification: if it wasn't sent by me, it's from partner. For real mapping, since DB uses 'you'/'her', 
                 // we assume the sender string matches whoever sent it locally.
                 socket.emit('chat:read', { roomId: session.room.id, messageId: msg.id });
@@ -136,7 +136,7 @@ const ChatBox: React.FC = () => {
             socket.off('chat:reaction');
             socket.off('chat:read');
         };
-    }, [socket, session, isRishika]);
+    }, [socket, session, isJuliet]);
 
     // Auto-scroll
     useEffect(() => {
@@ -149,8 +149,8 @@ const ChatBox: React.FC = () => {
         const isLoveMessage = inputText.toLowerCase().includes('i love you');
 
         // Note: the backend Prisma schema enum for Sender is "you" | "her". 
-        // We will just use 'you' when DSP sends and 'her' when Rishika sends for simplicity to respect the schema.
-        const senderEnum = isRishika ? 'her' : 'you';
+        // We will just use 'you' when Romeo sends and 'her' when Juliet sends for simplicity to respect the schema.
+        const senderEnum = isJuliet ? 'her' : 'you';
 
         socket.emit('chat:message', {
             roomId: session.room.id,
@@ -279,13 +279,13 @@ const ChatBox: React.FC = () => {
                     <AnimatePresence>
                         {messages.map((msg) => {
                             // Map 'you'/'her' to actual left/right logic based on the session
-                            const amIRishika = session?.user.role === 'Rishika';
-                            // If I am Rishika, and sender is 'her', then I am the sender locally. So change localSender to 'you'.
-                            // If I am DSP, and sender is 'you', then I am the sender locally. So change localSender to 'you'.
+                            const amIJuliet = session?.user.role === 'Juliet';
+                            // If I am Juliet, and sender is 'her', then I am the sender locally. So change localSender to 'you'.
+                            // If I am Romeo, and sender is 'you', then I am the sender locally. So change localSender to 'you'.
 
                             let localSender: 'you' | 'her' = 'her';
-                            if (amIRishika && msg.sender === 'her') localSender = 'you';
-                            if (!amIRishika && msg.sender === 'you') localSender = 'you';
+                            if (amIJuliet && msg.sender === 'her') localSender = 'you';
+                            if (!amIJuliet && msg.sender === 'you') localSender = 'you';
 
                             const mappedMsg = { ...msg, sender: localSender };
 

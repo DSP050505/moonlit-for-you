@@ -42,10 +42,10 @@ const TopBar: React.FC = () => {
 
     // Build presence text
     const myRole = session?.user.role;
-    const partnerRole = myRole === 'Rishika' ? 'DSP' : 'Rishika';
-    const partnerName = partnerRole === 'DSP' ? 'Devi Sri Prasad' : 'Rishika';
+    const partnerRole = myRole === 'Juliet' ? 'Romeo' : 'Juliet';
+    const partnerName = partnerRole === 'Romeo' ? 'Romeo' : 'Juliet';
     const partnerOnline = onlineRoles.includes(partnerRole);
-    const bothOnline = onlineRoles.includes('Rishika') && onlineRoles.includes('DSP');
+    const bothOnline = onlineRoles.includes('Juliet') && onlineRoles.includes('Romeo');
 
     return (
         <header className="app-topbar" style={{

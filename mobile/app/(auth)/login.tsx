@@ -12,7 +12,7 @@ export default function LoginScreen() {
     const [mode, setMode] = useState<'join' | 'create'>('join');
     const [roomName, setRoomName] = useState('');
     const [passcode, setPasscode] = useState('');
-    const [role, setRole] = useState<Role>('Rishika');
+    const [role, setRole] = useState<Role>('Juliet');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -134,16 +134,16 @@ export default function LoginScreen() {
                             <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: 10, letterSpacing: 2, marginBottom: 8, marginLeft: 4 }}>I am...</Text>
                             <View style={{ flexDirection: 'row', gap: 12 }}>
                                 <TouchableOpacity 
-                                    onPress={() => setRole('Rishika')}
-                                    style={{ flex: 1, paddingVertical: 16, borderWidth: 1, borderRadius: 8, borderColor: role === 'Rishika' ? 'rgba(242, 167, 195, 0.4)' : 'rgba(255,255,255,0.1)', backgroundColor: role === 'Rishika' ? 'rgba(242, 167, 195, 0.05)' : 'rgba(0,0,0,0.2)' }}
+                                    onPress={() => setRole('Juliet')}
+                                    style={{ flex: 1, paddingVertical: 16, borderWidth: 1, borderRadius: 8, borderColor: role === 'Juliet' ? 'rgba(242, 167, 195, 0.4)' : 'rgba(255,255,255,0.1)', backgroundColor: role === 'Juliet' ? 'rgba(242, 167, 195, 0.05)' : 'rgba(0,0,0,0.2)' }}
                                 >
-                                    <Text style={{ textAlign: 'center', color: role === 'Rishika' ? 'white' : 'rgba(255,255,255,0.3)' }}>Rishika</Text>
+                                    <Text style={{ textAlign: 'center', color: role === 'Juliet' ? 'white' : 'rgba(255,255,255,0.3)' }}>Juliet</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity 
-                                    onPress={() => setRole('DSP')}
-                                    style={{ flex: 1, paddingVertical: 16, borderWidth: 1, borderRadius: 8, borderColor: role === 'DSP' ? 'rgba(242, 167, 195, 0.4)' : 'rgba(255,255,255,0.1)', backgroundColor: role === 'DSP' ? 'rgba(242, 167, 195, 0.05)' : 'rgba(0,0,0,0.2)' }}
+                                    onPress={() => setRole('Romeo')}
+                                    style={{ flex: 1, paddingVertical: 16, borderWidth: 1, borderRadius: 8, borderColor: role === 'Romeo' ? 'rgba(242, 167, 195, 0.4)' : 'rgba(255,255,255,0.1)', backgroundColor: role === 'Romeo' ? 'rgba(242, 167, 195, 0.05)' : 'rgba(0,0,0,0.2)' }}
                                 >
-                                    <Text style={{ textAlign: 'center', color: role === 'DSP' ? 'white' : 'rgba(255,255,255,0.3)' }}>DSP</Text>
+                                    <Text style={{ textAlign: 'center', color: role === 'Romeo' ? 'white' : 'rgba(255,255,255,0.3)' }}>Romeo</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>

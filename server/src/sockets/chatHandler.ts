@@ -48,7 +48,7 @@ export function setupChatHandler(io: Server, socket: Socket) {
                 await createNotification(
                     data.roomId,
                     'love',
-                    `${data.sender === 'you' ? 'Devi Sri Prasad' : 'Rishika'} said "I love you" ❤️`,
+                    `${data.sender === 'you' ? 'Romeo' : 'Juliet'} said "I love you" ❤️`,
                     { messageId: message.id }
                 );
             } else if (isMilestone) {
@@ -63,7 +63,7 @@ export function setupChatHandler(io: Server, socket: Socket) {
                 await createNotification(
                     data.roomId,
                     'love',
-                    `New message from ${data.sender === 'you' ? 'Devi Sri Prasad' : 'Rishika'} 💌`,
+                    `New message from ${data.sender === 'you' ? 'Romeo' : 'Juliet'} 💌`,
                     { messageId: message.id }
                 );
             }

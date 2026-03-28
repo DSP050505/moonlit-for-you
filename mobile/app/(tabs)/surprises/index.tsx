@@ -209,7 +209,7 @@ function SurpriseCard({ surprise, onDelete }: { surprise: Surprise; onDelete: ()
                         "{surprise.content}"
                     </Text>
                     <Text style={{ color: '#8A8FA8', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, textAlign: 'center', marginTop: 12 }}>
-                        FROM {surprise.createdBy === 'DSP' ? 'DEVI SRI PRASAD' : 'RISHIKA'}
+                        FROM {surprise.createdBy === 'Romeo' ? 'ROMEO' : 'JULIET'}
                     </Text>
                 </View>
             ) : (

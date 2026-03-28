@@ -26,18 +26,18 @@ export default function ChatScreen() {
     const [onlineCount, setOnlineCount] = useState(0);
     const flatListRef = useRef<FlatList>(null);
 
-    const isRishika = session?.user.role === 'Rishika';
+    const isJuliet = session?.user.role === 'Juliet';
 
     // Mark as read and join chat presence when focused
     useEffect(() => {
         if (pathname === '/' && socket && session) {
-            socket.emit('chat:read', { roomId: session.room.id, sender: isRishika ? 'her' : 'you' });
-            socket.emit('chat:join', { roomId: session.room.id, sender: isRishika ? 'her' : 'you' });
+            socket.emit('chat:read', { roomId: session.room.id, sender: isJuliet ? 'her' : 'you' });
+            socket.emit('chat:join', { roomId: session.room.id, sender: isJuliet ? 'her' : 'you' });
         }
         
         return () => {
             if (pathname === '/' && socket && session) {
-                socket.emit('chat:leave', { roomId: session.room.id, sender: isRishika ? 'her' : 'you' });
+                socket.emit('chat:leave', { roomId: session.room.id, sender: isJuliet ? 'her' : 'you' });
             }
         };
     }, [pathname, socket, session]);
@@ -56,7 +56,7 @@ export default function ChatScreen() {
                 
                 // Once loaded, mark all messages from partner as read
                 if (socket && session) {
-                    socket.emit('chat:read', { roomId: session.room.id, sender: isRishika ? 'her' : 'you' });
+                    socket.emit('chat:read', { roomId: session.room.id, sender: isJuliet ? 'her' : 'you' });
                 }
             })
             .catch(err => {
@@ -72,21 +72,21 @@ export default function ChatScreen() {
         socket.on('chat:message', (msg: Message) => {
             setMessages(prev => [...prev, msg]);
             // If message is from partner, mark all as read automatically
-            const partnerSender = isRishika ? 'you' : 'her';
+            const partnerSender = isJuliet ? 'you' : 'her';
             if (msg.sender === partnerSender && session) {
-                socket.emit('chat:read', { roomId: session.room.id, sender: isRishika ? 'her' : 'you' });
+                socket.emit('chat:read', { roomId: session.room.id, sender: isJuliet ? 'her' : 'you' });
             }
         });
 
         socket.on('chat:read', (data: { reader: string }) => {
             const partnerReader = data.reader; // 'her' or 'you'
-            const isMeReading = (isRishika && partnerReader === 'her') || (!isRishika && partnerReader === 'you');
+            const isMeReading = (isJuliet && partnerReader === 'her') || (!isJuliet && partnerReader === 'you');
             
             if (!isMeReading) {
                 // The partner read my messages! Update local state to reflect this
                 setMessages(prev => prev.map(m => {
                     // Map local perspective
-                    const isMessageFromMe = (isRishika && m.sender === 'her') || (!isRishika && m.sender === 'you');
+                    const isMessageFromMe = (isJuliet && m.sender === 'her') || (!isJuliet && m.sender === 'you');
                     if (isMessageFromMe && !m.readAt) {
                         return { ...m, readAt: new Date().toISOString() };
                     }
@@ -117,8 +117,8 @@ export default function ChatScreen() {
             return;
         }
 
-        console.log(`📱 Chat: Emitting message "${inputText}" as ${isRishika ? 'Rishika' : 'DSP'}`);
-        const senderEnum = isRishika ? 'her' : 'you';
+        console.log(`📱 Chat: Emitting message "${inputText}" as ${isJuliet ? 'Juliet' : 'Romeo'}`);
+        const senderEnum = isJuliet ? 'her' : 'you';
         socket.emit('chat:message', {
             roomId: session.room.id,
             sender: senderEnum,
@@ -132,8 +132,8 @@ export default function ChatScreen() {
     const renderMessage = ({ item }: { item: Message }) => {
         // Map sender to local perspective
         let isMe = false;
-        if (isRishika && item.sender === 'her') isMe = true;
-        if (!isRishika && item.sender === 'you') isMe = true;
+        if (isJuliet && item.sender === 'her') isMe = true;
+        if (!isJuliet && item.sender === 'you') isMe = true;
 
         return (
             <View style={{ marginBottom: 16, flexDirection: 'row', justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
@@ -174,7 +174,7 @@ export default function ChatScreen() {
         
         socket.emit('chat:message', {
             roomId: session.room.id,
-            sender: isRishika ? 'her' : 'you',
+            sender: isJuliet ? 'her' : 'you',
             content: emoji,
             type: 'text'
         });
