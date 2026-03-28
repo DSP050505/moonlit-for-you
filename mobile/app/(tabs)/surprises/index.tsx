@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Alert, Modal, Platform } from 'react-native';
-import { FloatingPingAction } from '../../../components/FloatingPingAction';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useAuth } from '../../../hooks/useAuth';
 import { Gift, Plus, X, Trash2 } from 'lucide-react-native';
@@ -172,7 +171,6 @@ export default function SurprisesScreen() {
                     </View>
                 </View>
             </Modal>
-            <FloatingPingAction />
         </View>
     );
 }

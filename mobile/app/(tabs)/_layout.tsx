@@ -54,6 +54,40 @@ function CustomDrawerContent(props: any) {
   );
 }
 
+function HeaderPingButton() {
+  const { session } = useAuth();
+  const { socket } = useSocket();
+  const pathname = usePathname();
+
+  const handlePing = () => {
+    if (!socket || !session) return;
+    
+    let sectionName = 'Chat';
+    const path = pathname;
+    
+    if (path.includes('/calendar')) sectionName = 'Calendar';
+    else if (path.includes('/map')) sectionName = 'Distance';
+    else if (path.includes('/music')) sectionName = 'Music';
+    else if (path.includes('/gallery')) sectionName = 'Our Memories';
+    else if (path.includes('/games')) sectionName = 'Games';
+    else if (path.includes('/surprises')) sectionName = 'Surprises';
+    
+    socket.emit('invite:section', {
+      roomId: session.room.id,
+      sender: session.user.id,
+      senderRole: session.user.role,
+      sectionName,
+      path
+    });
+  };
+
+  return (
+    <TouchableOpacity onPress={handlePing} style={{ marginLeft: 15 }}>
+      <Sparkles size={24} color="#E8788A" />
+    </TouchableOpacity>
+  );
+}
+
 export default function SidebarLayout() {
   const { distance } = useLocationDistance();
 
@@ -85,7 +119,7 @@ export default function SidebarLayout() {
           fontSize: 18,
         },
         headerTitleAlign: 'center',
-        headerLeft: () => null,
+        headerLeft: () => <HeaderPingButton />,
         headerRight: () => (
           <TouchableOpacity 
             onPress={() => navigation.toggleDrawer()}

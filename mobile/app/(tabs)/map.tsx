@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, StyleSheet, Dimensions, Animated, Easing, ActivityIndicator, ScrollView } from 'react-native';
-import { FloatingPingAction } from '../../components/FloatingPingAction';
 import { Compass } from 'lucide-react-native';
 import { useLocationDistance } from '../../hooks/useLocationDistance';
 
@@ -101,7 +100,6 @@ export default function MapScreen() {
                 </Text>
             )}
             </ScrollView>
-            <FloatingPingAction />
         </View>
     );
 }

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
-import { FloatingPingAction } from '../../components/FloatingPingAction';
 import { useAuth } from '../../hooks/useAuth';
 import { useSocket } from '../../hooks/useSocket';
 
@@ -194,7 +193,6 @@ export default function CalendarScreen() {
                     </Text>
                 </View>
             </ScrollView>
-            <FloatingPingAction />
         </View>
     );
 }

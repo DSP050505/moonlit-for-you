@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
-import { FloatingPingAction } from '../../components/FloatingPingAction';
 import { useAuth } from '../../hooks/useAuth';
 import { useSocket } from '../../hooks/useSocket';
 import { Send, Heart } from 'lucide-react-native';
@@ -117,6 +116,17 @@ export default function ChatScreen() {
         );
     }
 
+    const sendEmoji = (emoji: string) => {
+        if (!socket || !session) return;
+        
+        socket.emit('chat:message', {
+            roomId: session.room.id,
+            sender: isRishika ? 'her' : 'you',
+            content: emoji,
+            type: 'text'
+        });
+    };
+
     return (
         <KeyboardAvoidingView 
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -132,32 +142,44 @@ export default function ChatScreen() {
                 onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
             />
 
-            <View style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: Platform.OS === 'ios' ? 32 : 36, backgroundColor: '#141829', borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.05)', flexDirection: 'row', alignItems: 'center' }}>
-                <TextInput
-                    value={inputText}
-                    onChangeText={setInputText}
-                    placeholder="Whisper something..."
-                    placeholderTextColor="#8A8FA8"
-                    onSubmitEditing={handleSend}
-                    returnKeyType="send"
-                    blurOnSubmit={false}
-                    style={{ flex: 1, backgroundColor: '#1C2038', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 25, paddingHorizontal: 20, paddingVertical: 12, color: 'white' }}
-                />
-                <TouchableOpacity 
-                    onPress={handleSend}
-                    disabled={!inputText.trim()}
-                    style={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: 24,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        backgroundColor: inputText.trim() ? '#E8788A' : 'rgba(255, 255, 255, 0.05)',
-                        marginLeft: 12
-                    }}
-                >
-                    <Send size={20} color={inputText.trim() ? 'white' : '#8A8FA8'} />
-                </TouchableOpacity>
+            <View style={{ backgroundColor: '#141829', borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.05)' }}>
+                {/* ── Quick Emojis ── */}
+                <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 20, paddingTop: 10, paddingBottom: 6 }}>
+                    {['❤️', '💔', '😊', '😭', '😘', '😡', '🥺'].map(emoji => (
+                        <TouchableOpacity key={emoji} onPress={() => sendEmoji(emoji)} activeOpacity={0.7}>
+                            <Text style={{ fontSize: 24 }}>{emoji}</Text>
+                        </TouchableOpacity>
+                    ))}
+                </View>
+
+                {/* ── Input Bar ── */}
+                <View style={{ paddingHorizontal: 16, paddingTop: 6, paddingBottom: Platform.OS === 'ios' ? 32 : 36, flexDirection: 'row', alignItems: 'center' }}>
+                    <TextInput
+                        value={inputText}
+                        onChangeText={setInputText}
+                        placeholder="Whisper something..."
+                        placeholderTextColor="#8A8FA8"
+                        onSubmitEditing={handleSend}
+                        returnKeyType="send"
+                        blurOnSubmit={false}
+                        style={{ flex: 1, backgroundColor: '#1C2038', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 25, paddingHorizontal: 20, paddingVertical: 12, color: 'white' }}
+                    />
+                    <TouchableOpacity 
+                        onPress={handleSend}
+                        disabled={!inputText.trim()}
+                        style={{
+                            width: 48,
+                            height: 48,
+                            borderRadius: 24,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            backgroundColor: inputText.trim() ? '#E8788A' : 'rgba(255, 255, 255, 0.05)',
+                            marginLeft: 12
+                        }}
+                    >
+                        <Send size={20} color={inputText.trim() ? 'white' : '#8A8FA8'} />
+                    </TouchableOpacity>
+                </View>
             </View>
         </KeyboardAvoidingView>
     );

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useAuth } from '../../../hooks/useAuth';
-import { FloatingPingAction } from '../../../components/FloatingPingAction';
 import { DoodleGame } from '../../../components/games/DoodleGame';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
@@ -55,7 +54,6 @@ export default function GamesScreen() {
             {activeTab === 'quiz' && <LoveQuiz />}
             {activeTab === 'wishes' && <WishJar />}
             {activeTab === 'doodle' && <DoodleGame />}
-            <FloatingPingAction />
         </View>
     );
 }

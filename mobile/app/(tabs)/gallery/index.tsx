@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Image, TouchableOpacity, ActivityIndicator, Dimensions, Modal, TextInput, KeyboardAvoidingView, Platform, Keyboard, TouchableWithoutFeedback, Alert } from 'react-native';
-import { FloatingPingAction } from '../../../components/FloatingPingAction';
 import { useAuth } from '../../../hooks/useAuth';
 import { ArrowLeft, Camera, Heart, X, Trash2, Image as ImageIcon } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
@@ -284,7 +283,6 @@ export default function GalleryScreen() {
                     </View>
                 )}
             </Modal>
-            <FloatingPingAction />
         </View>
     );
 }
