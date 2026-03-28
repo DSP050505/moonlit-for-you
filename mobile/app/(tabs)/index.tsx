@@ -21,15 +21,23 @@ export default function ChatScreen() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputText, setInputText] = useState('');
     const [isLoading, setIsLoading] = useState(true);
+    const [onlineCount, setOnlineCount] = useState(0);
     const flatListRef = useRef<FlatList>(null);
 
     const isRishika = session?.user.role === 'Rishika';
 
-    // Mark as read when focused
+    // Mark as read and join chat presence when focused
     useEffect(() => {
         if (pathname === '/' && socket && session) {
             socket.emit('chat:read', { roomId: session.room.id, sender: isRishika ? 'her' : 'you' });
+            socket.emit('chat:join', { roomId: session.room.id, sender: isRishika ? 'her' : 'you' });
         }
+        
+        return () => {
+            if (pathname === '/' && socket && session) {
+                socket.emit('chat:leave', { roomId: session.room.id, sender: isRishika ? 'her' : 'you' });
+            }
+        };
     }, [pathname, socket, session]);
 
     // Fetch history
@@ -85,9 +93,14 @@ export default function ChatScreen() {
             }
         });
 
+        socket.on('chat:online_count', (data: { count: number }) => {
+            setOnlineCount(data.count);
+        });
+
         return () => {
             socket.off('chat:message');
             socket.off('chat:read');
+            socket.off('chat:online_count');
         };
     }, [socket]);
 
@@ -165,6 +178,27 @@ export default function ChatScreen() {
         });
     };
 
+    const renderHeader = () => {
+        if (onlineCount < 2) return null;
+        return (
+            <View style={{ alignItems: 'center', paddingVertical: 8, marginBottom: 8 }}>
+                <View style={{ 
+                    flexDirection: 'row', 
+                    alignItems: 'center', 
+                    backgroundColor: 'rgba(126, 207, 160, 0.1)', 
+                    paddingHorizontal: 12, 
+                    paddingVertical: 4, 
+                    borderRadius: 999,
+                    borderWidth: 1,
+                    borderColor: 'rgba(126, 207, 160, 0.2)'
+                }}>
+                    <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#7ECFA0', marginRight: 6 }} />
+                    <Text style={{ color: '#7ECFA0', fontSize: 11, fontWeight: 'bold', letterSpacing: 0.5 }}>BOTH ONLINE ✨</Text>
+                </View>
+            </View>
+        );
+    };
+
     return (
         <KeyboardAvoidingView 
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -176,6 +210,7 @@ export default function ChatScreen() {
                 data={messages}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={renderMessage}
+                ListHeaderComponent={renderHeader}
                 contentContainerStyle={{ padding: 16 }}
                 onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
             />

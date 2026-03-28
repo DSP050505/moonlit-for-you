@@ -1,6 +1,9 @@
 import { Server, Socket } from 'socket.io';
 import prisma from '../db/database';
 
+// Track users active specifically in the chat screen: Map<roomId, Set<sender>>
+const chatPresence = new Map<number, Set<string>>();
+
 export function setupChatHandler(io: Server, socket: Socket) {
     console.log(`💬 Chat handler set up for socket ${socket.id}`);
     // Handle new chat message
@@ -127,6 +130,40 @@ export function setupChatHandler(io: Server, socket: Socket) {
             });
         } catch (error) {
             console.error('🔥 Error handling read receipt:', error);
+        }
+    });
+
+    // Handle specific chat focus join
+    socket.on('chat:join', (data: { roomId: number; sender: string }) => {
+        if (!chatPresence.has(data.roomId)) chatPresence.set(data.roomId, new Set());
+        chatPresence.get(data.roomId)!.add(data.sender);
+        
+        (socket as any).chatRoomId = data.roomId;
+        (socket as any).chatSender = data.sender;
+
+        io.to(`room_${data.roomId}`).emit('chat:online_count', { 
+            count: chatPresence.get(data.roomId)!.size 
+        });
+    });
+
+    // Handle specific chat focus leave
+    socket.on('chat:leave', (data: { roomId: number; sender: string }) => {
+        if (chatPresence.has(data.roomId)) {
+            chatPresence.get(data.roomId)!.delete(data.sender);
+            io.to(`room_${data.roomId}`).emit('chat:online_count', { 
+                count: chatPresence.get(data.roomId)!.size 
+            });
+        }
+    });
+
+    socket.on('disconnect', () => {
+        const roomId = (socket as any).chatRoomId;
+        const sender = (socket as any).chatSender;
+        if (roomId && sender && chatPresence.has(roomId)) {
+            chatPresence.get(roomId)!.delete(sender);
+            io.to(`room_${roomId}`).emit('chat:online_count', { 
+                count: chatPresence.get(roomId)!.size 
+            });
         }
     });
 
