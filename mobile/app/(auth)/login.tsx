@@ -32,14 +32,19 @@ export default function LoginScreen() {
                 ? { name: roomName, passcode, role }
                 : { name: roomName, passcode };
 
-            const res = await fetch(`${API_URL}${endpoint}`, {
+            const url = `${API_URL}${endpoint}`;
+            console.log(`📱 Login: Fetching POST ${url}`);
+            console.log(`📱 Login: Body = ${JSON.stringify(body)}`);
+
+            const res = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
             });
 
+            console.log(`📱 Login: Response status = ${res.status}`);
             const data = await res.json();
-            console.log('📱 Login: Response received', data);
+            console.log('📱 Login: Response data =', JSON.stringify(data));
 
             if (!res.ok) {
                 throw new Error(data.error || 'Authentication failed');
@@ -47,13 +52,20 @@ export default function LoginScreen() {
 
             if (mode === 'create') {
                 // Auto-join after create
-                const joinRes = await fetch(`${API_URL}/api/auth/join-room`, {
+                const joinUrl = `${API_URL}/api/auth/join-room`;
+                const joinBody = { name: roomName, passcode, role };
+                console.log(`📱 Login: Auto-joining POST ${joinUrl}`);
+                console.log(`📱 Login: Join body = ${JSON.stringify(joinBody)}`);
+                
+                const joinRes = await fetch(joinUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: roomName, passcode, role }),
+                    body: JSON.stringify(joinBody),
                 });
+                console.log(`📱 Login: Join response status = ${joinRes.status}`);
                 const joinData = await joinRes.json();
-                if (!joinRes.ok) throw new Error(joinData.error);
+                console.log(`📱 Login: Join response data = ${JSON.stringify(joinData)}`);
+                if (!joinRes.ok) throw new Error(joinData.error || 'Failed to join room');
                 await login({ room: joinData.room, user: joinData.user });
             } else {
                 await login({ room: data.room, user: data.user });

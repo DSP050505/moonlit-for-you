@@ -27,8 +27,8 @@ enum EventType {
 }
 
 enum UserRole {
-  Rishika
-  DSP
+  Juliet
+  Romeo
 }
 
 model Room {
