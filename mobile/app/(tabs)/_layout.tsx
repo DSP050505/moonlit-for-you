@@ -4,7 +4,10 @@ import { DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navi
 import { MessageSquare, Calendar, MapPin, Music, LogOut, Menu, Image as ImageIcon, Gamepad2, Gift } from 'lucide-react-native';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { useAuth } from '../../hooks/useAuth';
-import { useRouter } from 'expo-router';
+import { useRouter, usePathname } from 'expo-router';
+import { useLocationDistance } from '../../hooks/useLocationDistance';
+import { useSocket } from '../../hooks/useSocket';
+import { Sparkles } from 'lucide-react-native';
 
 function CustomDrawerContent(props: any) {
   const { logout } = useAuth();
@@ -52,9 +55,12 @@ function CustomDrawerContent(props: any) {
 }
 
 export default function SidebarLayout() {
+  const { distance } = useLocationDistance();
+
   return (
-    <Drawer
-      drawerContent={(props) => <CustomDrawerContent {...props} />}
+    <View style={{ flex: 1 }}>
+      <Drawer
+        drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={({ navigation }) => ({
         drawerStyle: {
           backgroundColor: '#0B0E1A',
@@ -109,7 +115,16 @@ export default function SidebarLayout() {
       <Drawer.Screen
         name="map"
         options={{
-          drawerLabel: 'Distance',
+          drawerLabel: ({ color }) => (
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginLeft: -10 }}>
+              <Text style={{ color, fontWeight: '600' }}>Distance</Text>
+              {distance !== null && (
+                <Text style={{ color: color === '#F2A7C3' ? '#F2A7C3' : '#8A8FA8', fontSize: 13, marginRight: 16 }}>
+                  {distance} km
+                </Text>
+              )}
+            </View>
+          ),
           title: 'Distance',
           drawerIcon: ({ color }) => <MapPin size={20} color={color} />,
         }}
@@ -126,7 +141,7 @@ export default function SidebarLayout() {
         name="gallery/index"
         options={{
           drawerLabel: 'Gallery',
-          title: 'Gallery',
+          title: 'Our Memories',
           drawerIcon: ({ color }) => <ImageIcon size={20} color={color} />,
         }}
       />
@@ -156,6 +171,7 @@ export default function SidebarLayout() {
         options={{ drawerItemStyle: { display: 'none' } }}
       />
     </Drawer>
+   </View>
   );
 }
 

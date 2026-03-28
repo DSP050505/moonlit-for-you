@@ -117,4 +117,10 @@ export function setupChatHandler(io: Server, socket: Socket) {
             console.error('Error handling read receipt:', error);
         }
     });
+
+    // Handle cross-section invites
+    socket.on('invite:section', (data: { roomId: number; sender: string; senderRole: string; sectionName: string; path: string }) => {
+        console.log(`🔔 invite:section: ${data.senderRole} invited partner to ${data.sectionName}`);
+        socket.to(`room_${data.roomId}`).emit('invite:section', data);
+    });
 }

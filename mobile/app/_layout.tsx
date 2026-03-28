@@ -9,6 +9,8 @@ import { View, ActivityIndicator, LogBox } from "react-native";
 LogBox.ignoreLogs(['Unable to activate keep awake', 'Exception in HostObject']);
 import "../global.css";
 
+import { GlobalCallNotification } from "../components/GlobalCallNotification";
+
 function RootLayoutNav() {
   const { session, isLoading } = useAuth();
   const segments = useSegments();
@@ -42,6 +44,7 @@ function RootLayoutNav() {
         <Stack.Screen name="(auth)" options={{ animation: 'fade' }} />
         {/* Let Expo Router handle (tabs) group layout automatically */}
       </Stack>
+      <GlobalCallNotification />
     </SocketProvider>
   );
 }

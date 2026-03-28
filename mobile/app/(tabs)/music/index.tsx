@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, ScrollView, ActivityIndicator, Image, Alert } from 'react-native';
+import { FloatingPingAction } from '../../../components/FloatingPingAction';
 import { useAuth } from '../../../hooks/useAuth';
 import { Search, Play, ListPlus, Disc, X, SkipForward, Pause, Plus, Trash2 } from 'lucide-react-native';
 
@@ -346,6 +347,7 @@ export default function MusicScreen() {
                     <View style={{ height: 40 }} />
                 </ScrollView>
             )}
+            <FloatingPingAction />
         </View>
     );
 }

@@ -1,90 +1,211 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
-import { useAuth } from '../../hooks/useAuth';
-import { useSocket } from '../../hooks/useSocket';
-import { Map as MapIcon, Compass } from 'lucide-react-native';
+import React from 'react';
+import { View, Text, StyleSheet, Dimensions, Animated, Easing, ActivityIndicator, ScrollView } from 'react-native';
+import { FloatingPingAction } from '../../components/FloatingPingAction';
+import { Compass } from 'lucide-react-native';
+import { useLocationDistance } from '../../hooks/useLocationDistance';
 
 export default function MapScreen() {
-    const { session } = useAuth();
-    const { socket } = useSocket();
-    const [locations, setLocations] = useState<Record<string, { lat: number, lon: number, time: number }>>({});
-    const [distance, setDistance] = useState<number | null>(null);
+    const { distance, locationAccess, myLoc, partnerLoc, isRishika, partnerName } = useLocationDistance();
 
-    const isRishika = session?.user.role === 'Rishika';
-    const partnerRole = isRishika ? 'DSP' : 'Rishika';
-    const partnerName = isRishika ? 'Devi Sri Prasad' : 'Rishika';
+    // Heart animation
+    const heartAnim = React.useRef(new Animated.Value(0)).current;
 
-    // Calculate distance Helper
-    const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-        const R = 6371; // km
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return Math.round(R * c);
-    };
+    React.useEffect(() => {
+        Animated.loop(
+            Animated.timing(heartAnim, {
+                toValue: 1,
+                duration: 3000,
+                easing: Easing.linear,
+                useNativeDriver: true,
+            })
+        ).start();
+    }, [heartAnim]);
 
-    useEffect(() => {
-        if (!socket) return;
-
-        socket.on('location:update', (data: any) => {
-            console.log('📱 Map: Received location update', data);
-            setLocations(prev => ({
-                ...prev,
-                [data.role]: { lat: data.latitude, lon: data.longitude, time: Date.now() }
-            }));
-        });
-
-        return () => { socket.off('location:update'); };
-    }, [socket]);
-
-    useEffect(() => {
-        const myLoc = locations[session?.user.role || ''];
-        const partnerLoc = locations[partnerRole];
-
-        if (myLoc && partnerLoc) {
-            setDistance(calculateDistance(myLoc.lat, myLoc.lon, partnerLoc.lat, partnerLoc.lon));
-        }
-    }, [locations, session, partnerRole]);
+    const translateX = heartAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, Dimensions.get('window').width - 240], // Estimate route length
+    });
 
     return (
-        <View style={{ flex: 1, backgroundColor: '#0B0E1A', padding: 24, alignItems: 'center', justifyContent: 'center' }}>
-            <View style={{ backgroundColor: '#141829', padding: 40, borderRadius: 50, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)', width: '100%', elevation: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.3, shadowRadius: 20 }}>
-                <View style={{ width: 80, height: 80, backgroundColor: 'rgba(242, 167, 195, 0.1)', borderRadius: 40, alignItems: 'center', justifyContent: 'center', marginBottom: 24, borderWidth: 1, borderColor: 'rgba(242, 167, 195, 0.2)' }}>
-                    <Compass size={40} color="#F2A7C3" />
+        <View style={{ flex: 1, backgroundColor: '#0B0E1A' }}>
+            <ScrollView contentContainerStyle={{ padding: 20 }}>
+            <Text style={{ fontFamily: 'Quicksand', color: 'white', fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginBottom: 32, opacity: 0.9 }}>
+                🛰️ Live Connection
+            </Text>
+
+            {/* Connection Card */}
+            <View style={styles.connectionCard}>
+                
+                {/* Visual Route */}
+                <View style={styles.routeContainer}>
+                    {/* Left Node */}
+                    <View style={styles.node}>
+                        <Text style={styles.nodeIcon}>📍</Text>
+                        <Text style={[styles.nodeText, { color: '#F2A7C3' }]}>Your Heart</Text>
+                    </View>
+
+                    {/* Connecting Line with Animated Heart */}
+                    <View style={styles.line}>
+                        <Animated.Text style={[styles.animatedHeart, { transform: [{ translateX }] }]}>
+                            ❤️
+                        </Animated.Text>
+                    </View>
+
+                    {/* Right Node */}
+                    <View style={styles.node}>
+                        <Text style={styles.nodeIcon}>📍</Text>
+                        <Text style={[styles.nodeText, { color: '#F5D380' }]}>{partnerName}'s Heart</Text>
+                    </View>
                 </View>
-                
-                <Text style={{ color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: 4, fontSize: 12, marginBottom: 8 }}>Distance Between Us</Text>
-                
-                {distance !== null ? (
-                    <View style={{ alignItems: 'center' }}>
-                        <Text style={{ color: 'white', fontSize: 72, fontWeight: 'bold', marginBottom: 8 }}>{distance}</Text>
-                        <Text style={{ color: '#F2A7C3', fontSize: 24, fontWeight: '600' }}>Kilometers</Text>
-                    </View>
-                ) : (
-                    <View style={{ alignItems: 'center', paddingVertical: 24 }}>
-                        <ActivityIndicator color="#F2A7C3" style={{ marginBottom: 16 }} />
-                        <Text style={{ color: '#8A8FA8', textAlign: 'center', lineHeight: 20, paddingHorizontal: 24 }}>
-                            Waiting for someone to share their location...
-                        </Text>
-                        <Text style={{ color: 'rgba(242, 167, 195, 0.6)', fontSize: 12, marginTop: 8, fontStyle: 'italic' }}>Connect on web to sync!</Text>
-                    </View>
-                )}
-                
-                <View style={{ marginTop: 48, width: '100%', paddingTop: 32, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.05)' }}>
-                    <Text style={{ color: 'rgba(255,255,255,0.3)', textAlign: 'center', fontSize: 12, fontStyle: 'italic' }}>
-                        "Distance means so little when someone means so much."
+
+                {/* Distance Value */}
+                <View style={styles.distanceContainer}>
+                    {distance !== null ? (
+                        <>
+                            <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'center' }}>
+                                <Text style={styles.distanceNumber}>{distance}</Text>
+                                <Text style={styles.distanceUnit}>km</Text>
+                            </View>
+                            <Text style={styles.distanceMessage}>
+                                {distance === 0 ? "You're side by side! ✨" : "Always thinking of you 💫"}
+                            </Text>
+                        </>
+                    ) : (
+                        <ActivityIndicator color="#F2A7C3" size="large" />
+                    )}
+                </View>
+
+                {/* Background Grid Pattern Simulator */}
+                <View style={styles.gridPattern} pointerEvents="none" />
+            </View>
+
+            {/* Detail Mini Cards */}
+            <View style={styles.cardsRow}>
+                <View style={styles.miniCard}>
+                    <Text style={[styles.cardTitle, { color: '#E8788A' }]}>Me</Text>
+                    <Text style={styles.cardCoord}>
+                        {locationAccess === 'denied' ? 'Permission Denied' : myLoc ? `${myLoc.lat.toFixed(4)}, ${myLoc.lng.toFixed(4)}` : 'Locating...'}
+                    </Text>
+                </View>
+                <View style={styles.miniCard}>
+                    <Text style={[styles.cardTitle, { color: '#F5D380' }]}>{partnerName}</Text>
+                    <Text style={styles.cardCoord}>
+                        {partnerLoc ? `${partnerLoc.lat.toFixed(4)}, ${partnerLoc.lng.toFixed(4)}` : 'Signal waiting...'}
                     </Text>
                 </View>
             </View>
 
-            <View style={{ marginTop: 32, paddingHorizontal: 24 }}>
-                <Text style={{ color: 'rgba(138, 143, 168, 0.4)', textAlign: 'center', fontSize: 10, lineHeight: 16 }}>
-                    Mobile app location sharing coming soon. Use the web app to update your current position.
+            {locationAccess === 'denied' && (
+                <Text style={{ textAlign: 'center', marginTop: 20, fontSize: 13, color: '#E8788A' }}>
+                    Please enable location access in device settings for real-time tracking!
                 </Text>
-            </View>
+            )}
+            </ScrollView>
+            <FloatingPingAction />
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    connectionCard: {
+        backgroundColor: 'rgba(28, 32, 56, 0.4)',
+        borderRadius: 24,
+        paddingVertical: 40,
+        paddingHorizontal: 24,
+        marginBottom: 24,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.08)',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.3,
+        shadowRadius: 20,
+        elevation: 10,
+        alignItems: 'center',
+        position: 'relative',
+        overflow: 'hidden'
+    },
+    routeContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        width: '100%',
+        marginBottom: 40,
+        zIndex: 2,
+    },
+    node: {
+        alignItems: 'center',
+        zIndex: 2,
+    },
+    nodeIcon: {
+        fontSize: 32,
+        marginBottom: 8,
+    },
+    nodeText: {
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
+    line: {
+        flex: 1,
+        height: 2,
+        backgroundColor: 'rgba(255,255,255,0.1)',
+        marginHorizontal: 16,
+        position: 'relative',
+        transform: [{ translateY: -15 }]
+    },
+    animatedHeart: {
+        position: 'absolute',
+        top: -12,
+        fontSize: 18,
+    },
+    distanceContainer: {
+        alignItems: 'center',
+        zIndex: 2,
+    },
+    distanceNumber: {
+        fontSize: 64,
+        color: 'white',
+        fontWeight: 'bold',
+        letterSpacing: -1,
+    },
+    distanceUnit: {
+        fontSize: 24,
+        color: '#F2A7C3',
+        marginLeft: 8,
+        fontWeight: 'bold',
+    },
+    distanceMessage: {
+        fontFamily: 'Caveat',
+        color: '#C4B1D4',
+        fontSize: 22,
+        marginTop: 8,
+    },
+    gridPattern: {
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        opacity: 0.03,
+        backgroundColor: 'transparent',
+    },
+    cardsRow: {
+        flexDirection: 'row',
+        gap: 16,
+    },
+    miniCard: {
+        flex: 1,
+        backgroundColor: 'rgba(28, 32, 56, 0.5)',
+        padding: 20,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.05)',
+        alignItems: 'center',
+    },
+    cardTitle: {
+        fontWeight: 'bold',
+        marginBottom: 6,
+        fontSize: 15,
+    },
+    cardCoord: {
+        fontSize: 12,
+        color: '#8A8FA8',
+        fontVariant: ['tabular-nums']
+    }
+});

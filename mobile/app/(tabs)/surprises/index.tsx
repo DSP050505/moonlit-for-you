@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Alert, Modal, Platform } from 'react-native';
+import { FloatingPingAction } from '../../../components/FloatingPingAction';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useAuth } from '../../../hooks/useAuth';
 import { Gift, Plus, X, Trash2 } from 'lucide-react-native';
 
@@ -24,7 +26,8 @@ export default function SurprisesScreen() {
     // Form state
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
-    const [revealDate, setRevealDate] = useState('');
+    const [revealDate, setRevealDate] = useState<Date>(new Date());
+    const [showDatePicker, setShowDatePicker] = useState(false);
 
     useEffect(() => { fetchSurprises(); }, [roomId]);
 
@@ -39,18 +42,19 @@ export default function SurprisesScreen() {
     };
 
     const handleAddSurprise = async () => {
-        if (!roomId || !session?.user.role || !title.trim() || !content.trim() || !revealDate.trim()) {
-            Alert.alert('Missing Fields', 'Please fill in all fields.');
+        if (!roomId || !session?.user.role || !title.trim() || !content.trim()) {
+            Alert.alert('Missing Fields', 'Please fill in all fields (Title and Content).');
             return;
         }
         try {
+            const dateStr = revealDate.toISOString().split('T')[0];
             const res = await fetch(`${API_URL}/api/surprises`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ roomId, title, content, revealDate, createdBy: session.user.role }),
+                body: JSON.stringify({ roomId, title, content, revealDate: dateStr, createdBy: session.user.role }),
             });
             if (res.ok) {
-                setTitle(''); setContent(''); setRevealDate('');
+                setTitle(''); setContent(''); setRevealDate(new Date());
                 setIsModalOpen(false);
                 fetchSurprises();
             }
@@ -117,10 +121,43 @@ export default function SurprisesScreen() {
                             placeholderTextColor="#8A8FA8" multiline numberOfLines={4} textAlignVertical="top"
                             style={{ backgroundColor: 'rgba(0,0,0,0.3)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 16, padding: 16, color: 'white', fontSize: 15, marginBottom: 16, minHeight: 100 }} />
 
-                        <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Reveal Date (YYYY-MM-DD)</Text>
-                        <TextInput value={revealDate} onChangeText={setRevealDate} placeholder="2026-04-15"
-                            placeholderTextColor="#8A8FA8" keyboardType="numeric"
-                            style={{ backgroundColor: 'rgba(0,0,0,0.3)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 16, padding: 16, color: 'white', fontSize: 15, marginBottom: 20 }} />
+                        <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Reveal Date</Text>
+                        {Platform.OS === 'ios' ? (
+                            <DateTimePicker
+                                value={revealDate}
+                                mode="date"
+                                display="default"
+                                onChange={(event, selectedDate) => {
+                                    if (selectedDate) setRevealDate(selectedDate);
+                                }}
+                                style={{ marginBottom: 20, alignSelf: 'flex-start' }}
+                                themeVariant="dark"
+                            />
+                        ) : (
+                            <>
+                                <TouchableOpacity 
+                                    onPress={() => setShowDatePicker(true)}
+                                    style={{ backgroundColor: 'rgba(0,0,0,0.3)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 16, padding: 16, marginBottom: 20 }}
+                                >
+                                    <Text style={{ color: 'white', fontSize: 15 }}>
+                                        {revealDate.toISOString().split('T')[0]}
+                                    </Text>
+                                </TouchableOpacity>
+                                {showDatePicker && (
+                                    <DateTimePicker
+                                        value={revealDate}
+                                        mode="date"
+                                        display="default"
+                                        onChange={(event, selectedDate) => {
+                                            setShowDatePicker(false);
+                                            if (event?.type === 'set' && selectedDate) {
+                                                setRevealDate(selectedDate);
+                                            }
+                                        }}
+                                    />
+                                )}
+                            </>
+                        )}
 
                         <View style={{ flexDirection: 'row', gap: 12 }}>
                             <TouchableOpacity onPress={() => setIsModalOpen(false)}
@@ -135,6 +172,7 @@ export default function SurprisesScreen() {
                     </View>
                 </View>
             </Modal>
+            <FloatingPingAction />
         </View>
     );
 }
