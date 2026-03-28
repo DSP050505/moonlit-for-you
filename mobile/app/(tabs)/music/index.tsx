@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, ScrollView, ActivityIndicator, Image, Alert } from 'react-native';
 import { useAuth } from '../../../hooks/useAuth';
-import { Search, Play, ListPlus, Disc, X, SkipForward, Pause, Plus, Trash2 } from 'lucide-react-native';
+import { useMusic } from '../../../hooks/useMusic';
+import { Search, Play, ListPlus, Disc, X, Trash2 } from 'lucide-react-native';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -29,6 +30,7 @@ interface Playlist {
 
 export default function MusicScreen() {
     const { session } = useAuth();
+    const { playTrack, addToQueue, queue, removeFromQueue } = useMusic();
     const roomId = session?.room.id;
     const userRole = session?.user.role || 'unknown';
 
@@ -36,9 +38,6 @@ export default function MusicScreen() {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<Track[]>([]);
     const [isSearching, setIsSearching] = useState(false);
-    const [queue, setQueue] = useState<Track[]>([]);
-    const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
-    const [isPlaying, setIsPlaying] = useState(false);
     const [playlists, setPlaylists] = useState<Playlist[]>([]);
     const [newPlaylistName, setNewPlaylistName] = useState('');
     const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
@@ -51,7 +50,7 @@ export default function MusicScreen() {
             const data = await res.json();
             if (data.playlists) setPlaylists(data.playlists);
         } catch (err) {
-            console.error('📱 Music: Failed to fetch playlists:', err);
+            console.error('🎵 Music: Failed to fetch playlists:', err);
         }
     }, [roomId]);
 
@@ -66,39 +65,10 @@ export default function MusicScreen() {
             const data = await res.json();
             setSearchResults(data.results || []);
         } catch (err) {
-            console.error('📱 Music: Search failed:', err);
+            console.error('🎵 Music: Search failed:', err);
         }
         setIsSearching(false);
     };
-
-    // Play track
-    const playTrack = (track: Track) => {
-        setCurrentTrack(track);
-        setIsPlaying(true);
-        console.log(`📱 Music: Now playing "${track.title}"`);
-    };
-
-    // Add to queue
-    const addToQueue = (track: Track) => {
-        setQueue(prev => [...prev, track]);
-        console.log(`📱 Music: Added "${track.title}" to queue`);
-    };
-
-    // Play next
-    const playNext = () => {
-        if (queue.length > 0) {
-            const [next, ...rest] = queue;
-            setCurrentTrack(next);
-            setQueue(rest);
-            setIsPlaying(true);
-        } else {
-            setCurrentTrack(null);
-            setIsPlaying(false);
-        }
-    };
-
-    // Toggle play/pause
-    const togglePlayPause = () => setIsPlaying(!isPlaying);
 
     // Create playlist
     const createPlaylist = async () => {
@@ -112,7 +82,7 @@ export default function MusicScreen() {
             setNewPlaylistName('');
             setShowCreatePlaylist(false);
             fetchPlaylists();
-        } catch (err) { console.error('📱 Music: Failed to create playlist:', err); }
+        } catch (err) { console.error('🎵 Music: Failed to create playlist:', err); }
     };
 
     // Add track to playlist
@@ -127,7 +97,7 @@ export default function MusicScreen() {
                 }),
             });
             fetchPlaylists();
-        } catch (err) { console.error('📱 Music: Failed to add track:', err); }
+        } catch (err) { console.error('🎵 Music: Failed to add track:', err); }
     };
 
     // Remove track from playlist
@@ -135,7 +105,7 @@ export default function MusicScreen() {
         try {
             await fetch(`${API_URL}/api/music/playlists/${playlistId}/tracks/${trackId}`, { method: 'DELETE' });
             fetchPlaylists();
-        } catch (err) { console.error('📱 Music: Failed to remove track:', err); }
+        } catch (err) { console.error('🎵 Music: Failed to remove track:', err); }
     };
 
     // Show playlist picker
@@ -165,25 +135,6 @@ export default function MusicScreen() {
 
     return (
         <View style={{ flex: 1, backgroundColor: '#0B0E1A' }}>
-            {/* Now Playing Bar */}
-            {currentTrack && (
-                <View style={{ backgroundColor: '#141829', borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)', padding: 16, flexDirection: 'row', alignItems: 'center' }}>
-                    <Image source={{ uri: currentTrack.thumbnail }} style={{ width: 48, height: 36, borderRadius: 6, marginRight: 12 }} />
-                    <View style={{ flex: 1, marginRight: 12 }}>
-                        <Text style={{ color: 'white', fontSize: 13, fontWeight: 'bold' }} numberOfLines={1}>
-                            {currentTrack.title.replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"')}
-                        </Text>
-                        <Text style={{ color: '#8A8FA8', fontSize: 11 }} numberOfLines={1}>{currentTrack.channel}</Text>
-                    </View>
-                    <TouchableOpacity onPress={togglePlayPause} style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: '#E8788A', alignItems: 'center', justifyContent: 'center', marginRight: 8 }}>
-                        {isPlaying ? <Pause size={16} color="white" /> : <Play size={16} color="white" />}
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={playNext} style={{ padding: 4 }}>
-                        <SkipForward size={20} color="#8A8FA8" />
-                    </TouchableOpacity>
-                </View>
-            )}
-
             {/* Tab Switcher */}
             <View style={{ flexDirection: 'row', justifyContent: 'center', paddingVertical: 16, gap: 8, paddingHorizontal: 16 }}>
                 {tabs.map(tab => (
@@ -276,7 +227,7 @@ export default function MusicScreen() {
                                             {item.title.replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"')}
                                         </Text>
                                     </View>
-                                    <TouchableOpacity onPress={() => setQueue(prev => prev.filter((_, idx) => idx !== index))} style={{ padding: 8 }}>
+                                    <TouchableOpacity onPress={() => removeFromQueue(index)} style={{ padding: 8 }}>
                                         <X size={18} color="#E8788A" />
                                     </TouchableOpacity>
                                 </View>

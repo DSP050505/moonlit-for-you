@@ -2,6 +2,7 @@ import "react-native-gesture-handler";
 import { Stack } from "expo-router";
 import { AuthProvider, useAuth } from "../hooks/useAuth";
 import { SocketProvider } from "../hooks/useSocket";
+import { MusicProvider } from "../hooks/useMusic";
 import { useEffect } from "react";
 import { useRouter, useSegments } from "expo-router";
 import { View, ActivityIndicator, LogBox } from "react-native";
@@ -22,10 +23,8 @@ function RootLayoutNav() {
     const inAuthGroup = segments[0] === "(auth)";
 
     if (!session && !inAuthGroup) {
-      // Redirect to login if user is not signed in and not in auth group
       router.replace("/(auth)/login");
     } else if (session && inAuthGroup) {
-      // Redirect to home if user is signed in and in auth group
       router.replace("/");
     }
   }, [session, isLoading, segments]);
@@ -40,11 +39,12 @@ function RootLayoutNav() {
 
   return (
     <SocketProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(auth)" options={{ animation: 'fade' }} />
-        {/* Let Expo Router handle (tabs) group layout automatically */}
-      </Stack>
-      <GlobalCallNotification />
+      <MusicProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(auth)" options={{ animation: 'fade' }} />
+        </Stack>
+        <GlobalCallNotification />
+      </MusicProvider>
     </SocketProvider>
   );
 }

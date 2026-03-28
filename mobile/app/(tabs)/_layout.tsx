@@ -1,13 +1,15 @@
 import React from 'react';
 import { Drawer } from 'expo-router/drawer';
 import { DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer';
-import { MessageSquare, Calendar, MapPin, Music, LogOut, Menu, Image as ImageIcon, Gamepad2, Gift } from 'lucide-react-native';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { MessageSquare, Calendar, MapPin, Music, LogOut, Menu, Image as ImageIcon, Gamepad2, Gift, Pause, Play, SkipForward } from 'lucide-react-native';
+import { View, Text, TouchableOpacity, Alert, Image, Platform } from 'react-native';
 import { useAuth } from '../../hooks/useAuth';
 import { useRouter, usePathname } from 'expo-router';
 import { useLocationDistance } from '../../hooks/useLocationDistance';
 import { useSocket } from '../../hooks/useSocket';
+import { useMusic } from '../../hooks/useMusic';
 import { Sparkles } from 'lucide-react-native';
+import YoutubePlayer from 'react-native-youtube-iframe';
 
 function CustomDrawerContent(props: any) {
   const { logout } = useAuth();
@@ -90,9 +92,33 @@ function HeaderPingButton() {
 
 export default function SidebarLayout() {
   const { distance } = useLocationDistance();
+  const { currentTrack, isPlaying, playerReady, togglePlayPause, playNext, onStateChange, setPlayerReady } = useMusic();
 
   return (
     <View style={{ flex: 1 }}>
+      {/* YouTube Player - off-screen but with real dimensions for audio */}
+      {currentTrack && (
+        <View style={{ position: 'absolute', top: -300, left: 0, opacity: 0, zIndex: -1 }} pointerEvents="none">
+          <YoutubePlayer
+            height={200}
+            width={300}
+            play={isPlaying}
+            videoId={currentTrack.youtubeId}
+            onChangeState={onStateChange}
+            onReady={() => {
+              console.log(`🎵 Global: YouTube READY for "${currentTrack.title}" (${currentTrack.youtubeId})`);
+              setPlayerReady(true);
+            }}
+            onError={(error: string) => {
+              console.error(`🎵 Global: YouTube ERROR: ${error}`);
+            }}
+            initialPlayerParams={{
+              preventFullScreen: true,
+            }}
+          />
+        </View>
+      )}
+
       <Drawer
         drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={({ navigation }) => ({
@@ -205,6 +231,41 @@ export default function SidebarLayout() {
         options={{ drawerItemStyle: { display: 'none' } }}
       />
     </Drawer>
+
+    {/* Global Now Playing Bar — visible on every screen */}
+    {currentTrack && (
+      <View style={{ 
+        backgroundColor: '#141829', 
+        borderTopWidth: 1, 
+        borderTopColor: 'rgba(255,255,255,0.08)', 
+        paddingHorizontal: 16, 
+        paddingTop: 12, 
+        paddingBottom: Platform.OS === 'ios' ? 28 : 12, // Handle safe area
+        flexDirection: 'row', 
+        alignItems: 'center',
+        elevation: 10,
+        shadowColor: 'black',
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4
+      }}>
+        <Image source={{ uri: currentTrack.thumbnail }} style={{ width: 44, height: 33, borderRadius: 6, marginRight: 12 }} />
+        <View style={{ flex: 1, marginRight: 12 }}>
+          <Text style={{ color: 'white', fontSize: 13, fontWeight: 'bold' }} numberOfLines={1}>
+            {currentTrack.title.replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"')}
+          </Text>
+          <Text style={{ color: playerReady ? '#7ECFA0' : '#8A8FA8', fontSize: 11 }} numberOfLines={1}>
+            {playerReady ? '♪ Playing' : '⏳ Loading...'} · {currentTrack.channel}
+          </Text>
+        </View>
+        <TouchableOpacity onPress={togglePlayPause} style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: '#E8788A', alignItems: 'center', justifyContent: 'center', marginRight: 8 }}>
+          {isPlaying ? <Pause size={16} color="white" /> : <Play size={16} color="white" />}
+        </TouchableOpacity>
+        <TouchableOpacity onPress={playNext} style={{ padding: 4 }}>
+          <SkipForward size={20} color="#8A8FA8" />
+        </TouchableOpacity>
+      </View>
+    )}
    </View>
   );
 }

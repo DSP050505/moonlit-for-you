@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useSocket } from '../../hooks/useSocket';
 import { usePathname } from 'expo-router';
 import { Send, Heart } from 'lucide-react-native';
+import { useMusic } from '../../hooks/useMusic';
 
 interface Message {
     id: number;
@@ -18,6 +19,7 @@ export default function ChatScreen() {
     const { session } = useAuth();
     const { socket } = useSocket();
     const pathname = usePathname();
+    const { currentTrack } = useMusic();
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputText, setInputText] = useState('');
     const [isLoading, setIsLoading] = useState(true);
@@ -202,7 +204,7 @@ export default function ChatScreen() {
     return (
         <KeyboardAvoidingView 
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? (currentTrack ? 140 : 90) : 0}
             style={{ flex: 1, backgroundColor: '#0B0E1A' }}
         >
             <FlatList
@@ -226,7 +228,7 @@ export default function ChatScreen() {
                 </View>
 
                 {/* ── Input Bar ── */}
-                <View style={{ paddingHorizontal: 16, paddingTop: 6, paddingBottom: Platform.OS === 'ios' ? 32 : 36, flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{ paddingHorizontal: 16, paddingTop: 6, paddingBottom: currentTrack ? 10 : (Platform.OS === 'ios' ? 32 : 36), flexDirection: 'row', alignItems: 'center' }}>
                     <TextInput
                         value={inputText}
                         onChangeText={setInputText}
